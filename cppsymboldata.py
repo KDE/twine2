@@ -57,15 +57,28 @@ class SymbolData(object):
 
         def format(self,indent=0):
             return ''.join( (item.format(indent) for item in self._items) )
-
+            
+    class Namespace(_Scope):
+        def __init__(self, parentScope, name, filename, lineno):
+            SymbolData._Scope.__init__(self)
+            self._scope = parentScope
+            self._name = name
+            self._filename = filename
+            self._lineno = lineno
+            self._scope.insertIntoScope(name, self)
+            
+        def format(self,indent=0):
+            pre = SymbolData._indentString(indent)
+            return pre + "namespace " + self._name + " {\n" + SymbolData._Scope.format(self,indent+1) + pre + "};\n"
+            
     class _CppEntity(object):
         def __init__(self, parentScope, name, filename, lineno):
             self._access = SymbolData.ACCESS_PUBLIC
             self._scope = parentScope
-            self._scope.insertIntoScope(name, self)
             self._name = name
             self._filename = filename
             self._lineno = lineno
+            self._scope.insertIntoScope(name, self)
 
         def setAccess(self,typeName):
             self._access = SymbolData.ACCESS_TYPE_MAPPING_FROM_NAME[typeName]
@@ -136,6 +149,7 @@ class SymbolData(object):
             self._return = None
             self._storage = None
             self._arguments = None
+            self._qualitifier = None
 
         def setStorage(self,storage):
             self._storage = storage
@@ -146,11 +160,25 @@ class SymbolData(object):
         def setArguments(self,arguments):
             self._arguments = arguments
 
+        def setQualifier(self,qualifier):
+            self._qualitifier = qualifier
+
         def format(self,indent=0):
-            pre = SymbolData._indentString(indent)
-            storage = self._storage+" " if self._storage is not None else ""
-            args = ', '.join( (arg.format() for arg in self._arguments) )
-            return pre + storage + self._return.format() + " " + self._name + "(" + args + ");\n"
+            accu = []
+            accu.append(SymbolData._indentString(indent))
+            if self._storage is not None:
+                accu.append(self._storage)
+                accu.append(" ")
+            if self._qualitifier is not None:
+                accu.append(self._qualitifier)
+                accu.append(" ")
+            accu.append(self._return.format())
+            accu.append(" ")
+            accu.append(self._name)
+            accu.append("(")
+            accu.append(', '.join( (arg.format() for arg in self._arguments) ))
+            accu.append(");\n")
+            return ''.join(accu)
 
     class Constructor(Function):
         def __init__(self,parentScope, name, filename, lineno):

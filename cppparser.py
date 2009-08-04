@@ -200,13 +200,11 @@ class CppParser(object):
 
     def p_namespace_decl0 (self, p):
         'namespace_decl : namespace_name LBRACE member_list RBRACE'
-        name, obj = self.stateInfo.popNamespace ()
-        self.symbolData.objectList.append (EndNamespaceMarker (name, self.lexer.lineno, self.stateInfo))
+        self._popScope()
         
     def p_namespace_decl1 (self, p):
         'namespace_decl : namespace_name LBRACE RBRACE'
-        self.stateInfo.popNamespace ()        
-        self.symbolData.objectList.pop ()
+        self._popScope()        
         
     def p_namespace_decl2 (self, p):
         'namespace_decl : namespace LBRACE member_list RBRACE'
@@ -214,10 +212,9 @@ class CppParser(object):
         
     def p_namespace_name (self, p):
         'namespace_name : namespace ID'
-        name = p [2]
-        namespace = NamespaceObject (name, self.lexer.lineno, self.stateInfo)
-        self.stateInfo.pushNamespace (name, namespace)
-        self.symbolData.objectList.append (namespace)
+        name = p[2]
+        namespace = self.symbolData.Namespace(self.scope, name, self.filename, self.lexer.lineno)
+        self._pushScope(namespace)
                         
     def p_empty (self, p):
         'empty :'
@@ -894,9 +891,8 @@ class CppParser(object):
     def p_virtual_primary (self, p):
         """virtual_primary : virtual function_name RPAREN
                           | virtual function_name argument_list RPAREN"""
-        fObj = self.stateInfo.currentObject ()
-        fObj.setArguments (self.arguments)
-        fObj.attributes.functionQualifier = 'virtual'
+        self.currentFunction.setArguments(self.argumentList())
+        self.currentFunction.setQualifier('virtual')
         
     def p_virtual_stmt0 (self, p):
         'virtual_stmt : virtual_primary decl_end'

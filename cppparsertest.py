@@ -98,5 +98,32 @@ class TestCppParser(unittest.TestCase):
             };""")
         print(self.syms.topScope().format())
 
+    def testClassVirtualMethod(self):
+        self.parser.parse(self.syms,
+            """
+            class Foo {
+                virtual int getFooValue(int x);
+            };""")
+        print(self.syms.topScope().format())
+
+    def testFunctions(self):
+        self.parser.parse(self.syms,
+            """
+            int DoFoo(int x);
+            void StopFoo();
+            """)
+        print(self.syms.topScope().format())
+
+    def testNamespace(self):
+        self.parser.parse(self.syms,
+            """
+            namespace FooSpace {
+                int DoFoo(int x);
+                void StopFoo();
+            }
+            """)
+        print(self.syms.topScope().format())
+
+
 if __name__ == '__main__':
     unittest.main()

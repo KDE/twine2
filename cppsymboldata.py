@@ -71,6 +71,47 @@ class SymbolData(object):
             pre = SymbolData._indentString(indent)
             return pre + "namespace " + self._name + " {\n" + SymbolData._Scope.format(self,indent+1) + pre + "};\n"
             
+    class Enum(object):
+        def __init__(self, parentScope, name, filename, lineno):
+            self._scope = parentScope
+            self._name = name
+            self._filename = filename
+            self._lineno = lineno
+            self._enumerators = []
+            self._scope.insertIntoScope(name, self)
+            
+        def appendEnumerator(self,enumerator):
+            self._enumerators.append(enumerator)
+            
+        def format(self,indent=0):
+            pre = SymbolData._indentString(indent)
+            accu = []
+            accu.append(pre)
+            accu.append("enum ")
+            if self._name is not None:
+                    accu.append(self._name)
+                    accu.append(" ")
+            accu.append("{\n")
+            
+            pre2 = SymbolData._indentString(indent+1)
+            accu.append(pre2)
+            accu.append((",\n"+pre2).join((item.format() for item in self._enumerators)))
+            accu.append("\n")
+            accu.append(pre)
+            accu.append("};\n")
+            return ''.join(accu)
+            
+    class Enumerator(object):
+        def __init__(self,name,value):
+            self._name = name
+            self._value = value
+            
+        def format(self):
+            if self._value is None:
+                return self._name
+            else:
+                return self._name + "=" + self._value
+            
     class _CppEntity(object):
         def __init__(self, parentScope, name, filename, lineno):
             self._access = SymbolData.ACCESS_PUBLIC

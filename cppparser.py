@@ -40,6 +40,7 @@ class CppParser(object):
         self.scope = None
         self.access = "private"
         self.currentFunction = None
+        self.currentEnum = None
 
         self.arguments      = []
         self.templateParams = []
@@ -101,9 +102,9 @@ class CppParser(object):
         #self.symbolData.objectList.append (class_)
     
     def enumObject (self, name):
-        enum = EnumObject (name, self.lexer.lineno, self.stateInfo)
-        self.stateInfo.pushObject (enum)
-        self.symbolData.objectList.append (enum)
+        enum = self.symbolData.Enum(self.scope, name, self.filename, self.lexer.lineno)
+        self.currentEnum = enum
+        return enum
     
     def typedefObject (self, typeName, newName):
         tdObj              = TypedefObject (newName, self.lexer.lineno, self.stateInfo)
@@ -142,7 +143,7 @@ class CppParser(object):
         #self.symbolData.objectList.append (vObj)
         return vObj
         
-    def functionObject (self, name, returns):
+    def functionObject(self, name, returns):
         if returns=='ctor':
             functionObj = self.symbolData.Constructor(self.scope, name, self.filename, self.lexer.lineno)
         else:
@@ -243,7 +244,6 @@ class CppParser(object):
         name, obj = self.stateInfo.popClass ()
         self.symbolData.objectList.append (EndClassMarker (name, self.lexer.lineno, self.stateInfo))
         
-        
     def p_class_member (self, p):
         """class_member : class_decl
                         | enum_decl
@@ -330,28 +330,27 @@ class CppParser(object):
 
     def p_enum_decl0 (self, p):
         'enum_decl : enum_statement SEMI'
-        self.stateInfo.popObject ()
+        self.currentEnum = None
         
     def p_enum_decl1 (self, p):
         'enum_decl : enum_statement id_list SEMI'
         self.object_id_list (p [2], 'enum')
-        self.stateInfo.popObject ()
+        self.currentEnum = None
         
     def p_enum_statement (self, p):
         """enum_statement : enum_name enumerator_list RBRACE
                                        | enum_name RBRACE"""
         self.lexer.begin ('variable')
-        self.stateInfo.lexState = 'variable'
         
     def p_enum_name0 (self, p):
         """enum_name : enum ID LBRACE
                      | enum LBRACE"""                     
             
         if p[2] != "{":
-            name = p [2]
+            name = p[2]
         else:
-            name = 'anonymous'
-        self.enumObject (name)
+            name = None
+        self.enumObject(name)
         
     def p_enum_name1 (self, p):
         'enum_name : enum_from_typedef'
@@ -361,37 +360,34 @@ class CppParser(object):
         """enumerator : ID
                       | ID EQUALS expression"""
                 
-        if len (p) == 4:
-            enumerator = Enumerator (p [1], p [3], self.stateInfo)
+        if len(p) == 4:
+            enumerator = self.symbolData.Enumerator(p[1], p[3])
         else:
-            enumerator = Enumerator (p [1], None, self.stateInfo)
-            
-        self.stateInfo.currentObject ().enumerators.append (enumerator)
+            enumerator = self.symbolData.Enumerator(p[1], None)
+        self.currentEnum.appendEnumerator(enumerator)
     
     def p_enumerator1 (self, p):
         """enumerator : DOC ID
                       | DOC ID EQUALS expression"""
                 
         if len (p) == 5:
-            enumerator = Enumerator (p [2], p [4], self.stateInfo)
+            enumerator = self.symbolData.Enumerator(p[2], p[4])
         else:
-            enumerator = Enumerator (p [2], None, self.stateInfo)            
-
-        enumerator.doc = p [1]
-        self.stateInfo.currentObject ().enumerators.append (enumerator)
+            enumerator = self.symbolData.Enumerator(p[2], None)
+        enumerator.setDoc(p[1])
+        self.currentEnum.appendEnumerator(enumerator)
         
     def p_enumerator2 (self, p):
         """enumerator : ID UPDOC
                       | ID EQUALS expression UPDOC"""
         
         if len (p) == 5:
-            enumerator = Enumerator (p [1], p [3], self.stateInfo)
-            enumerator.doc = p [4]
+            enumerator = self.symbolData.Enumerator(p[1], p[3], self.stateInfo)
+            enumerator.setDoc(p[4])
         else:
-            enumerator = Enumerator (p [1], None, self.stateInfo)
-            enumerator.doc = p [2]
-            
-        self.stateInfo.currentObject ().enumerators.append (enumerator)
+            enumerator = self.symbolData.Enumerator(p[1], None, self.stateInfo)
+            enumerator.setDoc(p[2])
+        self.currentEnum.appendEnumerator(enumerator)
 
     def p_enumerator_list0 (self, p):
         """enumerator_list : enumerator

@@ -124,6 +124,28 @@ class TestCppParser(unittest.TestCase):
             """)
         print(self.syms.topScope().format())
 
+    def testEnum(self):
+        self.parser.parse(self.syms,
+            """
+            enum global {
+                earth,
+                orb,
+                globe
+            };
+            """)
+        print(self.syms.topScope().format())
+
+    def testEnumAnonymous(self):
+        self.parser.parse(self.syms,
+            """
+            enum {
+                earth,
+                orb,
+                globe
+            };
+            """)
+        print(self.syms.topScope().format())
+
 
 if __name__ == '__main__':
     unittest.main()

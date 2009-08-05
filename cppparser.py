@@ -41,7 +41,7 @@ class CppParser(object):
         self.access = "private"
         self.currentFunction = None
         self.currentEnum = None
-        self.currrentClass = None
+        self.currentClass = None
 
         self.arguments      = []
         self.templateParams = []
@@ -93,7 +93,7 @@ class CppParser(object):
         #self.stateInfo.inTemplate = []
 
         #self.stateInfo.pushClass (name, class_)
-        self.currrentClass = class_
+        self.currentClass = class_
         self._pushScope(class_)
 
         if type_ == 'class':
@@ -142,12 +142,13 @@ class CppParser(object):
         
         self.storage = None
         self.template = None
-        #self.symbolData.objectList.append (vObj)
         return vObj
         
     def functionObject(self, name, returns):
         if returns=='ctor':
             functionObj = self.symbolData.Constructor(self.scope, name, self.filename, self.lexer.lineno)
+        elif returns=='dtor':
+            functionObj = self.symbolData.Destructor(self.scope, name, self.filename, self.lexer.lineno)
         else:
             functionObj = self.symbolData.Function(self.scope, name, self.filename, self.lexer.lineno)
             returnArg = self.symbolData.Argument(returns)
@@ -314,7 +315,7 @@ class CppParser(object):
     def p_base_list_element0 (self, p):
         """base_list_element : base_access_specifier qualified_id
                             | base_access_specifier template_type"""
-        self.currrentClass.addBase(p[2])
+        self.currentClass.addBase(p[2])
 
     def p_base_list_element1 (self, p):
         """base_list_element : virtual base_access_specifier qualified_id
@@ -323,7 +324,7 @@ class CppParser(object):
      
     def p_base_list_element2 (self, p):
         'base_list_element : qualified_id'
-        self.stateInfo.currentObject ().bases.append ('%s' % (p [1]))
+        self.currentClass.addBase(p[1])
 
     def p_base_list (self, p):
         """base_list : base_list_element
@@ -783,20 +784,20 @@ class CppParser(object):
     def p_cast_operator_stmt (self, p):
         """cast_operator_stmt : cast_operator_name decl_end
                                         | virtual cast_operator_name decl_end"""
-        self.currentFunction.setArguments (self.arguments)
-        if len (p) == 4:
-            self.stateInfo.currentObject ().attributes.functionQualifer = 'virtual'
+        self.currentFunction.setArguments(self.argumentList())
+        if len(p) == 4:
+            self.currentFunction.addQualifier('virtual')
 
     def p_operator_primary0 (self, p):
         """operator_primary : operator_name argument_list RPAREN
                             | operator_name RPAREN"""
-        self.currentFunction.setArguments (self.arguments)
+        self.currentFunction.setArguments(self.argumentList())
 
     def p_operator_primary1 (self, p):
         """operator_primary : virtual operator_name argument_list RPAREN
                             | virtual operator_name RPAREN"""
-        self.currentFunction.setArguments (self.arguments)
-        self.stateInfo.currentObject ().attributes.functionQualifer = 'virtual'
+        self.currentFunction.setArguments(self.argumentList())
+        self.currentFunction.addQualifier('virtual')
             
     def p_operator_stmt0 (self, p):
         """operator_stmt : operator_primary decl_end
@@ -806,16 +807,16 @@ class CppParser(object):
     def p_operator_stmt1 (self, p):
         """operator_stmt : operator_primary CVQUAL decl_end
                          | operator_primary CVQUAL pure_virtual_suffix"""
-        self.stateInfo.currentObject ().attributes.cv = p [2]
+        self.currentFunction.addQualifier(p[2])
 
     def p_ctor_name0 (self, p):
         'ctor_name : qualified_id LPAREN'
-        self.functionObject (p [1], 'ctor')
+        self.functionObject(p[1], 'ctor')
         self.arguments = []
         
     def p_ctor_name1 (self, p):
         'ctor_name : explicit qualified_id LPAREN'
-        fo = self.functionObject (p [2], 'ctor')
+        fo = self.functionObject(p[2], 'ctor')
         fo.attributes.functionQualifier = 'explicit'
         self.arguments = []
 
@@ -849,7 +850,7 @@ class CppParser(object):
         
     def p_function_stmt1 (self, p):
         'function_stmt : function_primary CVQUAL decl_end'
-        self.stateInfo.currentObject().attributes.cv = p [2]
+        self.currentFunction.addQualifier(p[2])
                             
     def p_ctor_primary (self, p):
         """ctor_primary : ctor_name RPAREN
@@ -880,7 +881,7 @@ class CppParser(object):
         
     def p_dtor_primary1 (self, p):
         'dtor_primary : virtual_dtor_name LPAREN RPAREN'
-        self.stateInfo.currentObject ().attributes.functionQualifier = 'virtual'
+        self.currentFunction.addQualifier('virtual')
         
     def p_dtor_stmt (self, p):
         'dtor_stmt : dtor_primary decl_end'
@@ -890,7 +891,7 @@ class CppParser(object):
         """virtual_primary : virtual function_name RPAREN
                           | virtual function_name argument_list RPAREN"""
         self.currentFunction.setArguments(self.argumentList())
-        self.currentFunction.setQualifier('virtual')
+        self.currentFunction.addQualifier('virtual')
         
     def p_virtual_stmt0 (self, p):
         'virtual_stmt : virtual_primary decl_end'
@@ -907,9 +908,9 @@ class CppParser(object):
     def p_pure_virtual (self, p):
         """pure_virtual : virtual_primary pure_virtual_suffix 
                         | virtual_primary CVQUAL pure_virtual_suffix"""
-        self.stateInfo.currentObject ().attributes.functionQualifier = 'pure'
-        if p [2] in ['const', 'volatile']:
-            self.stateInfo.currentObject ().attributes.cv = p [2]
+        self.currentFunction.addQualifier('pure')
+        if p[2] in ['const', 'volatile']:
+            self.currentFunction.attributes.cv = p[2]
 
     def p_template_param (self, p):
         """template_param : type_specifier

@@ -57,6 +57,13 @@ class TestCppParser(unittest.TestCase):
             };""")
         print(self.syms.topScope().format())
 
+    def testClass5(self):
+        self.parser.parse(self.syms,
+            """
+            class Foo : Bar, Zyzz {
+            };""")
+        print(self.syms.topScope().format())
+
     def testClassVariable(self):
         self.parser.parse(self.syms,
             """
@@ -104,6 +111,14 @@ class TestCppParser(unittest.TestCase):
             };""")
         print(self.syms.topScope().format())
 
+    def testClassDestructor1(self):
+        self.parser.parse(self.syms,
+            """
+            class Foo {
+                ~Foo();
+            };""")
+        print(self.syms.topScope().format())
+
     def testClassMethod(self):
         self.parser.parse(self.syms,
             """
@@ -120,6 +135,14 @@ class TestCppParser(unittest.TestCase):
             };""")
         print(self.syms.topScope().format())
 
+    def testClassPureVirtualMethod(self):
+        self.parser.parse(self.syms,
+            """
+            class Foo {
+                virtual int getFooValue(int x)=0;
+            };""")
+        print(self.syms.topScope().format())
+
     def testFunctions(self):
         self.parser.parse(self.syms,
             """
@@ -127,6 +150,44 @@ class TestCppParser(unittest.TestCase):
             void StopFoo();
             """)
         print(self.syms.topScope().format())
+
+    def testFunctions2(self):
+        self.parser.parse(self.syms,
+            """
+            const int *DoFoo(int x);
+            """)
+        print(self.syms.topScope().format())
+
+    def testFunctions3(self):
+        self.parser.parse(self.syms,
+            """
+            QString& FooConst() const;
+            """)
+        print(self.syms.topScope().format())
+
+    def testFunctions4(self):
+        self.parser.parse(self.syms,
+            """
+            void Foo(unsigned long x);
+            """)
+        print(self.syms.topScope().format())
+
+    def testFunctions5(self):
+        self.parser.parse(self.syms,
+            """
+            void Foo(long x[5]);
+            """)
+        print(self.syms.topScope().format())
+
+    def testOperator1(self):
+        self.parser.parse(self.syms,
+            """
+            class Foo {
+                bool operator == (int);
+            };
+            """)
+        print(self.syms.topScope().format())
+
 
     def testNamespace(self):
         self.parser.parse(self.syms,

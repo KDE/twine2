@@ -203,8 +203,8 @@ class SymbolData(object):
             SymbolData._CppEntity.__init__(self, parentScope, name, filename, lineno)
             self._return = None
             self._storage = None
-            self._arguments = None
-            self._qualitifier = None
+            self._arguments = []
+            self._qualifier = set()
 
         def setStorage(self,storage):
             self._storage = storage
@@ -212,27 +212,34 @@ class SymbolData(object):
         def setReturn(self,return_):
             self._return = return_
 
+        def return_(self):
+            return self._return
+
         def setArguments(self,arguments):
             self._arguments = arguments
 
-        def setQualifier(self,qualifier):
-            self._qualitifier = qualifier
+        def addQualifier(self,qualifier):
+            self._qualifier.add(qualifier)
 
         def format(self,indent=0):
             accu = []
             accu.append(SymbolData._indentString(indent))
+            if 'virtual' in self._qualifier:
+                accu.append("virtual ")
             if self._storage is not None:
                 accu.append(self._storage)
-                accu.append(" ")
-            if self._qualitifier is not None:
-                accu.append(self._qualitifier)
                 accu.append(" ")
             accu.append(self._return.format())
             accu.append(" ")
             accu.append(self._name)
             accu.append("(")
             accu.append(', '.join( (arg.format() for arg in self._arguments) ))
-            accu.append(");\n")
+            accu.append(")")
+            if 'pure' in self._qualifier:
+                accu.append("=0")
+            if 'const' in self._qualifier:
+                accu.append(" const")
+            accu.append(";\n")
             return ''.join(accu)
 
     class Constructor(Function):
@@ -244,3 +251,13 @@ class SymbolData(object):
             storage = self._storage+" " if self._storage is not None else ""
             args = ', '.join( (arg.format() for arg in self._arguments) )
             return pre + storage + self._name + "(" + args + ");\n"
+            
+    class Destructor(Function):
+        def __init__(self,parentScope, name, filename, lineno):
+            SymbolData.Function.__init__(self, parentScope, name, filename, lineno)
+
+        def format(self,indent=0):
+            pre = SymbolData._indentString(indent)
+            storage = self._storage+" " if self._storage is not None else ""
+            return pre + storage + "~" + self._name + "();\n"
+        

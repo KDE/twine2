@@ -41,6 +41,7 @@ class CppParser(object):
         self.access = "private"
         self.currentFunction = None
         self.currentEnum = None
+        self.currrentClass = None
 
         self.arguments      = []
         self.templateParams = []
@@ -92,6 +93,7 @@ class CppParser(object):
         #self.stateInfo.inTemplate = []
 
         #self.stateInfo.pushClass (name, class_)
+        self.currrentClass = class_
         self._pushScope(class_)
 
         if type_ == 'class':
@@ -303,7 +305,7 @@ class CppParser(object):
                       | struct ID
                       | union ID
                       | class template_type"""
-        self.classObject (p [2], p [1])
+        self.classObject(p[2], p[1])
         
     def p_opaque_class (self, p):
         'opaque_class : class_name SEMI'
@@ -312,12 +314,12 @@ class CppParser(object):
     def p_base_list_element0 (self, p):
         """base_list_element : base_access_specifier qualified_id
                             | base_access_specifier template_type"""
-        self.stateInfo.currentObject ().bases.append (p [2])
+        self.currrentClass.addBase(p[2])
 
     def p_base_list_element1 (self, p):
         """base_list_element : virtual base_access_specifier qualified_id
                             | virtual base_access_specifier template_type"""
-        self.stateInfo.currentObject ().bases.append ('%s' % (p [3]))
+        self.currentClass.addBase(p[3])
      
     def p_base_list_element2 (self, p):
         'base_list_element : qualified_id'

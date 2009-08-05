@@ -35,11 +35,25 @@ class TestCppParser(unittest.TestCase):
         print(self.syms.topScope().format())
         #self.assertEqual(self.seq, range(10))
 
-    def testClass1(self):
+    def testClass2(self):
         self.parser.parse(self.syms,
             """
             class Foo {
                 public:
+            };""")
+        print(self.syms.topScope().format())
+
+    def testClass3(self):
+        self.parser.parse(self.syms,
+            """
+            class Foo : public Bar {
+            };""")
+        print(self.syms.topScope().format())
+
+    def testClass4(self):
+        self.parser.parse(self.syms,
+            """
+            class Foo : private Bar {
             };""")
         print(self.syms.topScope().format())
 
@@ -146,6 +160,15 @@ class TestCppParser(unittest.TestCase):
             """)
         print(self.syms.topScope().format())
 
+    def testFriendClass(self):
+        self.parser.parse(self.syms,
+            """
+            class Foo {
+                friend class Bar;
+            };
+            """)
+        print(self.syms.topScope().format())
 
+    
 if __name__ == '__main__':
     unittest.main()

@@ -137,20 +137,34 @@ class SymbolData(object):
         def __init__(self,parentScope, name, filename, lineno):
             SymbolData._Scope.__init__(self)
             SymbolData._CppEntity.__init__(self, parentScope, name, filename, lineno)
-
+            self._bases = []
+            
+        def addBase(self, base):
+            self._bases.append(base)
+            
         def format(self,indent=0):
             pre = SymbolData._indentString(indent)
-            result = pre + "class " + self._name + " {\n"
+            accu = []
+            accu.append(pre)
+            accu.append("class ")
+            accu.append(self._name)
+            if len(self._bases):
+                accu.append(" : ")
+                accu.append(', '.join(self._bases))
+            accu.append(" {\n")
 
             access = SymbolData.ACCESS_PRIVATE
             pre2 = SymbolData._indentString(indent+1)
             for item in self._items:
                 if item.access() is not access:
-                    result = result + pre2 + item.formatAccess() + ":\n"
+                    accu.append(pre2)
+                    accu.append(item.formatAccess())
+                    accu.append(":\n")
                     access = item.access()
-                result = result + item.format(indent+2)
-
-            return result + pre + "};\n"
+                accu.append(item.format(indent+2))
+            accu.append(pre)
+            accu.append("};\n")
+            return ''.join(accu)
 
     class Argument(object):
         def __init__(self, argumentType, argumentName = None, argumentValue = None, annotation = None, template = None, defaultTypes = None):

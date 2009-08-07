@@ -42,6 +42,7 @@ class CppParser(object):
         self.currentFunction = None
         self.currentEnum = None
         self.currentClass = None
+        self.inTypedef = False
 
         self.arguments      = []
         self.templateParams = []
@@ -72,7 +73,7 @@ class CppParser(object):
 
     def object_id_list (self, id_list, obj, objType = None):
         idList = id_list.split (',')
-        if self.stateInfo.inTypedef:
+        if self.inTypedef:
             self.stateInfo.currentObject ().name = idList [0]
             for id in idList [1:]:
                 originalObj = self.stateInfo.popObject ()                
@@ -87,12 +88,6 @@ class CppParser(object):
     
     def classObject (self, name, type_):
         class_ = self.symbolData.CppClass(self.scope, name, self.filename, self.lexer.lineno)
-            # ClassObject(name, self.lexer.lineno, self.stateInfo)
-
-        #class_.templateParams = self.stateInfo.inTemplate
-        #self.stateInfo.inTemplate = []
-
-        #self.stateInfo.pushClass (name, class_)
         self.currentClass = class_
         self._pushScope(class_)
 
@@ -100,24 +95,22 @@ class CppParser(object):
             class_.setAccess('private')
         else:
             class_.setAccess('public')
-
-        #self.symbolData.objectList.append (class_)
     
     def enumObject (self, name):
         enum = self.symbolData.Enum(self.scope, name, self.filename, self.lexer.lineno)
         self.currentEnum = enum
         return enum
     
-    def typedefObject (self, typeName, newName):
-        tdObj              = TypedefObject (newName, self.lexer.lineno, self.stateInfo)
-        tdObj.setArgumentType (typeName)
-        if typeName.startswith ('QFlags<'):
-            tdObj.template = Template ('QFlags', typeName [7:-1])
+    def typedefObject(self, typeName, newName):
+        tdObj = self.symbolData.Typedef(self.scope, newName, self.filename, self.lexer.lineno)
+        tdObj.setArgumentType(typeName)
+        if typeName.startswith('QFlags<'):
+            tdObj.template = Template('QFlags', typeName [7:-1])
         else:
-            tdObj.template     = self.template
-        self.template      = None
-        self.stateInfo.pushObject (tdObj)
-        self.symbolData.objectList.append (tdObj)
+            tdObj.template = self.template
+        self.template = None
+        self._pushScope(tdObj)
+        self.currentTypedef = tdObj
             
         return tdObj
         
@@ -245,7 +238,6 @@ class CppParser(object):
         else:
             self.object_id_list (p [4], 'class')
         name, obj = self.stateInfo.popClass ()
-        self.symbolData.objectList.append (EndClassMarker (name, self.lexer.lineno, self.stateInfo))
         
     def p_class_member (self, p):
         """class_member : class_decl
@@ -298,8 +290,7 @@ class CppParser(object):
     def p_class_header1 (self, p):
         """class_header : union LBRACE
                         | struct LBRACE"""
-        self.classObject ('anonymous', p [1])
-                        
+        self.classObject('anonymous', p[1])
     
     def p_class_name (self, p):
         """class_name : class ID
@@ -310,7 +301,7 @@ class CppParser(object):
         
     def p_opaque_class (self, p):
         'opaque_class : class_name SEMI'
-        self.stateInfo.currentObject ().opaque = True
+        self.currentClass.setOpaque(True)
     
     def p_base_list_element0 (self, p):
         """base_list_element : base_access_specifier qualified_id
@@ -357,7 +348,8 @@ class CppParser(object):
         
     def p_enum_name1 (self, p):
         'enum_name : enum_from_typedef'
-        pass
+        self._popScope()
+        self.currentTypedef = None
         
     def p_enumerator0 (self, p):
         """enumerator : ID
@@ -533,21 +525,22 @@ class CppParser(object):
         """typedef_decl : typedef_simple SEMI
                         | typedef_elaborated SEMI
                         | typedef_function_ptr SEMI"""
-        self.stateInfo.popObject ()
+        self._popScope()
+        self.currentTypedef = None
        
     def p_typedef_simple0 (self, p):
         'typedef_simple : typedef type_specifier ID'
-        self.typedefObject (p [2], p [3])
-        self.stateInfo.inTypedef = True
+        self.typedefObject(p[2], p[3])
+        self.inTypedef = True
         
     def p_typedef_simple1 (self, p):
         'typedef_simple : typedef type_specifier ID ARRAYOP'
-        self.typedefObject ('%s*' % p [2], p [3])
-        self.stateInfo.inTypedef = True
+        self.typedefObject('%s*' % p [2], p [3])
+        self.inTypedef = True
 
     def p_q_declare_flags_name (self, p):
         'q_declare_flags_name : Q_DECLARE_FLAGS LPAREN ID COMMA ID'
-        self.typedefObject ("QFlags<%s>" % p [5], p [3]);
+        self.typedefObject("QFlags<%s>" % p [5], p [3]);
         
     def p_q_declare_flags (self, p):
         'q_declare_flags : q_declare_flags_name RPAREN'
@@ -558,8 +551,8 @@ class CppParser(object):
                               | typedef struct qualified_id ID
                               | typedef union qualified_id ID
                               | typedef enum qualified_id ID"""
-        self.typedefObject (p [3], p [4])
-        self.stateInfo.inTypedef = True
+        self.typedefObject(p[3], p[4])
+        self.inTypedef = True
         
     def p_class_from_typedef0 (self, p):
         """class_from_typedef : typedef class ID LBRACE
@@ -567,25 +560,30 @@ class CppParser(object):
                               | typedef union ID LBRACE"""
         p [0] = p [2]
         self.classObject (p [3], p [2])
-        self.stateInfo.inTypedef = True
+        self.inTypedef = True
         
     def p_class_from_typedef1 (self, p):
         """class_from_typedef : typedef struct LBRACE
                               | typedef union LBRACE"""
         p [0] = p [2]
         self.classObject ('anonymous', p [2])
-        self.stateInfo.inTypedef = True
+        self.inTypedef = True
 
     def p_enum_from_typedef (self, p):
         """enum_from_typedef : typedef enum ID LBRACE
                              | typedef enum LBRACE"""
-        
         if p [3] != "{":
             name = p [3]
         else:
-            name = "anonymous"
-        self.enumObject (name)
-        self.stateInfo.inTypedef = True
+            name = None
+            
+        tdObj = self.symbolData.Typedef(self.scope, name, self.filename, self.lexer.lineno)
+        self.template = None
+        self._pushScope(tdObj)
+        self.currentTypedef = tdObj
+
+        self.inTypedef = True
+        self.enumObject(name)
         
     def p_pointer_to_function_pfx (self, p):
         """pointer_to_function_pfx : ASTERISK FUNCPTR
@@ -619,7 +617,7 @@ class CppParser(object):
             typedefObj.functionPtr = args.split (',')
         else:
             typedefObj.functionPtr = ['()']
-        self.stateInfo.inTypedef = True
+        self.inTypedef = True
         
     def p_array_variable (self, p):
         'array_variable : ID ARRAYOP'
@@ -822,7 +820,7 @@ class CppParser(object):
 
     def p_dtor_name (self, p):
         'dtor_name : TILDE ID'
-        self.functionObject(p [2], 'dtor')
+        self.functionObject(p[2], 'dtor')
         self.arguments = []
         
     def p_virtual_dtor_name (self, p):
@@ -842,7 +840,7 @@ class CppParser(object):
     def p_function_primary (self, p):
         """function_primary : function_name RPAREN
                             | function_name argument_list RPAREN"""
-        self.currentFunction.setArguments (self.argumentList())
+        self.currentFunction.setArguments(self.argumentList())
     
     def p_function_stmt0 (self, p):
         'function_stmt : function_primary decl_end'
@@ -910,7 +908,7 @@ class CppParser(object):
                         | virtual_primary CVQUAL pure_virtual_suffix"""
         self.currentFunction.addQualifier('pure')
         if p[2] in ['const', 'volatile']:
-            self.currentFunction.attributes.cv = p[2]
+            self.currentFunction.addQualifier(p[2])
 
     def p_template_param (self, p):
         """template_param : type_specifier
@@ -1158,11 +1156,10 @@ class CppParser(object):
 
     def p_error(self, p):
         if p is not None:
-            print("syntax error in input -- token type: %s, token value: %s, lex state: %s" % (p.type, p.value, self.lexer.lexstate))
+            print("File: " + repr(self.filename) + " Line: " + str(self.lexer.lineno) + " Syntax error in input. Token type: %s, token value: %s, lex state: %s" % (p.type, p.value, self.lexer.lexstate))
         else:
-            print("syntax error in input -- lex state: %s" % (self.lexer.lexstate,) )
+            print("File: " + repr(self.filename) + " Line: " + str(self.lexer.lineno) + " Syntax error in input. Lex state: %s" % (self.lexer.lexstate,) )
         sys.exit (-1)
-
         
 if __name__ == '__main__':
 

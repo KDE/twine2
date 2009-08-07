@@ -138,9 +138,13 @@ class SymbolData(object):
             SymbolData._Scope.__init__(self)
             SymbolData._CppEntity.__init__(self, parentScope, name, filename, lineno)
             self._bases = []
-            
+            self._opaque = False
+        
         def addBase(self, base):
             self._bases.append(base)
+            
+        def setOpaque(self,opaque):
+            self._opaque = opaque
             
         def format(self,indent=0):
             pre = SymbolData._indentString(indent)
@@ -148,22 +152,25 @@ class SymbolData(object):
             accu.append(pre)
             accu.append("class ")
             accu.append(self._name)
-            if len(self._bases):
-                accu.append(" : ")
-                accu.append(', '.join(self._bases))
-            accu.append(" {\n")
+            if not self._opaque:
+                if len(self._bases):
+                    accu.append(" : ")
+                    accu.append(', '.join(self._bases))
+                accu.append(" {\n")
 
-            access = SymbolData.ACCESS_PRIVATE
-            pre2 = SymbolData._indentString(indent+1)
-            for item in self._items:
-                if item.access() is not access:
-                    accu.append(pre2)
-                    accu.append(item.formatAccess())
-                    accu.append(":\n")
-                    access = item.access()
-                accu.append(item.format(indent+2))
-            accu.append(pre)
-            accu.append("};\n")
+                access = SymbolData.ACCESS_PRIVATE
+                pre2 = SymbolData._indentString(indent+1)
+                for item in self._items:
+                    if item.access() is not access:
+                        accu.append(pre2)
+                        accu.append(item.formatAccess())
+                        accu.append(":\n")
+                        access = item.access()
+                    accu.append(item.format(indent+2))
+                accu.append(pre)
+                accu.append("};\n")
+            else:
+                accu.append(";\n")
             return ''.join(accu)
 
     class Argument(object):
@@ -260,4 +267,23 @@ class SymbolData(object):
             pre = SymbolData._indentString(indent)
             storage = self._storage+" " if self._storage is not None else ""
             return pre + storage + "~" + self._name + "();\n"
-        
+            
+    class Typedef(_Scope,_CppEntity):
+        def __init__(self,parentScope, name, filename, lineno):
+            SymbolData._Scope.__init__(self)
+            SymbolData._CppEntity.__init__(self, parentScope, name, filename, lineno)
+            self._argumentType = None
+            
+        def setArgumentType(self,argumentType):
+            self._argumentType = argumentType
+            
+        def format(self,indent=0):
+            pre = SymbolData._indentString(indent)
+            if self._argumentType is not None:
+                return pre + "typedef " + self._argumentType + " " + self._name + ";\n"
+            else:
+                contents = ""
+                if len(self._items)!=0:
+                    contents = self._items[0].format(indent+1)
+                return pre + "typedef\n" + " " + contents
+    

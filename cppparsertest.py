@@ -64,6 +64,14 @@ class TestCppParser(unittest.TestCase):
             };""")
         print(self.syms.topScope().format())
 
+    def testClass6(self):
+        self.parser.parse(self.syms,
+            """
+            class OpaqueFoo;
+            """)
+        print(self.syms.topScope().format())
+
+
     def testClassVariable(self):
         self.parser.parse(self.syms,
             """
@@ -230,6 +238,21 @@ class TestCppParser(unittest.TestCase):
             """)
         print(self.syms.topScope().format())
 
+    def testTypedef1(self):
+        self.parser.parse(self.syms,
+            """
+            typedef QString& stringref;
+            """)
+        print(self.syms.topScope().format())
+
+    def testTypedef2(self):
+        self.parser.parse(self.syms,
+            """
+            typedef enum simple {easy, bobsyouruncle, noproblem};
+            """,debugLevel=2)
+        print(self.syms.topScope().format())
     
+
+
 if __name__ == '__main__':
     unittest.main()

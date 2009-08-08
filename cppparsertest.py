@@ -256,7 +256,7 @@ class TestCppParser(unittest.TestCase):
         self.parser.parse(self.syms,
             """
             typedef enum simple {easy, bobsyouruncle, noproblem};
-            """,debugLevel=2)
+            """)
         print(self.syms.topScope().format())
     
     def testTypedef3(self):

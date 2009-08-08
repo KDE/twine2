@@ -139,18 +139,27 @@ class SymbolData(object):
             SymbolData._CppEntity.__init__(self, parentScope, name, filename, lineno)
             self._bases = []
             self._opaque = False
-        
+            self._macros = []
+            
         def addBase(self, base):
             self._bases.append(base)
             
         def setOpaque(self,opaque):
             self._opaque = opaque
             
+        def addMacro(self,macro):
+            self._macros.append(macro)
+                
         def format(self,indent=0):
             pre = SymbolData._indentString(indent)
             accu = []
             accu.append(pre)
             accu.append("class ")
+            
+            for macro in self._macros:
+                accu.append(macro.name())
+                accu.append(" ")
+            
             accu.append(self._name)
             if not self._opaque:
                 if len(self._bases):
@@ -287,7 +296,14 @@ class SymbolData(object):
                     contents = self._items[0].format(indent+1)
                 return pre + "typedef\n" + " " + contents
                 
-    class Macro(_CppEntity):
+    class Macro(object):
+        def __init__(self, name):
+            self._name = name
+            
+        def name(self):
+            return self._name
+        
+    class ScopedMacro(_CppEntity):
         def __init__(self,parentScope, name, filename, lineno):
             SymbolData._CppEntity.__init__(self, parentScope, name, filename, lineno)
             

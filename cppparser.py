@@ -127,7 +127,7 @@ class CppParser(object):
         return tdObj
         
     def bareMacro(self,name):
-        macro = self.symbolData.Macro(self.scope, name, self.filename, self.lexer.lineno)
+        macro = self.symbolData.ScopedMacro(self.scope, name, self.filename, self.lexer.lineno)
         return macro
     
     def argument(self, argumentType, argumentName = None, argumentValue = None):
@@ -316,6 +316,14 @@ class CppParser(object):
                       | union ID
                       | class template_type"""
         self.classObject(p[2], p[1])
+        
+    def p_class_name1 (self, p):
+        """class_name : class BAREMACRO ID
+                      | struct BAREMACRO ID
+                      | union BAREMACRO ID
+                      | class BAREMACRO template_type"""
+        self.classObject(p[3], p[1])
+        self.currentClass.addMacro(self.symbolData.Macro(p[2]))
         
     def p_opaque_class (self, p):
         'opaque_class : class_name SEMI'

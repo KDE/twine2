@@ -283,6 +283,14 @@ class TestCppParser(unittest.TestCase):
             """)
         print(self.syms.topScope().format())
 
+    def testMacro2(self):
+        self.parser.setBareMacros( ["FOO_EXPORT"] )
+        self.parser.parse(self.syms,
+            """
+            class FOO_EXPORT FooWidget {
+            };
+            """)
+        print(self.syms.topScope().format())
 
 if __name__ == '__main__':
     unittest.main()

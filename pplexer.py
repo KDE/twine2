@@ -240,7 +240,7 @@ def preprocess (text, global_values, global_macros):
 
     ppLexer.input (text)
 
-    token = ppLexer.token ()
+    #token = ppLexer.token ()
 
     return "".join (fixDoc (newtext))
     

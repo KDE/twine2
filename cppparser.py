@@ -20,6 +20,7 @@
 import sys
 import ply.yacc as yacc
 import cpplexer
+import pplexer
 
 class CppParser(object):
     def __init__(self):
@@ -29,16 +30,8 @@ class CppParser(object):
         self.tokens = cpplexer.tokens
         yacc.yacc(module = self, tabmodule = "cppParserTab")
         self._parse = yacc.parse
-        self.setBareMacros( ["Q_OBJECT", "Q_GADGET", "Q_OBJECT_CHECK", "K_DCOP"] )
-        self.setMacros( [
-            "Q_ENUMS", "Q_PROPERTY", "Q_OVERRIDE", "Q_SETS", "Q_CLASSINFO",\
-            "Q_DECLARE_OPERATORS_FOR_FLAGS", "Q_PRIVATE_SLOT", "Q_FLAGS",\
-            "Q_DECLARE_INTERFACE", "Q_DECLARE_METATYPE","KDE_DUMMY_COMPARISON_OPERATOR",\
-            "Q_GADGET", "K_DECLARE_PRIVATE", "PHONON_ABSTRACTBASE", "PHONON_HEIR",\
-            "PHONON_OBJECT", "Q_DECLARE_PRIVATE", "QT_BEGIN_HEADER", "QT_END_HEADER",\
-            "Q_DECLARE_BUILTIN_METATYPE", "Q_OBJECT_CHECK", "Q_DECLARE_PRIVATE_MI",\
-            "KDEUI_DECLARE_PRIVATE", "KPARTS_DECLARE_PRIVATE", "Q_INTERFACES",\
-            '__attribute__', 'Q_DISABLE_COPY', 'K_SYCOCATYPE', 'Q_DECLARE_TR_FUNCTIONS'] )
+        self._preprocessMacroValue = {}
+        self._preprocessSubstitutionMacroValue = []
 
     def _resetState(self):
         self.filename = None
@@ -63,13 +56,21 @@ class CppParser(object):
     def setMacros(self,macroList):
         self.lexer.lexmodule.setMacros(macroList)
         
+    def setPreprocessMacroValues(self,valueList):
+        self._preprocessMacroValue = valueList
+        
+    def setPreprocessSubstitutionMacros(self,macroList):
+        self._preprocessSubstitutionMacroValue = valueList
+        
     def parse(self, symbolData, text, filename=None, debugLevel = 0):
         self._resetState()
 
         self.symbolData = symbolData
         self.scope = self.symbolData.topScope()
 
-        self.lexer.input(text)
+        chewedText = pplexer.preprocess(text, self._preprocessMacroValue, self._preprocessSubstitutionMacroValue)
+
+        self.lexer.input(chewedText)
         self.lexer.lineno = 1
         self.lexer.lexpos = 0 
 

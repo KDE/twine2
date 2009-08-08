@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #     Copyright 2007-8 Jim Bublitz <jbublitz@nwinternet.com>
 #
 # This program is free software; you can redistribute it and/or modify
@@ -206,6 +207,8 @@ ppLexer = lex.lex ()
     
 def preprocess (text, global_values, global_macros):
     """
+    Preprocess a C/C++ header file text
+    
     Preprocesses h files - does #define substitutions and
     evaluates conditionals to include/exclude code. No
     substitutions are performed on preprocessor lines (any
@@ -216,6 +219,16 @@ def preprocess (text, global_values, global_macros):
     lines eliminated conditionally, is replaced with newlines
     so that error messages still refer to the correct line in
     the original file.
+    
+    Arguments:
+    text -- The text to process.
+    global_values -- Dict mapping string variable names to values.
+    global_macros -- List of tuples. The first value in a tuple is a
+                     regular expression object. The second is that
+                     replacement string which may contain re module
+                     back references.
+    
+    Returns the processed string.
     """
     global newtext, bitBucket, macros, values
     newtext   = []
@@ -223,7 +236,7 @@ def preprocess (text, global_values, global_macros):
     macros    = [] + global_macros
     values    = {}
         
-    values.update (global_values)      
+    values.update (global_values)
 
     ppLexer.input (text)
 

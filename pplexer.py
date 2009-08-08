@@ -237,13 +237,11 @@ def preprocess (text, global_values, global_macros):
     values    = {}
         
     values.update (global_values)
-
+    if text[-1]!='\n':
+        text = text + '\n'
     ppLexer.input (text)
-
-    #token = ppLexer.token ()
-
+    token = ppLexer.token ()
     return "".join (fixDoc (newtext))
-    
 
 def fixDoc (textList):
     doReplace = False

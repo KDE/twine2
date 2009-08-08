@@ -119,6 +119,15 @@ class TestCppParser(unittest.TestCase):
             };""")
         print(self.syms.topScope().format())
 
+    def testClassConstructor3(self):
+        self.parser.parse(self.syms,
+            """
+            class Foo {
+                explicit Foo(int x);
+            };""")
+        print(self.syms.topScope().format())
+
+
     def testClassDestructor1(self):
         self.parser.parse(self.syms,
             """

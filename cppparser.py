@@ -842,7 +842,7 @@ class CppParser(object):
     def p_ctor_name1 (self, p):
         'ctor_name : explicit qualified_id LPAREN'
         fo = self.functionObject(p[2], 'ctor')
-        fo.attributes.functionQualifier = 'explicit'
+        fo.addQualifier('explicit')
         self.arguments = []
 
     def p_dtor_name (self, p):

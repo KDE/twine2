@@ -263,10 +263,16 @@ class SymbolData(object):
             SymbolData.Function.__init__(self, parentScope, name, filename, lineno)
 
         def format(self,indent=0):
-            pre = SymbolData._indentString(indent)
-            storage = self._storage+" " if self._storage is not None else ""
-            args = ', '.join( (arg.format() for arg in self._arguments) )
-            return pre + storage + self._name + "(" + args + ");\n"
+            accu = []
+            accu.append(SymbolData._indentString(indent))
+            accu.append(self._storage+" " if self._storage is not None else "")
+            if 'explicit' in self._qualifier:
+                accu.append("explicit ")
+            accu.append(self._name)
+            accu.append("(")
+            accu.append(', '.join( (arg.format() for arg in self._arguments) ))
+            accu.append(");\n")
+            return ''.join(accu)
             
     class Destructor(Function):
         def __init__(self,parentScope, name, filename, lineno):

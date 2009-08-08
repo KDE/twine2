@@ -187,6 +187,13 @@ class TestCppParser(unittest.TestCase):
             """)
         print(self.syms.topScope().format())
 
+    def testFunctions6(self):
+        self.parser.parse(self.syms,
+            """
+            void* foo (int, double (*doublePtr)(float, QString*));
+            """)
+        print(self.syms.topScope().format())
+
     def testOperator1(self):
         self.parser.parse(self.syms,
             """
@@ -252,7 +259,18 @@ class TestCppParser(unittest.TestCase):
             """,debugLevel=2)
         print(self.syms.topScope().format())
     
+    def testTypedef3(self):
+        self.parser.parse(self.syms,
+            """typedef QObject** objPtrPtr;
+            """)
+        print(self.syms.topScope().format())
 
+    def testTemplate(self):
+        self.parser.parse(self.syms,
+            """
+            QList<int> intlist;
+            """)
+        print(self.syms.topScope().format())
 
 if __name__ == '__main__':
     unittest.main()

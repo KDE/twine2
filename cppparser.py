@@ -104,11 +104,11 @@ class CppParser(object):
     def typedefObject(self, typeName, newName):
         tdObj = self.symbolData.Typedef(self.scope, newName, self.filename, self.lexer.lineno)
         tdObj.setArgumentType(typeName)
-        if typeName.startswith('QFlags<'):
-            tdObj.template = Template('QFlags', typeName [7:-1])
-        else:
-            tdObj.template = self.template
-        self.template = None
+#        if typeName.startswith('QFlags<'):
+#            tdObj.template = Template('QFlags', typeName [7:-1])
+#       else:
+#            tdObj.template = self.template
+#        self.template = None
         self._pushScope(tdObj)
         self.currentTypedef = tdObj
             
@@ -439,8 +439,8 @@ class CppParser(object):
         """template_type : qualified_id LT type_specifier_list GT
                         | qualified_id LT static_cast_expression GT"""
         
-        p [0] = "".join (p [1:])           
-        self.template = Template (p [1], p [3], self.template)
+        p[0] = "".join (p[1:])
+        #self.template = Template(p[1], p[3], self.template)
         
     def p_elaborated_type (self, p):
         """elaborated_type : enum qualified_id
@@ -645,7 +645,7 @@ class CppParser(object):
     def p_argument_specifier4 (self, p):
         'argument_specifier : pointer_to_function'
         argType, name, args = p [1].split ('|', 2)
-        p [0] = self.argument ('$fp' + argType, name, args)
+        p[0] = self.argument('$fp' + argType, name, args)
                               
     def p_argument_list0 (self, p):
         """argument_list : argument_specifier"""

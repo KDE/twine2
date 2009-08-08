@@ -262,26 +262,26 @@ class CppLexerClass(object):
         if t.value in ['class', 'namespace']:
             t.lexer.begin ('variable')
             
-        if t.value in edges or t.value in ['new', 'static_cast']:
+        if t.value in CppLexerClass.edges or t.value in ['new', 'static_cast']:
             t.type = t.value
             if t.type == 'operator':
                 t.lexer.begin ('operator')
             if t.type == 'enum' and t.lexer.lexstate != 'function':
                 t.lexer.begin ('enum')
-        elif t.value in cppScalarTypes:
+        elif t.value in CppLexerClass.cppScalarTypes:
             t.type = t.value
-        elif t.value in accessSpecifiers:
+        elif t.value in CppLexerClass.accessSpecifiers:
             t.type = t.value
-        elif t.value in storageQualifiers:
+        elif t.value in CppLexerClass.storageQualifiers:
             t.type = "STORAGE"
-        elif t.value in functionQualifiers:
+        elif t.value in CppLexerClass.functionQualifiers:
             t.type = t.value
-        elif t.value in cvQualifiers:
+        elif t.value in CppLexerClass.cvQualifiers:
             t.type = "CVQUAL"
-        elif t.value in BareMacros:
+        elif t.value in CppLexerClass.BareMacros:
             t.lexer.skip(1)
             return
-        elif t.value in MacroCalls:
+        elif t.value in CppLexerClass.MacroCalls:
             t.type = "MACROCALL"
             t.lexer.begin('macro')
         return t
@@ -343,14 +343,6 @@ class CppLexerClass(object):
         t.lexer.skip(1)
 
 tokens = CppLexerClass.tokens
-edges = CppLexerClass.edges
-cppScalarTypes = CppLexerClass.cppScalarTypes
-accessSpecifiers = CppLexerClass.accessSpecifiers
-storageQualifiers = CppLexerClass.storageQualifiers
-functionQualifiers = CppLexerClass.functionQualifiers
-cvQualifiers = CppLexerClass.cvQualifiers
-BareMacros = CppLexerClass.BareMacros
-MacroCalls = CppLexerClass.MacroCalls
 
 def CppLexer():
     return lex.lex(object=CppLexerClass())

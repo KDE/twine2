@@ -272,5 +272,17 @@ class TestCppParser(unittest.TestCase):
             """)
         print(self.syms.topScope().format())
 
+    def testMacro(self):
+        self.parser.parse(self.syms,
+            """
+            class FooWidget : public QObject {
+                    Q_OBJECT
+                public:
+                    FooWidget();
+            };
+            """)
+        print(self.syms.topScope().format())
+
+
 if __name__ == '__main__':
     unittest.main()

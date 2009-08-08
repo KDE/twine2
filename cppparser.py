@@ -21,10 +21,6 @@ import sys
 import ply.yacc as yacc
 import cpplexer
 
-#from symboldata import NamespaceObject, ClassObject, EnumObject, Enumerator, TypedefObject
-#from symboldata import FunctionObject, Argument, VariableObject, EndClassMarker
-#from symboldata import EndNamespaceMarker, Template
-
 class CppParser(object):
     def __init__ (self):
         self.lexer = cpplexer.CppLexer()
@@ -114,6 +110,10 @@ class CppParser(object):
             
         return tdObj
         
+    def bareMacro(self,name):
+        macro = self.symbolData.Macro(self.scope, name, self.filename, self.lexer.lineno)
+        return macro
+    
     def argument(self, argumentType, argumentName = None, argumentValue = None):
         self.arguments.append ((argumentType, argumentName, argumentValue, None, self.template, self.exprElements))
         self.template = None
@@ -181,6 +181,7 @@ class CppParser(object):
                   | function_decl
                   | variable_decl
                   | template_decl
+                  | bare_macro
                   | skip_macro"""
         pass
         #self.lexer.begin (self.stateInfo.lexState)
@@ -248,6 +249,7 @@ class CppParser(object):
                         | function_decl
                         | variable_decl
                         | template_decl
+                        | bare_macro
                         | skip_macro"""
         #if self.stateInfo.lexState != 'operator':
         #   self.lexer.begin (self.stateInfo.lexState)
@@ -1132,7 +1134,12 @@ class CppParser(object):
             self.stateInfo.popObject ()
         else:
             pass
-
+            
+    def p_bare_macro(self,p):
+        'bare_macro : BAREMACRO'
+        print("bare:"+p[1])
+        self.bareMacro(p[1])
+    
     def p_macro_call_parens (self, p):
         """macro_call_parens : LPAREN RPAREN
                             | LPAREN macro_call_element_list RPAREN"""

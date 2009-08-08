@@ -286,4 +286,12 @@ class SymbolData(object):
                 if len(self._items)!=0:
                     contents = self._items[0].format(indent+1)
                 return pre + "typedef\n" + " " + contents
-    
+                
+    class Macro(_CppEntity):
+        def __init__(self,parentScope, name, filename, lineno):
+            SymbolData._CppEntity.__init__(self, parentScope, name, filename, lineno)
+            
+        def format(self,indent=0):
+            pre = SymbolData._indentString(indent)
+            return pre + self._name + "\n"
+            

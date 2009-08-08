@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #     Copyright 2007-8 Jim Bublitz <jbublitz@nwinternet.com>
+#     Copyright 2009 Simon Edwards <simon@simonzone.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -59,7 +60,7 @@ class CppLexerClass(object):
     'STORAGE', 'PURESFX', 'CODE_TOKEN', 'STMT_BEGIN', 'STMT_END', 'CODE_STMT_BEGIN',
 
     # Expressions we don't parse
-    'ARRAYOP', 'FUNCPTR', 'MACROCALL', 'MACRO_ELEMENT', 'MACRO_CALL_BEGIN', 'MACRO_CALL_END',
+    'ARRAYOP', 'FUNCPTR', 'BAREMACRO', 'MACROCALL', 'MACRO_ELEMENT', 'MACRO_CALL_BEGIN', 'MACRO_CALL_END',
 
     # Structure dereference (->)
     'ARROW',
@@ -279,8 +280,7 @@ class CppLexerClass(object):
         elif t.value in CppLexerClass.cvQualifiers:
             t.type = "CVQUAL"
         elif t.value in CppLexerClass.BareMacros:
-            t.lexer.skip(1)
-            return
+            t.type = "BAREMACRO"
         elif t.value in CppLexerClass.MacroCalls:
             t.type = "MACROCALL"
             t.lexer.begin('macro')

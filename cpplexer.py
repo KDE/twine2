@@ -23,6 +23,16 @@ class CppLexerClass(object):
     def __init__(self):
         self.codeStack = []
         self.parenStack = []
+        self._bareMacros = []
+        self._macros = []
+
+    def setBareMacros(self,macroList):
+        # macroList - List of strings
+        self._bareMacros = macroList
+
+    def setMacros(self,macroList):
+        # macroList - List of strings
+        self._macros = macroList
 
     states = (('function', 'inclusive'), ('macro', 'exclusive'), ('operator', 'inclusive'), ('variable', 'inclusive'),\
             ('stmt', 'exclusive'), ('enum', 'inclusive'))
@@ -78,19 +88,6 @@ class CppLexerClass(object):
     'ELLIPSIS'
     )
 
-    # BareMacros and MacroCalls are not directly used by the parser.
-    BareMacros = ("Q_OBJECT", "Q_GADGET", "Q_OBJECT_CHECK", "K_DCOP")
-    MacroCalls  = (
-        "Q_ENUMS", "Q_PROPERTY", "Q_OVERRIDE", "Q_SETS", "Q_CLASSINFO",\
-        "Q_DECLARE_OPERATORS_FOR_FLAGS", "Q_PRIVATE_SLOT", "Q_FLAGS",\
-        "Q_DECLARE_INTERFACE", "Q_DECLARE_METATYPE","KDE_DUMMY_COMPARISON_OPERATOR",\
-        "Q_GADGET", "K_DECLARE_PRIVATE", "PHONON_ABSTRACTBASE", "PHONON_HEIR",\
-        "PHONON_OBJECT", "Q_DECLARE_PRIVATE", "QT_BEGIN_HEADER", "QT_END_HEADER",\
-        "Q_DECLARE_BUILTIN_METATYPE", "Q_OBJECT_CHECK", "Q_DECLARE_PRIVATE_MI",\
-        "KDEUI_DECLARE_PRIVATE", "KPARTS_DECLARE_PRIVATE", "Q_INTERFACES",\
-        '__attribute__', 'Q_DISABLE_COPY', 'K_SYCOCATYPE', 'Q_DECLARE_TR_FUNCTIONS')
-
-        
     # Completely ignored characters
     t_ANY_ignore          = ' \t\x0c'
     #t_ANY_ignore_typename = 'typename'
@@ -279,9 +276,9 @@ class CppLexerClass(object):
             t.type = t.value
         elif t.value in CppLexerClass.cvQualifiers:
             t.type = "CVQUAL"
-        elif t.value in CppLexerClass.BareMacros:
+        elif t.value in self._bareMacros:
             t.type = "BAREMACRO"
-        elif t.value in CppLexerClass.MacroCalls:
+        elif t.value in self._macros:
             t.type = "MACROCALL"
             t.lexer.begin('macro')
         return t

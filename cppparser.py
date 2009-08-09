@@ -762,7 +762,8 @@ class CppParser(object):
     def p_function_name (self, p):
         'function_name : decl_starter LPAREN'
         returns, name = p [1].split ('|')
-        self.functionObject (name, returns)
+        func = self.functionObject(name, returns)
+        func.setAccess(self.access)
         self.arguments = []
         
     def p_operator_pfx (self, p):
@@ -1174,10 +1175,12 @@ class CppParser(object):
         #    pass
         macro = self.bareMacro(p[1])
         macro.setArgument(p[3])
-            
+        macro.setAccess(self.access)
+        
     def p_bare_macro(self,p):
         'bare_macro : BAREMACRO'
-        self.bareMacro(p[1])
+        macro = self.bareMacro(p[1])
+        macro.setAccess(self.access)
     
     def p_macro_call_parens (self, p):
         """macro_call_parens : LPAREN RPAREN

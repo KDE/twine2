@@ -21,10 +21,12 @@ class SymbolData(object):
     ACCESS_PUBLIC = object()
     ACCESS_PRIVATE = object()
     ACCESS_PROTECTED = object()
+    ACCESS_SIGNALS = object()
     ACCESS_TYPE_MAPPING_FROM_NAME = {
         'public': ACCESS_PUBLIC,
         'private': ACCESS_PRIVATE,
-        'protected': ACCESS_PROTECTED
+        'protected': ACCESS_PROTECTED,
+        'signals': ACCESS_SIGNALS
     }
 
     ACCESS_TYPE_MAPPING_TO_NAME = {}

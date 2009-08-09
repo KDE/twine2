@@ -19,6 +19,7 @@
 import unittest
 import cppparser
 import cppsymboldata
+import qtkdemacros
 
 class TestCppParser(unittest.TestCase):
 
@@ -300,6 +301,30 @@ class TestCppParser(unittest.TestCase):
             };
             """)
         print(self.syms.topScope().format())
+
+    def testMacro3(self):
+        self.parser.setMacros( ["Q_DISABLE_COPY"] )
+        self.parser.parse(self.syms,
+            """
+            class FooWidget {
+                public:
+                    Foo();
+                private:
+                    Q_DISABLE_COPY( FooWidget )
+            };
+            """)
+        print(self.syms.topScope().format())
+
+
+    def testLiveAmmo(self):
+        with open("/home/sbe/devel/svn/kde/branches/KDE/4.3/kdeedu/marble/src/lib/MarbleMap.h") as fhandle:
+            text = fhandle.read()
+        self.parser.setBareMacros(qtkdemacros.QtBareMacros(["MARBLE_EXPORT"]))
+        self.parser.setMacros(qtkdemacros.QtMacros())
+        self.parser.setPreprocessSubstitutionMacros(qtkdemacros.QtPreprocessSubstitutionMacros())
+        self.parser.parse(self.syms, text)
+        print(self.syms.topScope().format())
+
 
 if __name__ == '__main__':
     unittest.main()

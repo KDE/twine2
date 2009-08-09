@@ -21,3 +21,12 @@ def QtMacros(extraMacros=[]):
     macros = __QtMacros[:]
     macros.extend(extraMacros)
     return macros
+
+__QtPreprocessSubstitutionMacros = [
+        ('Q_SLOTS','slots'),
+        ('Q_SIGNALS','signals')
+        ]
+def QtPreprocessSubstitutionMacros(extraMacros=[]):
+    macros = __QtPreprocessSubstitutionMacros[:]
+    macros.extend(extraMacros)
+    return macros

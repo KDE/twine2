@@ -312,8 +312,15 @@ class SymbolData(object):
     class ScopedMacro(_CppEntity):
         def __init__(self,parentScope, name, filename, lineno):
             SymbolData._CppEntity.__init__(self, parentScope, name, filename, lineno)
+            self._argument = None
+            
+        def setArgument(self,argument):
+            self._argument = argument
             
         def format(self,indent=0):
             pre = SymbolData._indentString(indent)
-            return pre + self._name + "\n"
+            if self._argument is None:
+                return pre + self._name + "\n"
+            else:
+                return pre + self._name + "(" + self._argument + ")\n"
             

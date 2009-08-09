@@ -18,6 +18,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 import sys
+import re
 import ply.yacc as yacc
 import cpplexer
 import pplexer
@@ -30,8 +31,8 @@ class CppParser(object):
         self.tokens = cpplexer.tokens
         yacc.yacc(module = self, tabmodule = "cppParserTab")
         self._parse = yacc.parse
-        self._preprocessMacroValue = {}
-        self._preprocessSubstitutionMacroValue = []
+        self._preprocessValue = {}
+        self._preprocessSubstitutionMacros = []
 
     def _resetState(self):
         self.filename = None
@@ -56,19 +57,19 @@ class CppParser(object):
     def setMacros(self,macroList):
         self.lexer.lexmodule.setMacros(macroList)
         
-    def setPreprocessMacroValues(self,valueList):
-        self._preprocessMacroValue = valueList
+    def setPreprocessValues(self,valueList):
+        self._preprocessValue = valueList
         
     def setPreprocessSubstitutionMacros(self,macroList):
-        self._preprocessSubstitutionMacroValue = valueList
+        self._preprocessSubstitutionMacros = macroList
         
     def parse(self, symbolData, text, filename=None, debugLevel = 0):
         self._resetState()
 
         self.symbolData = symbolData
         self.scope = self.symbolData.topScope()
-
-        chewedText = pplexer.preprocess(text, self._preprocessMacroValue, self._preprocessSubstitutionMacroValue)
+        
+        chewedText = pplexer.preprocess(text, self._preprocessValue, self.__compileMacros(self._preprocessSubstitutionMacros))
 
         self.lexer.input(chewedText)
         self.lexer.lineno = 1
@@ -76,7 +77,19 @@ class CppParser(object):
 
         result = self._parse(debug = debugLevel, lexer = self.lexer)
         return result
- 
+        
+    def __compileMacros(self, macroList):
+        # Convert the list of macros to regular expressions. Macro which are
+        # already regexs don't need to changed. Bare string macros and their
+        # substituation strings are treated as straight string substituations.
+        compiledMacros = []
+        for item in macroList:
+            if not isinstance(item[0],str):
+                compiledMacros.append(item)
+            else:
+                compiledMacros.append( (re.compile(item[0]), re.escape(item[1])) )
+        return compiledMacros
+
     def _pushScope(self, newScope):
         self._scopeStack.append(self.scope)
         self.scope = newScope
@@ -1153,12 +1166,14 @@ class CppParser(object):
 # calls to mostly ignored macros
     def p_skip_macro (self, p):
         'skip_macro : MACROCALL MACRO_CALL_BEGIN macro_call_element_list MACRO_CALL_END'
-        if p [1] == 'Q_DISABLE_COPY':
-            fcn  = self.functionObject (p [3], 'ctor')
-            fcn.setArguments (self.argument ('const %s&' % p[3]))
-            self.stateInfo.popObject ()
-        else:
-            pass
+        #if p [1] == 'Q_DISABLE_COPY':
+        #    fcn  = self.functionObject (p [3], 'ctor')
+        #    fcn.setArguments (self.argument ('const %s&' % p[3]))
+        #    self.stateInfo.popObject ()
+        #else:
+        #    pass
+        macro = self.bareMacro(p[1])
+        macro.setArgument(p[3])
             
     def p_bare_macro(self,p):
         'bare_macro : BAREMACRO'

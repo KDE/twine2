@@ -1,0 +1,567 @@
+                        
+    precedence = (('right','UMINUS'), )
+        """declarations : member
+                        | member_list member"""
+
+        """member : namespace_decl
+                  | class_decl
+                  | enum_decl
+                  | typedef_decl
+                  | q_declare_flags
+                  | function_decl
+                  | variable_decl
+                  | template_decl
+                  | skip_macro"""
+
+        """member_list : member
+                       | member_list member"""
+
+        'namespace_decl : namespace_name LBRACE member_list RBRACE'
+
+        'namespace_decl : namespace_name LBRACE RBRACE'
+
+        'namespace_decl : namespace LBRACE member_list RBRACE'
+
+        'namespace_name : namespace ID'
+
+        'empty :'
+
+        """decl_end : SEMI
+                   | inline_code"""
+
+        """class_decl : class_header class_member_list RBRACE decl_end
+                      | opaque_class
+                      | class_header RBRACE decl_end"""
+
+        'class_decl : class_header class_member_list RBRACE id_list decl_end'
+
+        """class_member : class_decl
+                        | enum_decl
+                        | typedef_decl
+                        | q_declare_flags
+                        | access_specifier
+                        | function_decl
+                        | variable_decl
+                        | template_decl
+                        | skip_macro"""
+
+        """access_specifier : public COLON
+                            | public slots COLON
+                            | protected COLON
+                            | protected slots COLON
+                            | private COLON
+                            | private slots COLON
+                            | signals COLON
+                            | slots COLON"""
+
+        """base_access_specifier : public
+                                 | protected
+                                 | private"""
+
+        """class_member_list : class_member
+                             | class_member_list class_member"""
+
+        """class_header : class_name LBRACE
+                        | class_name COLON base_list LBRACE
+                        | class_from_typedef"""
+
+        """class_header : union LBRACE
+                        | struct LBRACE"""
+
+        """class_name : class ID
+                      | struct ID
+                      | union ID
+                      | class template_type"""
+
+        'opaque_class : class_name SEMI'
+
+        """base_list_element : base_access_specifier qualified_id
+                            | base_access_specifier template_type"""
+
+        """base_list_element : virtual base_access_specifier qualified_id
+                            | virtual base_access_specifier template_type"""
+
+        'base_list_element : qualified_id'
+
+        """base_list : base_list_element
+                     | base_list COMMA base_list_element"""
+
+        'enum_decl : enum_statement SEMI'
+
+        'enum_decl : enum_statement id_list SEMI'
+
+        """enum_statement : enum_name enumerator_list RBRACE
+                                       | enum_name RBRACE"""
+
+        """enum_name : enum ID LBRACE
+                     | enum LBRACE"""                     
+
+        'enum_name : enum_from_typedef'
+
+        """enumerator : ID
+                      | ID EQUALS expression"""
+                
+
+        """enumerator : DOC ID
+                      | DOC ID EQUALS expression"""
+                
+
+        """enumerator : ID UPDOC
+                      | ID EQUALS expression UPDOC"""
+        
+
+        """enumerator_list : enumerator
+                           | enumerator_list enum_delim enumerator
+                           | enumerator_list UPDOC"""
+
+        """enum_delim : COMMA
+                      | COMMA UPDOC"""
+
+        'enum_delim : COMMA UPDOC DOC'
+
+        """enum_delim : COMMA DOC
+                      | DOC COMMA"""
+
+        'id_list_element : ID'
+
+        """id_list_element : ASTERISK ID
+                                    | AMPERSAND ID"""
+
+        """id_list : id_list_element
+                   | id_list COMMA id_list_element"""
+
+        """qualified_id : ID
+                        | nested_name_specifier"""
+
+        """nested_name_specifier : ID COLON2 ID
+                                 | nested_name_specifier COLON2 ID
+                                 | template_type COLON2 ID"""                                 
+
+        'nested_name_specifier : COLON2 ID'
+
+        """template_type : qualified_id LT type_specifier_list GT
+                        | qualified_id LT static_cast_expression GT"""
+        
+
+        """elaborated_type : enum qualified_id
+                           | class qualified_id
+                           | struct qualified_id
+                           | union qualified_id
+                           | typename qualified_id"""
+
+        """type_specifier_base : qualified_id
+                               | template_type
+                               | elaborated_type
+                               | int
+                               | unsigned int
+                               | signed int
+                               | char
+                               | unsigned char
+                               | signed char
+                               | float
+                               | double
+                               | long
+                               | long int
+                               | unsigned long
+                               | unsigned long int
+                               | long unsigned int
+                               | signed long
+                               | signed long int
+                               | long long
+                               | unsigned long long
+                               | signed long long
+                               | signed long long int
+                               | short
+                               | unsigned short
+                               | signed short
+                               | short int
+                               | unsigned short int
+                               | signed short int
+                               | unsigned
+                               | signed
+                               | bool
+                               | void
+                               | wchar_t"""
+
+        'type_specifier : type_specifier_base '
+
+        'type_specifier : CVQUAL type_specifier_base'
+
+        'type_specifier : type_specifier_base type_decorator'
+
+        'type_specifier : CVQUAL type_specifier_base type_decorator'
+
+        'type_specifier : type_specifier_base CVQUAL type_decorator'
+
+        """type_decorator : ASTERISK
+                          | AMPERSAND
+                          | ASTERISK CVQUAL
+                          | ASTERISK AMPERSAND
+                          | ASTERISK ASTERISK
+                          | ASTERISK ASTERISK ASTERISK
+                          | ARRAYOP"""
+
+        """type_specifier_list : type_specifier
+                               | type_specifier_list COMMA type_specifier"""
+
+        """typedef_decl : typedef_simple SEMI
+                        | typedef_elaborated SEMI
+                        | typedef_function_ptr SEMI"""
+
+        'typedef_simple : typedef type_specifier ID'
+
+        'typedef_simple : typedef type_specifier ID ARRAYOP'
+
+        'q_declare_flags_name : Q_DECLARE_FLAGS LPAREN ID COMMA ID'
+
+        'q_declare_flags : q_declare_flags_name RPAREN'
+
+        """typedef_elaborated : typedef class qualified_id ID
+                              | typedef struct qualified_id ID
+                              | typedef union qualified_id ID
+                              | typedef enum qualified_id ID"""
+
+        """class_from_typedef : typedef class ID LBRACE
+                              | typedef struct ID LBRACE
+                              | typedef union ID LBRACE"""
+
+        """class_from_typedef : typedef struct LBRACE
+                              | typedef union LBRACE"""
+
+        """enum_from_typedef : typedef enum ID LBRACE
+                             | typedef enum LBRACE"""
+
+        """pointer_to_function_pfx : ASTERISK FUNCPTR
+                                   | type_specifier FUNCPTR"""
+
+        'pointer_to_function_name : pointer_to_function_pfx ID'
+
+        """pointer_to_function_args : RPAREN LPAREN type_specifier_list
+                                    | RPAREN LPAREN empty"""
+
+        'pointer_to_function : pointer_to_function_name pointer_to_function_args RPAREN'
+
+        'typedef_function_ptr : typedef pointer_to_function'
+
+        'array_variable : ID ARRAYOP'
+
+        """argument_specifier : type_specifier
+                              | ELLIPSIS"""
+
+        """argument_specifier : type_specifier ID
+                              | type_specifier array_variable"""
+
+        'argument_specifier : type_specifier EQUALS expression'
+
+        """argument_specifier : type_specifier ID EQUALS expression
+                              | type_specifier array_variable EQUALS expression"""
+
+        'argument_specifier : pointer_to_function'
+
+        """argument_list : argument_specifier"""
+#                         | type_specifier"""
+
+        """argument_list : argument_list COMMA argument_specifier
+                         | argument_list COMMA type_specifier"""
+
+        'decl_starter : type_specifier qualified_id'
+
+        'decl_starter : STORAGE type_specifier qualified_id'
+
+        'variable_decl : decl_starter SEMI'
+
+        'variable_decl : argument_specifier SEMI'
+
+        'variable_decl : STORAGE argument_specifier SEMI'
+
+        'variable_decl : type_specifier id_list SEMI'
+
+        'variable_decl : STORAGE type_specifier id_list SEMI'
+
+        'variable_decl : type_specifier CVQUAL ID SEMI'
+
+        'variable_decl : type_specifier ID COLON ICONST SEMI'
+
+        'variable_decl : pointer_to_function SEMI'
+
+        'function_name : decl_starter LPAREN'
+
+        'operator_pfx : type_specifier operator'
+
+        """operator_name : operator_pfx PLUS LPAREN
+                         | operator_pfx MINUS LPAREN
+                         | operator_pfx ASTERISK LPAREN
+                         | operator_pfx SLASH LPAREN
+                         | operator_pfx PERCENT LPAREN
+                         | operator_pfx VBAR LPAREN
+                         | operator_pfx AMPERSAND LPAREN
+                         | operator_pfx LT LPAREN
+                         | operator_pfx LT LT LPAREN
+                         | operator_pfx GT LPAREN
+                         | operator_pfx GT GT LPAREN
+                         | operator_pfx LOR LPAREN
+                         | operator_pfx LAND LPAREN
+                         | operator_pfx BANG LPAREN
+                         | operator_pfx LE LPAREN
+                         | operator_pfx GE LPAREN
+                         | operator_pfx EQ LPAREN
+                         | operator_pfx EQUALS LPAREN
+                         | operator_pfx TIMESEQUAL LPAREN
+                         | operator_pfx DIVEQUAL LPAREN
+                         | operator_pfx MODEQUAL LPAREN
+                         | operator_pfx PLUSEQUAL LPAREN
+                         | operator_pfx MINUSEQUAL LPAREN
+                         | operator_pfx LSHIFTEQUAL LPAREN
+                         | operator_pfx GT GE LPAREN
+                         | operator_pfx ANDEQUAL LPAREN
+                         | operator_pfx OREQUAL LPAREN
+                         | operator_pfx XOREQUAL LPAREN
+                         | operator_pfx PLUSPLUS LPAREN
+                         | operator_pfx MINUSMINUS LPAREN
+                         | operator_pfx ARRAYOP LPAREN
+                         | operator_pfx LPAREN RPAREN LPAREN
+                         | operator_pfx ARROW LPAREN
+                         | operator_pfx NE LPAREN"""
+
+        'cast_operator_name : operator type_specifier LPAREN RPAREN'
+
+        'cast_operator_name : operator type_specifier LPAREN RPAREN CVQUAL'
+
+        """cast_operator_stmt : cast_operator_name decl_end
+                                        | virtual cast_operator_name decl_end"""
+
+        """operator_primary : operator_name argument_list RPAREN
+                            | operator_name RPAREN"""
+
+        """operator_primary : virtual operator_name argument_list RPAREN
+                            | virtual operator_name RPAREN"""
+
+        """operator_stmt : operator_primary decl_end
+                         | operator_primary pure_virtual_suffix decl_end"""
+
+        """operator_stmt : operator_primary CVQUAL decl_end
+                         | operator_primary CVQUAL pure_virtual_suffix"""
+
+        'ctor_name : qualified_id LPAREN'
+
+        'ctor_name : explicit qualified_id LPAREN'
+
+        'dtor_name : TILDE ID'
+
+        'virtual_dtor_name : virtual dtor_name'
+
+        """function_decl : ctor_stmt
+                         | dtor_stmt
+                         | function_stmt
+                         | operator_stmt
+                         | cast_operator_stmt
+                         | virtual_stmt
+                         | pure_virtual"""
+
+        """function_primary : function_name RPAREN
+                            | function_name argument_list RPAREN"""
+
+        'function_stmt : function_primary decl_end'
+
+        'function_stmt : function_primary CVQUAL decl_end'
+
+        """ctor_primary : ctor_name RPAREN
+                       | ctor_name argument_list RPAREN"""
+
+        """ctor_initializer : qualified_id LPAREN expression_list RPAREN
+                            | qualified_id LPAREN RPAREN
+                            | template_type LPAREN expression_list RPAREN
+                            | template_type LPAREN RPAREN"""
+
+        """ctor_initializer_list : ctor_initializer
+                                 | ctor_initializer_list COMMA ctor_initializer"""
+                                 
+
+        """ctor_stmt : ctor_primary decl_end
+                     | ctor_primary COLON ctor_initializer_list decl_end"""
+
+        'dtor_primary : dtor_name LPAREN RPAREN'
+
+        'dtor_primary : virtual_dtor_name LPAREN RPAREN'
+
+        'dtor_stmt : dtor_primary decl_end'
+
+        """virtual_primary : virtual function_name RPAREN
+                          | virtual function_name argument_list RPAREN"""
+
+        'virtual_stmt : virtual_primary decl_end'
+
+        'virtual_stmt : virtual_primary CVQUAL decl_end'
+
+        'pure_virtual_suffix : EQUALS PURESFX'
+
+        """pure_virtual : virtual_primary pure_virtual_suffix 
+                        | virtual_primary CVQUAL pure_virtual_suffix"""
+                        
+        """template_param : type_specifier
+                         | type_specifier ID"""
+                         
+        """template_param_list : template_param
+                              | template_param_list COMMA template_param"""
+
+        'template_decl : template LT template_param_list GT'
+                        
+#     def p_skip_macro (self, p):
+#         'skip_macro : MACROCALL MACROBODY'
+#         pass        
+
+        """expression_list : expression
+                          | expression_list COMMA expression"""
+
+        """expression : add_expression
+                      | sub_expression
+                      | mult_expression
+                      | div_expression
+                      | mod_expression
+                      | unary_expression
+                      | or_expression
+                      | and_expression
+                      | xor_expression
+                      | bitor_expression
+                      | bitand_expression
+                      | lt_expression
+                      | le_expression
+                      | eq_expression
+                      | ge_expression
+                      | gt_expression
+                      | lshift_expression
+                      | rshift_expression
+                      | ptr_expression
+                      | dot_expression
+                      | new_expression
+                      | static_cast_expression
+                      | ICONST
+                      | FCONST
+                      | HEXCONST
+                      | CCONST
+                      | SCONST"""
+
+'expression : LPAREN expression RPAREN'
+
+'expression : qualified_id'
+
+"""expression : type_specifier LPAREN expression_list RPAREN
+                      | type_specifier LPAREN RPAREN"""
+
+"""expression : type_specifier PERIOD ID LPAREN expression_list RPAREN
+                      | type_specifier PERIOD ID LPAREN RPAREN"""
+
+'expression : type_specifier PERIOD ID'
+
+"""expression_list : expression
+                           | expression_list COMMA expression"""
+
+"""unary_expression : sign_expression
+                            | not_expression
+                            | bitnot_expression
+                            | new_expression"""
+
+'add_expression : expression PLUS expression'
+
+'sub_expression : expression MINUS expression'
+
+'mult_expression : expression ASTERISK expression'
+
+'div_expression : expression SLASH expression'
+
+'mod_expression : expression PERCENT expression'
+
+'sign_expression : MINUS expression %prec UMINUS'
+
+'or_expression : expression LOR expression'
+
+'and_expression : expression LAND expression'
+
+'xor_expression : expression CARET expression'
+
+'bitor_expression : expression VBAR expression'
+
+'bitand_expression : expression AMPERSAND expression'
+
+'lt_expression : expression LT expression'
+
+'le_expression : expression LE expression'
+
+'eq_expression : expression EQ expression'
+
+'ge_expression : expression GE expression'
+
+'gt_expression : expression GT expression'
+
+'lshift_expression : expression GT GT expression'
+
+'rshift_expression : expression LT LT expression'
+
+'not_expression : BANG expression'
+
+'bitnot_expression : TILDE expression'
+
+'new_expression : new expression'
+
+'static_cast_expression : static_cast LT type_specifier GT LPAREN expression RPAREN'
+
+'ptr_expression : expression ARROW expression'
+
+'dot_expression : expression PERIOD expression'
+
+"""inline_code : STMT_BEGIN code_list STMT_END
+                      |  STMT_BEGIN code_list STMT_END SEMI
+                      | STMT_BEGIN STMT_END
+                      | STMT_BEGIN STMT_END SEMI"""
+
+"""code_list_block : CODE_STMT_BEGIN code_list STMT_END
+                                    | CODE_STMT_BEGIN STMT_END"""
+
+"""code_list : CODE_TOKEN
+                    | code_list_block
+                    | code_list code_list_block
+                    | code_list CODE_TOKEN"""
+
+
+'skip_macro : MACROCALL MACRO_CALL_BEGIN macro_call_element_list MACRO_CALL_END'
+
+"""macro_call_parens : LPAREN RPAREN
+                            | LPAREN macro_call_element_list RPAREN"""
+
+'macro_call_element_list : MACRO_ELEMENT'
+
+'macro_call_element_list : macro_call_element_list MACRO_ELEMENT'
+
+'macro_call_element_list : macro_call_element_list macro_call_parens'
+
+'macro_call_element_list : macro_call_parens'
+
+
+
+===========================================================================
+Typedef Enum:
+
+        """enum_statement : enum_name enumerator_list RBRACE
+                                       | enum_name RBRACE"""
+                                       
+        'enum_name : enum_from_typedef'
+        """enum_from_typedef : typedef enum ID LBRACE
+                             | typedef enum LBRACE"""
+                             
+        """enumerator_list : enumerator
+                           | enumerator_list enum_delim enumerator
+                           | enumerator_list UPDOC"""
+
+===========================================================================
+Templates:
+
+        """template_type : qualified_id LT type_specifier_list GT
+                        | qualified_id LT static_cast_expression GT"""
+                        
+        """template_param : type_specifier
+                         | type_specifier ID"""
+                         
+        """template_param_list : template_param
+                              | template_param_list COMMA template_param"""
+
+        'template_decl : template LT template_param_list GT'

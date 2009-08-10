@@ -35,6 +35,9 @@ class SipParser:
         
     def _resetState(self):
         self._scopeStack = []
+        self.scope = None
+        self.access = "private"
+        
         self.lexState = 'variable'
         self.test = []
         self.currentClass = None
@@ -317,7 +320,7 @@ class SipParser:
                             | signals COLON
                             | slots COLON"""
                             
-        self.stateInfo.access = p [1]
+        self.access = p[1]
 
     def p_class_member_list (self, p):
         """class_member_list : class_member
@@ -352,7 +355,7 @@ class SipParser:
     
     def p_base_list_element (self, p):
         'base_list_element : qualified_id'
-        self.stateInfo.currentObject ().bases.append (p [1])
+        self.currentClass.addBase(p[1])
      
     def p_base_list (self, p):
         """base_list : base_list_element

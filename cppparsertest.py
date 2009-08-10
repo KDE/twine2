@@ -283,6 +283,7 @@ class TestCppParser(unittest.TestCase):
         print(self.syms.topScope().format())
 
     def testMacro(self):
+        self.parser.setBareMacros( ["Q_OBJECT"] )
         self.parser.parse(self.syms,
             """
             class FooWidget : public QObject {

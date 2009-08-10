@@ -63,11 +63,31 @@ class TestSipParser(unittest.TestCase):
             };""")
         print(self.syms.topScope().format())
 
+    def testClass5(self):
+        self.parser.parse(self.syms,
+            """
+            class Foo : Bar, Zyzz {
+            };""")
+        print(self.syms.topScope().format())
+
     def testOpaqueClass(self):
         self.parser.parse(self.syms,
             """
             class OpaqueFoo;
             """)
+        print(self.syms.topScope().format())
+
+    def testClassVariable(self):
+        self.parser.parse(self.syms,
+            """
+            class Foo {
+                public:
+                    int public_x;
+                private:
+                    int private_y;
+                protected:
+                    int protected_z;
+            };""")
         print(self.syms.topScope().format())
 
 #        self.parser = sipparser.SipParser()

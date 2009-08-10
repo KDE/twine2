@@ -26,7 +26,7 @@ class SymbolData(cppsymboldata.SymbolData):
         def __init__(self,parentScope, name, filename, lineno):
             cppsymboldata.SymbolData.CppClass.__init__(self, parentScope, name, filename, lineno)
             
-    class _SipFunctionExtra(object):
+    class _SipEntityExtra(object):
         def __init__(self):
             self._annotation = None
             
@@ -36,18 +36,23 @@ class SymbolData(cppsymboldata.SymbolData):
         def setCppArgs(self,cppArgs):
             pass
             
-    class Function(cppsymboldata.SymbolData.Function, _SipFunctionExtra):
+    class Function(cppsymboldata.SymbolData.Function, _SipEntityExtra):
         def __init__(self, parentScope, name, filename, lineno):
             cppsymboldata.SymbolData.Function.__init__(self,parentScope,name,filename,lineno)
-            SymbolData._SipFunctionExtra.__init__(self)
+            SymbolData._SipEntityExtra.__init__(self)
             
-    class Constructor(cppsymboldata.SymbolData.Constructor, _SipFunctionExtra):
+    class Constructor(cppsymboldata.SymbolData.Constructor, _SipEntityExtra):
         def __init__(self, parentScope, name, filename, lineno):
             cppsymboldata.SymbolData.Constructor.__init__(self,parentScope,name,filename,lineno)
-            SymbolData._SipFunctionExtra.__init__(self)
+            SymbolData._SipEntityExtra.__init__(self)
             
-    class Destructor(cppsymboldata.SymbolData.Destructor, _SipFunctionExtra):
+    class Destructor(cppsymboldata.SymbolData.Destructor, _SipEntityExtra):
         def __init__(self, parentScope, name, filename, lineno):
             cppsymboldata.SymbolData.Destructor.__init__(self,parentScope,name,filename,lineno)
-            SymbolData._SipFunctionExtra.__init__(self)
-        
+            SymbolData._SipEntityExtra.__init__(self)
+            
+    class Variable(cppsymboldata.SymbolData.Variable, _SipEntityExtra):
+        def __init__(self, parentScope, name, filename, lineno):
+            cppsymboldata.SymbolData.Variable.__init__(self,parentScope,name,filename,lineno)
+            SymbolData._SipEntityExtra.__init__(self)
+            

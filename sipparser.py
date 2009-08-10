@@ -37,6 +37,7 @@ class SipParser:
         self._scopeStack = []
         self.scope = None
         self.access = "private"
+        self.storage = None
         
         self.lexState = 'variable'
         self.test = []
@@ -123,20 +124,20 @@ class SipParser:
             
         return typedefObj
 
-    def variableObject (self):
-        v = self.arguments [0]
-        varObj = VariableObject (v [1], self.lexer.lineno, self.stateInfo)
-        varObj.variable = Argument (v [0], v [1], v [2], None, self.template)
-        varObj.annotation = self.annotation
-        varObj.filepath = self.filename
-        self.stateInfo.pushObject (varObj)
-        self.template   = None
-        self.arguments  = []
+    def variableObject (self, name, vtype, init = None):
+        vObj = self.symbolData.Variable(self.scope, name, self.filename, self.lexer.lineno)
+        vObj.setArgument(self.symbolData.Argument(vtype, name, init, None, self.template))
+        vObj.setStorage(self.storage)
+        vObj.setAccess(self.access)
+        vObj.setAnnotation(self.annotation)
+
+        self._pushScope(vObj)
+        
+        self.template = None
+        self.arguments = []
         self.annotation = []
-        self.symbolData.objectList.append (varObj)
         self.ignore = False
-            
-        return varObj
+        return vObj
     
     def functionObject (self, name, returns):
         if returns=='ctor':
@@ -644,8 +645,9 @@ class SipParser:
     def p_variable_decl0 (self, p):
         """variable_decl : argument_specifier SEMI
                          | argument_specifier annotation SEMI"""
-        self.variableObject () 
-        self.stateInfo.popObject ()
+        vtype, name, init = p[1][0][:3]
+        self.variableObject(name, vtype, init)
+        self._popScope()
                          
     def p_variable_decl1 (self, p):
         """variable_decl : STORAGE argument_specifier SEMI

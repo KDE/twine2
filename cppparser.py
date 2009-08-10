@@ -175,7 +175,6 @@ class CppParser(object):
         else:
             functionObj = self.symbolData.Function(self.scope, name, self.filename, self.lexer.lineno)
             returnArg = self.symbolData.Argument(returns)
-            #returnArg.template = self.template
             functionObj.setReturn(returnArg)
 
         #self.template = None

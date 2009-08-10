@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #     Copyright 2007-8 Jim Bublitz <jbublitz@nwinternet.com>
-#     Copyright 2008   Simon Edwards <simon@simonzone.com>
+#     Copyright 2008-9 Simon Edwards <simon@simonzone.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,47 +20,58 @@
 import sys
 import ply.yacc as yacc
 from siplexer import sipLexer, tokens, setStateInfoTarget
-from symboldata import NamespaceObject, ClassObject, EnumObject, Enumerator, TypedefObject
-from symboldata import FunctionObject, Argument, VariableObject, EndClassMarker, EndNamespaceMarker
-from symboldata import SipDirectiveObject, SipBlockObject, SipTypeObject, Template
+#from symboldata import NamespaceObject, ClassObject, EnumObject, Enumerator, TypedefObject
+#from symboldata import FunctionObject, Argument, VariableObject, EndClassMarker, EndNamespaceMarker
+#from symboldata import SipDirectiveObject, SipBlockObject, SipTypeObject, Template
 
 class SipParser:
-    def __init__ (self, testing = False):
-        self.lexer       = sipLexer
-        self.lexer.begin ('variable')
-        self.testing     = testing
-        self.test        = []
-        self.arguments   = []
-        self.annotation  = []
-        self.versionLow  = ""
-        self.versionHigh = ""
-        self.platform    = ""
-        self.ignore      = False
-        self.templateParams = []
-        self.template       = None
-        
+    def __init__ (self):
+        self.lexer = sipLexer
+        self.lexer.begin('variable')
+
         self.tokens = tokens        
-        yacc.yacc (module = self, tabmodule = "sipParserTab")
+        yacc.yacc(module = self, tabmodule = "sipParserTab")
         self._parse = yacc.parse 
-                    
-    def parse (self, symbolData, stateInfo, text, debugLevel = 1, filename=None):
+        
+    def _resetState(self):
+        self._scopeStack = []
+        self.lexState = 'variable'
+        self.test = []
+        self.currentClass = None
+        self.arguments = []
+        self.annotation = []
+        self.versionLow = ""
+        self.versionHigh = ""
+        self.platform = ""
+        self.ignore = False
+        self.templateParams = []
+        self.template = None
+        
+        self.currentFunction = None
+        
+    def parse(self, symbolData, text, filename=None, debugLevel = 0):
+        self._resetState()
+
         self.symbolData = symbolData
-        self.stateInfo  = stateInfo
-        self.stateInfo.previousObject = None
-        self.test       = []
-        self.filename   = filename
-        setStateInfoTarget (stateInfo)
+        self.scope = self.symbolData.topScope()
+        
+        self.test = []
+        self.filename = filename
+        #setStateInfoTarget (stateInfo)
         sipLexer.input (text)
         sipLexer.lineno = 1
         sipLexer.lexpos = 0
     
-        result = self._parse (debug = debugLevel, lexer = self.lexer)
+        result = self._parse(debug = debugLevel, lexer = self.lexer)
+        return result
+        
+    def _pushScope(self, newScope):
+        self._scopeStack.append(self.scope)
+        self.scope = newScope
 
-        if self.testing:
-            return result, self.test
-        else:
-            return result
- 
+    def _popScope(self):
+        self.scope = self._scopeStack.pop()
+
     def object_id_list (self, id_list, obj, objType = None):
         idList = id_list.split (',')
         if self.stateInfo.inTypedef:
@@ -77,16 +88,16 @@ class SipParser:
                 self.variableObject (id, self.stateInfo.currentObject ().name)
 
     def classObject (self, name, type_):
-        class_ = ClassObject (name, self.lexer.lineno, self.stateInfo)
-        class_.templateParams = self.stateInfo.inTemplate
-        class_.filepath = self.filename
-        self.stateInfo.inTemplate = []
-        self.stateInfo.pushClass (name, class_)
+        class_ = self.symbolData.SipClass(self.scope, name, self.filename, self.lexer.lineno)
+        self.currentClass = class_
+        self._pushScope(class_)
+
+        #self.stateInfo.inTemplate = []
+        #self.stateInfo.pushClass (name, class_)
         if type_ == 'class':
-            self.stateInfo.access = 'private'
+            class_.setAccess('private')
         else:
-            self.stateInfo.access = 'public'
-        self.symbolData.objectList.append (class_)
+            class_.setAccess('public')
         self.ignore = False
             
     def enumObject (self, name):
@@ -125,31 +136,35 @@ class SipParser:
         return varObj
     
     def functionObject (self, name, returns):
-        functionObj  = FunctionObject (name, self.lexer.lineno, self.stateInfo, returns == 'ctor')
-        returnArg = Argument (returns)
-        functionObj.returns.append (returnArg)
-        functionObj.templateParams = self.stateInfo.inTemplate
-        functionObj.filepath = self.filename
-        self.stateInfo.inTemplate = []
-        self.ignore = False
-        
-        self.stateInfo.pushObject (functionObj)
-        self.symbolData.objectList.append (functionObj)
+        if returns=='ctor':
+            functionObj = self.symbolData.Constructor(self.scope, name, self.filename, self.lexer.lineno)
+        elif returns=='dtor':
+            functionObj = self.symbolData.Destructor(self.scope, name, self.filename, self.lexer.lineno)
+        else:
+            functionObj = self.symbolData.Function(self.scope, name, self.filename, self.lexer.lineno)
+            returnArg = self.symbolData.Argument(returns)
+            functionObj.setReturn(returnArg)
+            
+        self.currentFunction = functionObj
 
+        #functionObj.templateParams = self.stateInfo.inTemplate
+        #self.inTemplate = []
+        #self.ignore = False
         self.lexer.begin ('function')
-
         return functionObj
         
-    def argument (self, argumentType, argumentName = None, argumentValue = None, annotation = []):
-        self.arguments.append ((argumentType, argumentName, argumentValue, annotation, None, None))        
+    def argument(self, argumentType, argumentName = None, argumentValue = None, annotation = []):
+        self.arguments.append ((argumentType, argumentName, argumentValue, annotation, None, None))
+        self.template = None
+        self.exprElements = []
         return self.arguments
 
-    def setArguments (self, cpp = False, ctor = False):
+    def setArguments(self, cpp = False, ctor = False):
         if not cpp:
-            self.stateInfo.currentObject ().setArguments (self.arguments)
+            self.currentFunction.setArguments(self.arguments)
         else:
-            self.stateInfo.currentObject ().setCppArgs (self.arguments, ctor)
-        self.stateInfo.currentObject ().annotation = self.annotation
+            self.currentFunction.setCppArgs(self.arguments)
+        self.currentFunction.setAnnotation(self.annotation)
         self.arguments  = []
         self.annotation = []
         
@@ -199,13 +214,13 @@ class SipParser:
                   | object_ignore
                   | object_force
                   | object_end"""
-               
-        self.lexer.begin (self.stateInfo.lexState)
-        self.stateInfo.lexState  = 'variable'
-        self.stateInfo.inTypedef = False
-        self.stateInfo.ignore    = self.ignore           
-        self.arguments  = []
-        self.annotation = []
+        pass       
+        #self.lexer.begin (self.stateInfo.lexState)
+        #self.stateInfo.lexState  = 'variable'
+        #self.stateInfo.inTypedef = False
+        #self.stateInfo.ignore    = self.ignore           
+        #self.arguments  = []
+        #self.annotation = []
                   
     def p_member_list (self, p):
         """member_list : member
@@ -214,17 +229,16 @@ class SipParser:
 
     def p_namespace_decl (self, p):
         'namespace_decl : namespace_name LBRACE member_list RBRACE SEMI'
-        name, obj = self.stateInfo.popNamespace ()
-        self.symbolData.objectList.append (EndNamespaceMarker (name, self.lexer.lineno, self.stateInfo))
+        self._popScope()
         
     def p_namespace_decl1 (self, p):
         'namespace_decl : namespace_name SEMI'
-        self.stateInfo.popNamespace ()
+        self._popScope()
         self.ignore = False
         
     def p_namespace_name (self, p):
         'namespace_name : namespace ID'
-        name = p [2]
+        name = p[2]
         namespace = NamespaceObject (name, self.lexer.lineno, self.stateInfo)
         self.stateInfo.pushNamespace (name, namespace)
         self.symbolData.objectList.append (namespace)
@@ -259,19 +273,17 @@ class SipParser:
 
     def p_class_decl0 (self, p):
         """class_decl : class_header class_member_list RBRACE stmt_end
-                      | opaque_class"""
-        name, obj = self.stateInfo.popClass ()
-        if not obj.opaque:
-            self.symbolData.objectList.append (EndClassMarker (name, self.lexer.lineno, self.stateInfo))
+                      | opaque_class
+                      | class_header RBRACE stmt_end"""
+        self._popScope()
 
     def p_class_decl1 (self, p):
         'class_decl : class_header class_member_list RBRACE id_list stmt_end'
-        if p [1] in ['class', 'struct', 'union']:
+        if p[1] in ['class', 'struct', 'union']:
             self.object_id_list (p [4], p [1])
         else:
             self.object_id_list (p [4], 'class')
-        name, obj = self.stateInfo.popClass ()
-        self.symbolData.objectList.append (EndClassMarker (name, self.lexer.lineno, self.stateInfo))
+        self._popScope()
         
     def p_class_member (self, p):
         """class_member : class_decl
@@ -289,10 +301,10 @@ class SipParser:
                         | object_force
                         | object_end"""
 
-        self.lexer.begin (self.stateInfo.lexState)
-        self.stateInfo.lexState  = 'variable'
-        self.stateInfo.inTypedef = False
-        self.stateInfo.ignore    = self.ignore          
+        self.lexer.begin(self.lexState)
+        self.lexState  = 'variable'
+        self.inTypedef = False
+        self.ignore    = self.ignore          
         self.arguments  = []
         self.template   = None
             
@@ -321,7 +333,7 @@ class SipParser:
     def p_class_header1 (self, p):
         """class_header : class_name annotation LBRACE
                         | class_name COLON base_list annotation LBRACE"""
-        p [0] = p [1]
+        p[0] = p[1]
         self.stateInfo.currentObject ().annotation = self.annotation
         self.annotation = []
         
@@ -329,15 +341,14 @@ class SipParser:
         """class_name : class ID
                       | struct ID
                       | union ID"""
-        self.classObject (p [2], p [1])
+        self.classObject(p[2], p[1])
             
     def p_opaque_class (self, p):
         """opaque_class : class qualified_id SEMI
                         | class qualified_id annotation SEMI
                         | class_name SEMI
                         | class_name annotation SEMI"""
-        self.stateInfo.currentObject ().opaque = True
-        
+        self.currentClass.setOpaque(True)
     
     def p_base_list_element (self, p):
         'base_list_element : qualified_id'
@@ -776,7 +787,7 @@ class SipParser:
                          | operator_stmt
                          | virtual_stmt
                          | pure_virtual"""
-        self.stateInfo.popObject ()
+        pass
                                  
     def p_function_primary (self, p):
         """function_primary : function_name RPAREN
@@ -838,9 +849,7 @@ class SipParser:
     def p_ctor_primary (self, p):
         """ctor_primary : ctor_name RPAREN
                         | ctor_name argument_list RPAREN"""                        
-        self.setArguments (False, True)
-        if self.testing:
-            self.test.append (str (self.arguments))
+        self.setArguments(False, True)
         
     def p_ctor_stmt (self, p):
         """ctor_stmt : ctor_primary stmt_end
@@ -1231,11 +1240,12 @@ class SipParser:
     def p_bitnot_expression (self, p):
         'bitnot_expression : TILDE expression'
         p [0] = "".join (p [1:])
-
+        
     def p_error(self, p):
-        print "sip parser ..."
-        filename = self.filename if self.filename is not None else "(?)"
-        print "syntax error in file %s -- token type %s   token value %s   lex state" % (filename, p.type, p.value)#, p.lexer.lexstate)
+        if p is not None:
+            print("File: " + repr(self.filename) + " Line: " + str(self.lexer.lineno) + " Syntax error in input. Token type: %s, token value: %s, lex state: %s" % (p.type, p.value, self.lexer.lexstate))
+        else:
+            print("File: " + repr(self.filename) + " Line: " + str(self.lexer.lineno) + " Syntax error in input. Lex state: %s" % (self.lexer.lexstate,) )
         sys.exit (-1)
 
         

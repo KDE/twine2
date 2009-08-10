@@ -1,4 +1,5 @@
-#     Copyright 2008 Simon Edwards <simon@simonzone.com>
+# -*- coding: utf-8 -*-
+#     Copyright 2008-9 Simon Edwards <simon@simonzone.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,20 +21,45 @@
 #
 import unittest
 import sipparser
-import symboldata
-import stateInfo
+import sipsymboldata
+#import stateInfo
 
-debug = False
+#debug = False
 
 class TestSipParser(unittest.TestCase):
     def setUp(self):
         self.parser = sipparser.SipParser()
-        self.symbol_data = symboldata.Data()
-        self.state_info = stateInfo.StateInfo()
+        self.syms = sipsymboldata.SymbolData()
 
-    def parse(self,text):
-        self.parser.parse(self.symbol_data, self.state_info, text,2 if debug else 1)
+    def testClass0(self):
+        self.parser.parse(self.syms,
+            """
+            class Foo {
+            };
+            """)
+        print(self.syms.topScope().format())
 
+    def testClass1(self):
+        self.parser.parse(self.syms,
+            """
+            class Foo {
+                Foo();
+            };
+            """)
+        print(self.syms.topScope().format())
+
+    def testOpaqueClass(self):
+        self.parser.parse(self.syms,
+            """
+            class OpaqueFoo;
+            """)
+        print(self.syms.topScope().format())
+
+#        self.parser = sipparser.SipParser()
+
+#    def parse(self,text):
+#        self.parser.parse(self.symbol_data, self.state_info, text,2 if debug else 1)
+'''
     def testEmpty(self):
         self.parse("")
 
@@ -74,6 +100,6 @@ muliple
 
 """)
 
-
+'''
 if __name__ == '__main__':
     unittest.main()

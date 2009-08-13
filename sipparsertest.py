@@ -90,6 +90,24 @@ class TestSipParser(unittest.TestCase):
             };""")
         print(self.syms.topScope().format())
 
+    def testClassVariable2(self):
+        self.parser.parse(self.syms,
+            """
+            class Foo {
+                public:
+                    int x=0;
+            };""")
+        print(self.syms.topScope().format())
+
+    def testClassVariable3(self):
+        self.parser.parse(self.syms,
+            """
+            class Foo {
+                static int x;
+                const int y;
+            };""")
+        print(self.syms.topScope().format())
+
 #        self.parser = sipparser.SipParser()
 
 #    def parse(self,text):

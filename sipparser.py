@@ -652,10 +652,10 @@ class SipParser:
     def p_variable_decl1 (self, p):
         """variable_decl : STORAGE argument_specifier SEMI
                          | STORAGE argument_specifier annotation SEMI"""
-                         
-        varObj = self.variableObject () 
-        varObj.variable.attributes.storageClass = p [1]
-        self.stateInfo.popObject ()
+        vtype, name, init = p[2][0][:3]                 
+        varObj = self.variableObject(name, vtype, init) 
+        varObj.setStorage(p[1])
+        self._popScope()
                 
     def p_function_name0 (self, p):
         'function_name : type_specifier ID LPAREN'

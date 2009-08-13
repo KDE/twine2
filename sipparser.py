@@ -163,9 +163,17 @@ class SipParser:
         self.exprElements = []
         return self.arguments
 
+    def argumentList(self):
+        instanceList = []
+        for argTuple in self.arguments:
+            vtype, name, init, annotation, template, exprElements = argTuple
+            instanceList.append(self.symbolData.Argument(vtype, name, init, annotation, template))
+        return instanceList
+
+
     def setArguments(self, cpp = False, ctor = False):
         if not cpp:
-            self.currentFunction.setArguments(self.arguments)
+            self.currentFunction.setArguments(self.argumentList())
         else:
             self.currentFunction.setCppArgs(self.arguments)
         self.currentFunction.setAnnotation(self.annotation)
@@ -773,7 +781,7 @@ class SipParser:
     def p_ctor_name1 (self, p):
         'ctor_name : explicit ID LPAREN'
         fo = self.functionObject (p [2], 'ctor')
-        fo.attributes.functionQualifier = 'explicit'
+        fo.addQualifier('explicit')
         self.arguments = []
 
     def p_dtor_name (self, p):

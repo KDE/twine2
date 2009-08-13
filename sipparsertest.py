@@ -108,6 +108,30 @@ class TestSipParser(unittest.TestCase):
             };""")
         print(self.syms.topScope().format())
 
+    def testClassConstructor2(self):
+        self.parser.parse(self.syms,
+            """
+            class Foo {
+                Foo(int x,int y);
+            };""")
+        print(self.syms.topScope().format())
+
+    def testClassConstructor3(self):
+        self.parser.parse(self.syms,
+            """
+            class Foo {
+                explicit Foo(int x);
+            };""")
+        print(self.syms.topScope().format())
+
+    def testClassDestructor1(self):
+        self.parser.parse(self.syms,
+            """
+            class Foo {
+                ~Foo();
+            };""")
+        print(self.syms.topScope().format())
+
 #        self.parser = sipparser.SipParser()
 
 #    def parse(self,text):

@@ -199,6 +199,26 @@ class TestSipParser(unittest.TestCase):
             """)
         print(self.syms.topScope().format())
 
+    def testOperator1(self):
+        self.parser.parse(self.syms,
+            """
+            class Foo {
+                bool operator == (int);
+            };
+            """)
+        print(self.syms.topScope().format())
+
+    def testNamespace(self):
+        self.parser.parse(self.syms,
+            """
+            namespace FooSpace {
+                int DoFoo(int x);
+                void StopFoo();
+            };
+            """)
+        print(self.syms.topScope().format())
+
+
 #        self.parser = sipparser.SipParser()
 
 #    def parse(self,text):

@@ -251,12 +251,9 @@ class SipParser:
     def p_namespace_name (self, p):
         'namespace_name : namespace ID'
         name = p[2]
-        namespace = NamespaceObject (name, self.lexer.lineno, self.stateInfo)
-        self.stateInfo.pushNamespace (name, namespace)
-        self.symbolData.objectList.append (namespace)
-        if self.testing:
-            self.test.append ("namespace %s" % name)
-        
+        namespace = self.symbolData.Namespace(self.scope, name, self.filename, self.lexer.lineno)
+        self._pushScope(namespace)
+                
     def p_empty (self, p):
         'empty :'
         pass
@@ -737,9 +734,7 @@ class SipParser:
         """operator_primary : operator_name argument_list RPAREN
                             | operator_name RPAREN
                             | cast_operator_name"""
-        self.setArguments ()
-        if self.testing:
-            self.test.append (str (self.arguments))
+        self.setArguments()
 
     def p_operator_primary1 (self, p):
         """operator_primary : virtual operator_name argument_list RPAREN

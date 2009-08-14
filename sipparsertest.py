@@ -132,6 +132,30 @@ class TestSipParser(unittest.TestCase):
             };""")
         print(self.syms.topScope().format())
 
+    def testClassMethod(self):
+        self.parser.parse(self.syms,
+            """
+            class Foo {
+                int getFooValue(int x);
+            };""")
+        print(self.syms.topScope().format())
+
+    def testClassVirtualMethod(self):
+        self.parser.parse(self.syms,
+            """
+            class Foo {
+                virtual int getFooValue(int x);
+            };""")
+        print(self.syms.topScope().format())
+
+    def testClassPureVirtualMethod(self):
+        self.parser.parse(self.syms,
+            """
+            class Foo {
+                virtual int getFooValue(int x)=0;
+            };""")
+        print(self.syms.topScope().format())
+
 #        self.parser = sipparser.SipParser()
 
 #    def parse(self,text):

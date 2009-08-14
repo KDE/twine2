@@ -813,10 +813,7 @@ class SipParser:
     def p_function_primary (self, p):
         """function_primary : function_name RPAREN
                             | function_name argument_list RPAREN"""
-                            
-        self.setArguments ()
-        if self.testing:
-            self.test.append (str (self.arguments))
+        self.setArguments()
  
     def p_cpp_args (self, p):
         'cpp_args : LBRACKET type_specifier cpp_arg_list RBRACKET'
@@ -888,21 +885,21 @@ class SipParser:
                            | virtual function_name argument_list RPAREN
                            | STORAGE virtual function_name RPAREN
                            | STORAGE virtual function_name argument_list RPAREN"""
-        self.setArguments ()
+        self.setArguments()
         if p [1] != 'virtual':
-            self.stateInfo.currentObject ().attributes.storageClass = p [1]
+            self.currentFunction.setStorage(p[1])
             
         
     def p_virtual_stmt0 (self, p):
         """virtual_stmt : virtual_primary SEMI
                         | virtual_primary exception SEMI"""
-        self.stateInfo.currentObject ().attributes.functionQualifier = 'virtual'
+        self.currentFunction.addQualifier('virtual')
 
     def p_virtual_stmt1 (self, p):
         """virtual_stmt : virtual_primary CVQUAL SEMI
                         | virtual_primary CVQUAL exception SEMI"""
-        self.stateInfo.currentObject ().attributes.functionQualifier = 'virtual'
-        self.stateInfo.currentObject ().attributes.cv = p [2]
+        self.currentFunction.addQualifier('virtual')
+        self.currentFunction.addQualifier(p[2])
 
     def p_virtual_stmt2 (self, p):
         """virtual_stmt : virtual_primary annotation SEMI
@@ -922,8 +919,8 @@ class SipParser:
                         | virtual_primary CVQUAL exception annotation cpp_args SEMI
                         | virtual_primary CVQUAL exception cpp_args SEMI"""
         self.setArguments (True)
-        self.stateInfo.currentObject ().attributes.functionQualifier = 'virtual'
-        self.stateInfo.currentObject ().attributes.cv = p [2]
+        self.currentFunction.addQualifier('virtual')
+        self.currentFunction.addQualifier(p[2])
         
     def p_pure_virtual_suffix (self, p):
         """pure_virtual_suffix : EQUALS ICONST
@@ -937,9 +934,10 @@ class SipParser:
                         | virtual_primary CVQUAL pure_virtual_suffix SEMI
                         | virtual_primary exception pure_virtual_suffix SEMI
                         | virtual_primary CVQUAL exception pure_virtual_suffix SEMI"""
-        self.stateInfo.currentObject ().attributes.functionQualifier = 'pure'
+        self.currentFunction.addQualifier('pure')
+        self.currentFunction.addQualifier('virtual')
         if p [2] in ['const', 'volatile']:
-            self.stateInfo.currentObject ().attributes.cv = p [2]
+            self.currentFunction.addQualifier(p[2])
         
     def p_template_param (self, p):
         """template_param : type_specifier

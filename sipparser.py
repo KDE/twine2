@@ -52,7 +52,8 @@ class SipParser:
         self.ignore = False
         self.templateParams = []
         self.template = None
-                
+        self.inTypedef = False
+        
     def parse(self, symbolData, text, filename=None, debugLevel = 0):
         self._resetState()
 
@@ -110,15 +111,18 @@ class SipParser:
         self.currentEnum = enum
         return enum
         
-    def typedefObject (self, typeName, newName):
-        typedefObj = TypedefObject (newName, self.lexer.lineno, self.stateInfo)
-        typedefObj.filepath = self.filename
-        typedefObj.setArgumentType (typeName)
-        self.stateInfo.pushObject (typedefObj)
-        self.symbolData.objectList.append (typedefObj)
-        self.ignore = False
+    def typedefObject(self, typeName, newName):
+        tdObj = self.symbolData.Typedef(self.scope, newName, self.filename, self.lexer.lineno)
+        tdObj.setArgumentType(typeName)
+#        if typeName.startswith('QFlags<'):
+#            tdObj.template = Template('QFlags', typeName [7:-1])
+#       else:
+#            tdObj.template = self.template
+#        self.template = None
+        self._pushScope(tdObj)
+        self.currentTypedef = tdObj
             
-        return typedefObj
+        return tdObj
 
     def variableObject (self, name, vtype, init = None):
         vObj = self.symbolData.Variable(self.scope, name, self.filename, self.lexer.lineno)
@@ -523,12 +527,13 @@ class SipParser:
         """typedef_decl : typedef_simple SEMI
                         | typedef_simple annotation SEMI
                         | typedef_function_ptr SEMI"""
-        self.stateInfo.popObject ()
-       
+        self._popScope()
+        self.currentTypedef = None
+
     def p_typedef_simple (self, p):
         'typedef_simple : typedef type_specifier ID'
-        self.typedefObject (p [2], p [3])
-        self.stateInfo.inTypedef = True
+        self.typedefObject(p [2], p [3])
+        self.inTypedef = True
                                         
     def p_pointer_to_function_pfx (self, p):
         """pointer_to_function_pfx : ASTERISK FUNCPTR

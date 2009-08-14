@@ -240,6 +240,19 @@ class TestSipParser(unittest.TestCase):
             """)
         print(self.syms.topScope().format())
 
+    def testTypedef1(self):
+        self.parser.parse(self.syms,
+            """
+            typedef QString& stringref;
+            """)
+        print(self.syms.topScope().format())
+    
+    def testTypedef2(self):
+        self.parser.parse(self.syms,
+            """typedef QObject** objPtrPtr;
+            """)
+        print(self.syms.topScope().format())
+
 
 #        self.parser = sipparser.SipParser()
 

@@ -849,7 +849,7 @@ class SipParser:
                          | function_primary CVQUAL exception cpp_args stmt_end
                          | function_primary CVQUAL annotation cpp_args stmt_end
                          | function_primary CVQUAL exception annotation cpp_args stmt_end"""
-        self.stateInfo.currentObject ().attributes.cv = p [2]
+        self.currentFunction.addQualifier(p[2])
         self.setArguments (True)
         
     def p_function_stmt2 (self, p):

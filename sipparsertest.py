@@ -156,6 +156,49 @@ class TestSipParser(unittest.TestCase):
             };""")
         print(self.syms.topScope().format())
 
+    def testFunctions(self):
+        self.parser.parse(self.syms,
+            """
+            int DoFoo(int x);
+            void StopFoo();
+            """)
+        print(self.syms.topScope().format())
+
+    def testFunctions2(self):
+        self.parser.parse(self.syms,
+            """
+            const int *DoFoo(int x);
+            """)
+        print(self.syms.topScope().format())
+
+    def testFunctions3(self):
+        self.parser.parse(self.syms,
+            """
+            QString& FooConst() const;
+            """)
+        print(self.syms.topScope().format())
+
+    def testFunctions4(self):
+        self.parser.parse(self.syms,
+            """
+            void Foo(unsigned long x);
+            """)
+        print(self.syms.topScope().format())
+
+    def testFunctions5(self):
+        self.parser.parse(self.syms,
+            """
+            void Foo(long x[5]);
+            """)
+        print(self.syms.topScope().format())
+
+    def testFunctions6(self):
+        self.parser.parse(self.syms,
+            """
+            void* foo (int, double (*doublePtr)(float, QString*));
+            """)
+        print(self.syms.topScope().format())
+
 #        self.parser = sipparser.SipParser()
 
 #    def parse(self,text):

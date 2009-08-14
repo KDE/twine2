@@ -42,6 +42,8 @@ class SipParser:
         self.lexState = 'variable'
         self.test = []
         self.currentClass = None
+        self.currentFunction = None
+        self.currentEnum = None
         self.arguments = []
         self.annotation = []
         self.versionLow = ""
@@ -50,9 +52,7 @@ class SipParser:
         self.ignore = False
         self.templateParams = []
         self.template = None
-        
-        self.currentFunction = None
-        
+                
     def parse(self, symbolData, text, filename=None, debugLevel = 0):
         self._resetState()
 
@@ -103,16 +103,12 @@ class SipParser:
         else:
             class_.setAccess('public')
         self.ignore = False
-            
-    def enumObject (self, name):
-        enum = EnumObject (name, self.lexer.lineno, self.stateInfo)
-        enum.filepath = self.filename
-        
-        self.lexer.begin ('enum')
 
-        self.stateInfo.pushObject (enum)
-        self.symbolData.objectList.append (enum)
-        self.ignore = False
+    def enumObject (self, name):
+        enum = self.symbolData.Enum(self.scope, name, self.filename, self.lexer.lineno)
+        self.lexer.begin('enum')
+        self.currentEnum = enum
+        return enum
         
     def typedefObject (self, typeName, newName):
         typedefObj = TypedefObject (newName, self.lexer.lineno, self.stateInfo)
@@ -370,12 +366,13 @@ class SipParser:
        
     def p_enum_decl0 (self, p):
         'enum_decl : enum_statement SEMI'
-        self.stateInfo.popObject ()
-        
+        self.currentEnum = None
+        self.lexer.begin('variable')
+
     def p_enum_decl1 (self, p):
         'enum_decl : enum_statement id_list SEMI'
-        self.object_id_list (p [2], 'enum')
-        self.stateInfo.popObject ()
+        self.currentEnum = None
+        self.lexer.begin('variable')
         
     def p_enum_statement (self, p):
         """enum_statement : enum_name enumerator_list RBRACE
@@ -386,25 +383,20 @@ class SipParser:
     def p_enum_name0 (self, p):
         """enum_name : enum ID LBRACE
                      | enum LBRACE"""                     
-            
         if p[2] != "{":
             name = p [2]
         else:
-            name = 'anonymous'
-        self.enumObject (name)
+            name = None
+        self.enumObject(name)
                     
     def p_enumerator (self, p):
         """enumerator : ID
                       | ID ENUMINIT"""
-                
-        if len (p) == 3:
-            enumerator = Enumerator (p [1], p [2], self.stateInfo)
+        if len(p) == 3:
+            enumerator = self.symbolData.Enumerator(p[1], p[2])
         else:
-            enumerator = Enumerator (p [1], None, self.stateInfo)
-            
-        self.stateInfo.currentObject ().enumerators.append (enumerator)
-        if self.testing:
-            self.test.append (enumerator.name)
+            enumerator = self.symbolData.Enumerator(p[1], None)
+        self.currentEnum.appendEnumerator(enumerator)
             
     def p_versioned_enumerator_start (self, p):
         'versioned_enumerator_start : sip_if enumerator'

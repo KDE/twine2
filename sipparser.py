@@ -349,7 +349,7 @@ class SipParser:
         """class_header : class_name annotation LBRACE
                         | class_name COLON base_list annotation LBRACE"""
         p[0] = p[1]
-        self.stateInfo.currentObject ().annotation = self.annotation
+        self.currentClass.setAnnotation(self.annotation)
         self.annotation = []
         
     def p_class_name (self, p):

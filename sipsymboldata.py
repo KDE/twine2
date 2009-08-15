@@ -22,10 +22,6 @@ class SymbolData(cppsymboldata.SymbolData):
     def __init__(self):
         cppsymboldata.SymbolData.__init__(self)
 
-    class SipClass(cppsymboldata.SymbolData.CppClass):
-        def __init__(self,parentScope, name, filename, lineno):
-            cppsymboldata.SymbolData.CppClass.__init__(self, parentScope, name, filename, lineno)
-            
     class _SipEntityExtra(object):
         def __init__(self):
             self._annotation = None
@@ -39,6 +35,45 @@ class SymbolData(cppsymboldata.SymbolData):
 
         def addBlock(self, block):
             self._blocks.append(block)
+
+    class SipClass(cppsymboldata.SymbolData.CppClass, _SipEntityExtra):
+        def __init__(self,parentScope, name, filename, lineno):
+            cppsymboldata.SymbolData.CppClass.__init__(self, parentScope, name, filename, lineno)
+            SymbolData._SipEntityExtra.__init__(self)
+
+        def format(self,indent=0):
+            pre = SymbolData._indentString(indent)
+            accu = []
+            accu.append(pre)
+            accu.append("class ")
+            
+            accu.append(self._name)
+            if not self._opaque:
+                if len(self._bases):
+                    accu.append(" : ")
+                    accu.append(', '.join(self._bases))
+                    
+                if self._annotation is not None and len(self._annotation)!=0:
+                    accu.append(' /')
+                    accu.append(','.join(self._annotation))
+                    accu.append('/')
+                accu.append(" {\n")
+
+                access = SymbolData.ACCESS_PRIVATE
+                pre2 = SymbolData._indentString(indent+1)
+                for item in self._items:
+                    if item.access() is not access:
+                        accu.append(pre2)
+                        accu.append(item.formatAccess())
+                        accu.append(":\n")
+                        access = item.access()
+                    accu.append(item.format(indent+2))
+                accu.append(pre)
+                accu.append("};\n")
+            else:
+                accu.append(";\n")
+            return ''.join(accu)
+
 
     class Function(cppsymboldata.SymbolData.Function, _SipEntityExtra):
         def __init__(self, parentScope, name, filename, lineno):

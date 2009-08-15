@@ -29,18 +29,26 @@ class SymbolData(cppsymboldata.SymbolData):
     class _SipEntityExtra(object):
         def __init__(self):
             self._annotation = None
+            self._blocks = []
             
         def setAnnotation(self,annotation):
             self._annotation = annotation
             
         def setCppArgs(self,cppArgs):
             pass
-            
+
+        def addBlock(self, block):
+            self._blocks.append(block)
+
     class Function(cppsymboldata.SymbolData.Function, _SipEntityExtra):
         def __init__(self, parentScope, name, filename, lineno):
             cppsymboldata.SymbolData.Function.__init__(self,parentScope,name,filename,lineno)
             SymbolData._SipEntityExtra.__init__(self)
-            
+
+        def format(self,indent=0):
+            return cppsymboldata.SymbolData.Function.format(self,indent) + \
+                ''.join( (block.format(indent) for block in self._blocks))
+
     class Constructor(cppsymboldata.SymbolData.Constructor, _SipEntityExtra):
         def __init__(self, parentScope, name, filename, lineno):
             cppsymboldata.SymbolData.Constructor.__init__(self,parentScope,name,filename,lineno)
@@ -55,4 +63,15 @@ class SymbolData(cppsymboldata.SymbolData):
         def __init__(self, parentScope, name, filename, lineno):
             cppsymboldata.SymbolData.Variable.__init__(self,parentScope,name,filename,lineno)
             SymbolData._SipEntityExtra.__init__(self)
-            
+
+    class SipBlock(object):
+        def __init__(self, name):
+            self._name = name
+            self._body = None
+
+        def setBody(self, body):
+            self._body = body
+
+        def format(self,indent=0):
+            pre = SymbolData._indentString(indent)
+            return self._body

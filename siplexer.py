@@ -110,6 +110,7 @@ tokens = cppTokens + sipDirectives + (
 
 # Completely ignored characters
 t_ANY_ignore           = ' \t\x0c'
+t_block_ignore         = ''
 
 # Operators
 t_PLUS             = r'\+'

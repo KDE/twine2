@@ -253,6 +253,17 @@ class TestSipParser(unittest.TestCase):
             """)
         print(self.syms.topScope().format())
 
+    def testMethodCode1(self):
+        self.parser.parse(self.syms,
+            """
+            int DoFoo(int x);
+            %MethodCode
+            // Method code is here.
+
+            // Ends here.
+            %End
+            """)
+        print(self.syms.topScope().format())
 
 #        self.parser = sipparser.SipParser()
 

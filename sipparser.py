@@ -77,6 +77,9 @@ class SipParser:
     def _popScope(self):
         self.scope = self._scopeStack.pop()
 
+    def _lastEntity(self):
+        return self.scope.lastMember()
+
     def object_id_list (self, id_list, obj, objType = None):
         idList = id_list.split (',')
         if self.stateInfo.inTypedef:
@@ -179,12 +182,15 @@ class SipParser:
         self.currentFunction.setAnnotation(self.annotation)
         self.arguments  = []
         self.annotation = []
-        
+
+    def SipBlockObject(self, name):
+        blockObj = self.symbolData.SipBlock(name)
+        return blockObj
+
     def sipDirectiveObject (self, name, arg):
         obj = SipDirectiveObject (name, self.lexer.lineno, self.stateInfo)
         obj.argument = arg
         self.symbolData.objectList.append (obj)
-
         
     precedence = (('left','PLUS','MINUS'), ('left','ASTERISK','SLASH'), ('right','UMINUS'), )
     
@@ -900,7 +906,7 @@ class SipParser:
                         | virtual_primary exception annotation SEMI
                         | virtual_primary exception annotation cpp_args SEMI
                         | virtual_primary exception cpp_args SEMI"""
-        self.setArguments (True)
+        self.setArguments(True)
         self.stateInfo.currentObject ().attributes.functionQualifier = 'virtual'
 
     def p_virtual_stmt3 (self, p):
@@ -952,20 +958,17 @@ class SipParser:
         
     def p_sip_block (self, p):
         'sip_block : sip_block_header BLOCK_BODY'
-        blockObj = SipBlockObject (p [1], self.lexer.lineno, self.stateInfo)
-        blockObj.block = ('\n'.join (p [1:])) 
-        if self.stateInfo.previousObject:
-            self.stateInfo.previousObject.blocks.append (blockObj)
-        else:
-            self.symbolData.objectList.append (blockObj)
+        blockObj = self.SipBlockObject(p[1])
+        blockObj.setBody('\n'.join(p[1:]))
+        self._lastEntity().addBlock(blockObj)
 
     def p_sip_block_header (self, p):
         'sip_block_header : PERCENT BLOCK'
-        p [0] = ''.join (p [1:])
+        p[0] = ''.join (p [1:])
 
     def p_sip_stmt (self, p):
         'sip_stmt : sip_stmt_header SIPSTMT_BODY'
-        p [0] = '\n'.join (p [1:])
+        p[0] = '\n'.join (p [1:])
         self.stateInfo.currentObject ().block = ('\n'.join (p [1:]))        
         
     def p_sip_stmt_header (self, p):

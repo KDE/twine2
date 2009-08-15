@@ -59,6 +59,9 @@ class SymbolData(object):
 
         def format(self,indent=0):
             return ''.join( (item.format(indent) for item in self._items) )
+
+        def lastMember(self):
+            return self._items[-1] if len(self._items)!=0 else None
             
     class Namespace(_Scope):
         def __init__(self, parentScope, name, filename, lineno):

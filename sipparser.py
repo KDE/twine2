@@ -458,8 +458,8 @@ class SipParser:
         
     def p_template_type (self, p):
         'template_type : qualified_id LT type_specifier_list GT'
-        p [0] = "".join (p [1:])
-        self.template = Template (p [1], p [3], self.template)
+        p[0] = "".join (p[1:])
+        #self.template = Template (p [1], p [3], self.template)
        
     def p_elaborated_type (self, p):
         """elaborated_type : enum qualified_id

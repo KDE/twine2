@@ -285,6 +285,13 @@ int DoFoo(int x);
 """)
         print(self.syms.topScope().format())
 
+    def testTemplate(self):
+        self.parser.parse(self.syms,
+            """
+            QList<int> intlist;
+            """)
+        print(self.syms.topScope().format())
+
     def testLiveAmmo(self):
         with open("/home/sbe/devel/svn/kde/branches/KDE/4.3/kdebindings/python/pykde4/sip/kdecore/kconfigbase.sip") as fhandle:
             text = fhandle.read()

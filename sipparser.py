@@ -122,6 +122,7 @@ class SipParser:
 #       else:
 #            tdObj.template = self.template
 #        self.template = None
+        tdObj.setAccess(self.access)
         self._pushScope(tdObj)
         self.currentTypedef = tdObj
             
@@ -151,6 +152,7 @@ class SipParser:
             functionObj = self.symbolData.Function(self.scope, name, self.filename, self.lexer.lineno)
             returnArg = self.symbolData.Argument(returns)
             functionObj.setReturn(returnArg)
+        functionObj.setAccess(self.access)
             
         self.currentFunction = functionObj
 
@@ -358,7 +360,8 @@ class SipParser:
                       | struct ID
                       | union ID"""
         self.classObject(p[2], p[1])
-            
+        self.access = 'private'
+        
     def p_opaque_class (self, p):
         """opaque_class : class qualified_id SEMI
                         | class qualified_id annotation SEMI

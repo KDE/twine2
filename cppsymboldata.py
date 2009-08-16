@@ -51,8 +51,10 @@ class SymbolData(object):
             self._names = {}
 
         def insertIntoScope(self, name, cppMember):
-            self._items.append(cppMember)
-            self._names[name] = cppMember
+            if cppMember not in self._items:
+                self._items.append(cppMember)
+            if name is not None:
+                self._names[name] = cppMember
 
         def __str__(self):
             return '\n'.join( (str(item) for item in self._items) )
@@ -116,14 +118,19 @@ class SymbolData(object):
                 return self._name
             else:
                 return self._name + "=" + self._value
-            
-    class _CppEntity(object):
-        def __init__(self, parentScope, name, filename, lineno):
-            self._access = SymbolData.ACCESS_PUBLIC
+
+    class _ScopedEntity(object):
+        def __init__(self, parentScope, filename, lineno):
             self._scope = parentScope
-            self._name = name
             self._filename = filename
             self._lineno = lineno
+            self._scope.insertIntoScope(None, self)
+
+    class _CppEntity(_ScopedEntity):
+        def __init__(self, parentScope, name, filename, lineno):
+            SymbolData._ScopedEntity.__init__(self, parentScope, filename, lineno)
+            self._name = name
+            self._access = SymbolData.ACCESS_PUBLIC
             self._scope.insertIntoScope(name, self)
 
         def setAccess(self,typeName):

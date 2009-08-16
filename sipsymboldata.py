@@ -62,7 +62,7 @@ class SymbolData(cppsymboldata.SymbolData):
                 access = SymbolData.ACCESS_PRIVATE
                 pre2 = SymbolData._indentString(indent+1)
                 for item in self._items:
-                    if item.access() is not access:
+                    if isinstance(item,cppsymboldata.SymbolData._CppEntity) and item.access() is not access:
                         accu.append(pre2)
                         accu.append(item.formatAccess())
                         accu.append(":\n")
@@ -109,4 +109,10 @@ class SymbolData(cppsymboldata.SymbolData):
 
         def format(self,indent=0):
             pre = SymbolData._indentString(indent)
-            return self._body
+            return pre + self._body + '\n'
+
+    class SipDirective(cppsymboldata.SymbolData._ScopedEntity, SipBlock):
+        def __init__(self, parentScope, name, filename, lineno):
+            cppsymboldata.SymbolData._ScopedEntity.__init__(self, parentScope, filename, lineno)
+            SymbolData.SipBlock.__init__(self, name)
+            

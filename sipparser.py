@@ -183,15 +183,16 @@ class SipParser:
         self.arguments  = []
         self.annotation = []
 
-    def SipBlockObject(self, name):
+    def sipBlockObject(self, name):
         blockObj = self.symbolData.SipBlock(name)
         return blockObj
 
-    def sipDirectiveObject (self, name, arg):
-        obj = SipDirectiveObject (name, self.lexer.lineno, self.stateInfo)
-        obj.argument = arg
-        self.symbolData.objectList.append (obj)
-        
+    def sipDirectiveObject(self, name):
+        obj = self.symbolData.SipDirective(self.scope, name, self.filename, self.lexer.lineno)
+        #obj.argument = arg
+        #self.symbolData.objectList.append (obj)
+        return obj
+      
     precedence = (('left','PLUS','MINUS'), ('left','ASTERISK','SLASH'), ('right','UMINUS'), )
     
     # start
@@ -958,10 +959,15 @@ class SipParser:
         
     def p_sip_block (self, p):
         'sip_block : sip_block_header BLOCK_BODY'
-        blockObj = self.SipBlockObject(p[1])
-        blockObj.setBody('\n'.join(p[1:]))
-        self._lastEntity().addBlock(blockObj)
-
+        body = '\n'.join(p[1:])
+        if p[1]=='%MethodCode':
+            blockObj = self.sipBlockObject(p[1])
+            blockObj.setBody(body)
+            self._lastEntity().addBlock(blockObj)
+        else:
+            sipDirectiveObj = self.sipDirectiveObject(p[1])
+            sipDirectiveObj.setBody(body)
+        
     def p_sip_block_header (self, p):
         'sip_block_header : PERCENT BLOCK'
         p[0] = ''.join (p [1:])

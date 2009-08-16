@@ -262,16 +262,33 @@ class TestSipParser(unittest.TestCase):
             """)
         print(self.syms.topScope().format())
 
+    def testSipDirective1(self):
+        self.parser.parse(self.syms,
+            """
+class Foo {
+    %TypeHeaderCode
+    #include <kconfigbase.h>
+    %End
+};
+""")
+        print(self.syms.topScope().format())
+
     def testMethodCode1(self):
         self.parser.parse(self.syms,
             """
-            int DoFoo(int x);
-            %MethodCode
-            // Method code is here.
+int DoFoo(int x);
+%MethodCode
+// Method code is here.
 
-            // Ends here.
-            %End
-            """)
+// Ends here.
+%End
+""")
+        print(self.syms.topScope().format())
+
+    def testLiveAmmo(self):
+        with open("/home/sbe/devel/svn/kde/branches/KDE/4.3/kdebindings/python/pykde4/sip/kdecore/kconfigbase.sip") as fhandle:
+            text = fhandle.read()
+        self.parser.parse(self.syms, text)
         print(self.syms.topScope().format())
 
 #        self.parser = sipparser.SipParser()

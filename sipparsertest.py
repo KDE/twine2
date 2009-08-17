@@ -208,6 +208,15 @@ class TestSipParser(unittest.TestCase):
             """)
         print(self.syms.topScope().format())
 
+    def testFunctionIgnore(self):
+        self.parser.parse(self.syms,
+            """
+            void DontIgnoreThisFoo();
+            //ig int DoIgnoreMeFoo(int x);
+            void DontIgnoreThisFoo2();
+            """)
+        print(self.syms.topScope().format())
+
     def testOperator1(self):
         self.parser.parse(self.syms,
             """

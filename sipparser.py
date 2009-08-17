@@ -106,6 +106,8 @@ class SipParser:
             class_.setAccess('private')
         else:
             class_.setAccess('public')
+            
+        class_.setIgnore(self.ignore)
         self.ignore = False
 
     def enumObject (self, name):
@@ -134,7 +136,8 @@ class SipParser:
         vObj.setStorage(self.storage)
         vObj.setAccess(self.access)
         vObj.setAnnotation(self.annotation)
-
+        vObj.setIgnore(self.ignore)
+        
         self._pushScope(vObj)
         
         self.template = None
@@ -153,12 +156,13 @@ class SipParser:
             returnArg = self.symbolData.Argument(returns)
             functionObj.setReturn(returnArg)
         functionObj.setAccess(self.access)
-            
+        functionObj.setIgnore(self.ignore)
+        
         self.currentFunction = functionObj
-
+        
         #functionObj.templateParams = self.stateInfo.inTemplate
         #self.inTemplate = []
-        #self.ignore = False
+        self.ignore = False
         self.lexer.begin ('function')
         return functionObj
         

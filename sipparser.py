@@ -254,7 +254,8 @@ class SipParser:
     
     def p_member_comment (self, p):
         """member : LINECOMMENT
-                  | CCOMMENT"""
+                  | CCOMMENT
+                  | BLANKLINE"""
         self.commentObject(p[1])
     
     def p_member_list (self, p):
@@ -339,7 +340,13 @@ class SipParser:
         self.ignore    = self.ignore          
         self.arguments  = []
         self.template   = None
-            
+        
+    def p_class_member_comment (self, p):
+        """class_member : LINECOMMENT
+                  | CCOMMENT
+                  | BLANKLINE"""
+        self.commentObject(p[1])
+        
     def p_access_specifier (self, p):
         """access_specifier : public COLON
                             | public slots COLON

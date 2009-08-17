@@ -17,6 +17,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 import ply.lex as lex
+import string
 
 states = (('enum', 'inclusive'), ('function', 'inclusive'), ('variable', 'inclusive'),\
           ('block', 'exclusive'), ('sipStmt', 'exclusive'), ('filename', 'exclusive'), \
@@ -87,7 +88,7 @@ tokens = cppTokens + sipDirectives + (
 # Expressions we don't parse
 'ENUMINIT',  'ARRAYOP', 'FUNCPTR', 'BLOCK_BODY', 'BLOCK', 'SIPSTMT', 
 'SIPSTMT_BODY', 'FILENAME', 'licenseAnnotation', 'IG', 'throw',
-'FORCE', 'END', 'STRING', 'DOTTEDNAME', 'LINECOMMENT', 'CCOMMENT',
+'FORCE', 'END', 'STRING', 'DOTTEDNAME', 'LINECOMMENT', 'CCOMMENT', 'BLANKLINE',
 
 # Structure dereference (->)
 'ARROW',
@@ -234,8 +235,17 @@ def t_inline (t):
     pass
 
 def t_ANY_NEWLINE(t):
-    r'\n+'
-    t.lexer.lineno += t.value.count("\n")
+    r'\n'
+    t.lexer.lineno += 1
+    pos = t.lexpos-1
+    while True:
+        if (pos < 0) or (t.lexer.lexdata[pos]=='\n'):
+            t.value = t.lexer.lexdata[pos+1:t.lexpos+1]
+            t.type = 'BLANKLINE'
+            return t
+        elif t.lexer.lexdata[pos] not in string.whitespace:
+            break
+        pos -= 1
         
 # any sip block - %<blocktype> ... %End
 def t_block_BLOCK_BODY (t):

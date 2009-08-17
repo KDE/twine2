@@ -94,6 +94,11 @@ class SipParser:
         else:
             for id in idList:
                 self.variableObject (id, self.stateInfo.currentObject ().name)
+    
+    def commentObject(self,value):
+        comment = self.symbolData.Comment(self.scope, self.filename, self.lexer.lineno)
+        comment.setValue(value)
+        return comment
 
     def classObject (self, name, type_):
         class_ = self.symbolData.SipClass(self.scope, name, self.filename, self.lexer.lineno)
@@ -246,7 +251,12 @@ class SipParser:
         #self.stateInfo.ignore    = self.ignore           
         #self.arguments  = []
         #self.annotation = []
-                  
+    
+    def p_member_comment (self, p):
+        """member : LINECOMMENT
+                  | CCOMMENT"""
+        self.commentObject(p[1])
+    
     def p_member_list (self, p):
         """member_list : member
                        | member_list member"""

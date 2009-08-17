@@ -138,3 +138,14 @@ class SymbolData(cppsymboldata.SymbolData):
             cppsymboldata.SymbolData._ScopedEntity.__init__(self, parentScope, filename, lineno)
             SymbolData.SipBlock.__init__(self, name)
             
+    class Comment(cppsymboldata.SymbolData._ScopedEntity):
+        def __init__(self, parentScope, filename, lineno):
+            cppsymboldata.SymbolData._ScopedEntity.__init__(self, parentScope, filename, lineno)
+            self._comment = None
+            
+        def setValue(self,comment):
+            self._comment = comment
+            
+        def format(self,indent=0):
+            return self._comment
+            

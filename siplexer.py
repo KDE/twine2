@@ -87,7 +87,7 @@ tokens = cppTokens + sipDirectives + (
 # Expressions we don't parse
 'ENUMINIT',  'ARRAYOP', 'FUNCPTR', 'BLOCK_BODY', 'BLOCK', 'SIPSTMT', 
 'SIPSTMT_BODY', 'FILENAME', 'licenseAnnotation', 'IG', 'throw',
-'FORCE', 'END', 'STRING', 'DOTTEDNAME',
+'FORCE', 'END', 'STRING', 'DOTTEDNAME', 'LINECOMMENT', 'CCOMMENT',
 
 # Structure dereference (->)
 'ARROW',
@@ -345,11 +345,15 @@ def t_ANY_DO2CPPCOMMENT (t):
 def t_ANY_comment(t):
     r'/\*[^\*](.|\n)*?\*/'
     t.lineno += t.value.count('\n')
-        
+    t.type = 'CCOMMENT'
+    return t
+
 def t_ANY_cppcomment (t):
     r'//[^\n]*\n'
     t.lexer.lineno += t.value.count ('\n')
-
+    t.type = 'LINECOMMENT'
+    return t
+    
 # Preprocessor directive (ignored)
 def t_preprocessor(t):
     r'\#(.)*?\n'

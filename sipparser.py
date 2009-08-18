@@ -1136,11 +1136,11 @@ class SipParser:
 
     def p_object_force (self, p):
         'object_force : FORCE'
-        self.stateInfo.force = True
+        pass
 
     def p_object_end (self, p):
         'object_end : END'
-        self.stateInfo.force = False
+        pass
 
 # expression handling for argument default values - just parses and
 # then reassembles the default value expression (no evaluation)

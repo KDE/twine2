@@ -20,9 +20,6 @@
 import sys
 import ply.yacc as yacc
 from siplexer import sipLexer, tokens, setStateInfoTarget
-#from symboldata import NamespaceObject, ClassObject, EnumObject, Enumerator, TypedefObject
-#from symboldata import FunctionObject, Argument, VariableObject, EndClassMarker, EndNamespaceMarker
-#from symboldata import SipDirectiveObject, SipBlockObject, SipTypeObject, Template
 
 class SipParser:
     def __init__ (self):
@@ -117,6 +114,7 @@ class SipParser:
 
     def enumObject (self, name):
         enum = self.symbolData.Enum(self.scope, name, self.filename, self.lexer.lineno)
+        enum.setAccess(self.access)
         self.lexer.begin('enum')
         self.currentEnum = enum
         return enum

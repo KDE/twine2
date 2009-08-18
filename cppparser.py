@@ -124,6 +124,7 @@ class CppParser(object):
     
     def enumObject (self, name):
         enum = self.symbolData.Enum(self.scope, name, self.filename, self.lexer.lineno)
+        enum.setAccess(self.access)
         self.currentEnum = enum
         return enum
     

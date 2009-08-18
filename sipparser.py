@@ -699,7 +699,7 @@ class SipParser:
         'function_name : STORAGE type_specifier ID LPAREN'
         fObj = self.functionObject (p [3], p[2])
         self.arguments = []
-        fObj.attributes.storageClass = p [1]
+        fObj.setStorage(p[1])
 
     def p_operator_pfx (self, p):
         'operator_pfx : type_specifier operator'
@@ -791,8 +791,8 @@ class SipParser:
                          | operator_primary CVQUAL exception cpp_args SEMI
                          | operator_primary CVQUAL annotation cpp_args SEMI
                          | operator_primary CVQUAL exception annotation cpp_args SEMI"""
-        self.setArguments (True)
-        self.stateInfo.currentObject ().attributes.cv = p [2]
+        self.setArguments(True)
+        self.currentFunction.addQualifier(p[2])
 
     def p_ctor_name0 (self, p):
         'ctor_name : ID LPAREN'

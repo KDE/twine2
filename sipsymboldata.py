@@ -131,7 +131,7 @@ class SymbolData(cppsymboldata.SymbolData):
 
         def format(self,indent=0):
             pre = SymbolData._indentString(indent)
-            return pre + self._body + '\n'
+            return self._body + '\n'
 
     class SipDirective(cppsymboldata.SymbolData._ScopedEntity, SipBlock):
         def __init__(self, parentScope, name, filename, lineno):

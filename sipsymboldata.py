@@ -70,17 +70,18 @@ class SymbolData(cppsymboldata.SymbolData):
                     accu.append(' /')
                     accu.append(','.join(self._annotation))
                     accu.append('/')
-                accu.append(" {\n")
+                accu.append("\n")
+                accu.append(pre)
+                accu.append("{\n")
 
                 access = SymbolData.ACCESS_PRIVATE
-                pre2 = SymbolData._indentString(indent+1)
                 for item in self._items:
                     if isinstance(item,cppsymboldata.SymbolData._CppEntity) and item.access() is not access:
-                        accu.append(pre2)
+                        accu.append(pre)
                         accu.append(item.formatAccess())
                         accu.append(":\n")
                         access = item.access()
-                    accu.append(item.format(indent+2))
+                    accu.append(item.format(indent+1))
                 accu.append(pre)
                 accu.append("};\n")
             else:

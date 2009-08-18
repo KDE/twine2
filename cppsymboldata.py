@@ -17,6 +17,8 @@
 # Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+RETURN_INDENT = 24
+
 class SymbolData(object):
     ACCESS_PUBLIC = object()
     ACCESS_PRIVATE = object()
@@ -120,6 +122,8 @@ class SymbolData(object):
             if self._name is not None:
                     accu.append(self._name)
                     accu.append(" ")
+            accu.append("\n")
+            accu.append(pre)
             accu.append("{\n")
             
             pre2 = SymbolData._indentString(indent+1)
@@ -202,8 +206,9 @@ class SymbolData(object):
             self._template = template           # the parsed info from any template-type argument
 
         def format(self):
-            return self._argumentType + (" " + self._argumentName if self._argumentName is not None else "")+ ("" if self._defaultValue is None else "="+self._defaultValue)
-
+            return self._argumentType + (" " + self._argumentName if self._argumentName is not None else "") + \
+                ("" if self._defaultValue is None else "="+self._defaultValue)
+            
     class Variable(_CppEntity):
         def __init__(self,parentScope, name, filename, lineno):
             SymbolData._CppEntity.__init__(self, parentScope, name, filename, lineno)
@@ -253,10 +258,16 @@ class SymbolData(object):
             if self._storage is not None:
                 accu.append(self._storage)
                 accu.append(" ")
-            accu.append(self._return.format())
-            accu.append(" ")
+                
+            ret = self._return.format()
+            accu.append(ret)
+            if len(ret)<RETURN_INDENT:
+                accu.append(' ' * (RETURN_INDENT-len(ret)))
+            else:
+                accu.append(" ")
+                
             accu.append(self._name)
-            accu.append("(")
+            accu.append(" (")
             accu.append(', '.join( (arg.format() for arg in self._arguments) ))
             accu.append(")")
             if 'pure' in self._qualifier:
@@ -273,11 +284,13 @@ class SymbolData(object):
         def format(self,indent=0):
             accu = []
             accu.append(SymbolData._indentString(indent))
-            accu.append(self._storage+" " if self._storage is not None else "")
-            if 'explicit' in self._qualifier:
-                accu.append("explicit ")
+            ret = (self._storage+" " if self._storage is not None else "") + \
+                ("explicit " if 'explicit' in self._qualifier else "")
+            accu.append(ret)
+            if len(ret)<RETURN_INDENT:
+                accu.append(' ' * (RETURN_INDENT-len(ret)))
             accu.append(self._name)
-            accu.append("(")
+            accu.append(" (")
             accu.append(', '.join( (arg.format() for arg in self._arguments) ))
             accu.append(");\n")
             return ''.join(accu)

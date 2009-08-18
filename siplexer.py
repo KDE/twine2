@@ -234,6 +234,14 @@ def t_inline (t):
     r'inline\s+'
     pass
 
+# any sip block - %<blocktype> ... %End
+# This has high prio than t_ANY_NEWLINE
+def t_block_BLOCK_BODY (t):
+    r'(.|\n)*?%End'
+    t.lexer.lineno += t.value.count("\n")
+    t.lexer.begin ('variable')
+    return t
+
 def t_ANY_NEWLINE(t):
     r'\n'
     t.lexer.lineno += 1
@@ -247,13 +255,6 @@ def t_ANY_NEWLINE(t):
             break
         pos -= 1
         
-# any sip block - %<blocktype> ... %End
-def t_block_BLOCK_BODY (t):
-    r'(.|\n)*?%End'
-    t.lexer.lineno += t.value.count("\n")
-    t.lexer.begin ('variable')
-    return t
-
 def t_sipStmt_SIPSTMT_BODY (t):
     r'(?s){.*?(};|\n*\s*};)'
     t.lexer.lineno += t.value.count("\n")

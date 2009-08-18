@@ -333,6 +333,19 @@ int DoFoo(int x);
 """)
         print(self.syms.topScope().format())
 
+    def testBlankLine2(self):
+        self.parser.parse(self.syms,
+"""
+class Foo {
+%ConvertToSubClassCode
+
+// Subcode...
+// End.
+%End
+};
+""")
+        print(self.syms.topScope().format())
+
     def testLiveAmmo(self):
         with open("/home/sbe/devel/svn/kde/branches/KDE/4.3/kdebindings/python/pykde4/sip/kdecore/kconfigbase.sip") as fhandle:
             text = fhandle.read()

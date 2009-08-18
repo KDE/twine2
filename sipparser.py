@@ -981,6 +981,7 @@ class SipParser:
     def p_sip_block (self, p):
         'sip_block : sip_block_header BLOCK_BODY'
         body = '\n'.join(p[1:])
+        body = p[1] + p[2]
         if p[1]=='%MethodCode':
             blockObj = self.sipBlockObject(p[1])
             blockObj.setBody(body)

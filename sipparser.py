@@ -99,18 +99,11 @@ class SipParser:
 
     def classObject (self, name, type_):
         class_ = self.symbolData.SipClass(self.scope, name, self.filename, self.lexer.lineno)
-        self.currentClass = class_
-        self._pushScope(class_)
-
-        #self.stateInfo.inTemplate = []
-        #self.stateInfo.pushClass (name, class_)
-        if type_ == 'class':
-            class_.setAccess('private')
-        else:
-            class_.setAccess('public')
-            
+        class_.setAccess(self.access)    
         class_.setIgnore(self.ignore)
         self.ignore = False
+        self.currentClass = class_
+        self._pushScope(class_)
 
     def enumObject (self, name):
         enum = self.symbolData.Enum(self.scope, name, self.filename, self.lexer.lineno)

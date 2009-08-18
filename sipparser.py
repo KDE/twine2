@@ -769,9 +769,7 @@ class SipParser:
                             | virtual operator_name RPAREN
                             | virtual cast_operator_name"""
         self.setArguments ()
-        self.stateInfo.currentObject ().attributes.functionQualifer = 'virtual'
-        if self.testing:
-            self.test.append (str (self.arguments))
+        self.currentFunction.addQualifier('virtual')
 
     def p_operator_stmt0 (self, p):
         """operator_stmt : operator_primary SEMI
@@ -798,7 +796,7 @@ class SipParser:
 
     def p_ctor_name0 (self, p):
         'ctor_name : ID LPAREN'
-        self.functionObject (p [1], 'ctor')
+        self.functionObject(p[1], 'ctor')
         self.arguments = []
         
     def p_ctor_name1 (self, p):
@@ -809,7 +807,7 @@ class SipParser:
 
     def p_dtor_name (self, p):
         'dtor_name : TILDE ID'
-        self.functionObject (p [2], 'dtor')
+        self.functionObject(p [2], 'dtor')
         self.arguments = []
         
     def p_virtual_dtor_name (self, p):
@@ -830,8 +828,6 @@ class SipParser:
                             | function_name argument_list RPAREN"""
                             
         self.setArguments ()
-        if self.testing:
-            self.test.append (str (self.arguments))
             
     def p_function_primary (self, p):
         """function_primary : function_name RPAREN
@@ -878,7 +874,8 @@ class SipParser:
     def p_function_stmt2 (self, p):
         'function_stmt : function_primary EQUALS ICONST stmt_end'
         self.setArguments (True)
-        self.stateInfo.currentObject ().attributes.functionQualifier = 'virtual'
+        self.currentFunction.addQualifier('virtual')
+
     def p_ctor_primary (self, p):
         """ctor_primary : ctor_name RPAREN
                         | ctor_name argument_list RPAREN"""                        
@@ -897,7 +894,7 @@ class SipParser:
         
     def p_dtor_primary1 (self, p):
         'dtor_primary : virtual_dtor_name LPAREN RPAREN'
-        self.stateInfo.currentObject ().attributes.functionQualifier = 'virtual'
+        self.currentFunction.addQualifier('virtual')
         
     def p_dtor_stmt (self, p):
         'dtor_stmt : dtor_primary stmt_end'

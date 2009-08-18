@@ -226,6 +226,15 @@ class TestSipParser(unittest.TestCase):
             """)
         print(self.syms.topScope().format())
 
+    def testOperator2(self):
+        self.parser.parse(self.syms,
+            """
+            class Foo {
+                virtual bool operator == (int);
+            };
+            """)
+        print(self.syms.topScope().format())
+
     def testNamespace(self):
         self.parser.parse(self.syms,
             """

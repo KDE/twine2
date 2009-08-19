@@ -131,7 +131,7 @@ class SipParser:
         vObj.setArgument(self.symbolData.Argument(vtype, name, init, None, self.template))
         vObj.setStorage(self.storage)
         vObj.setAccess(self.access)
-        vObj.setAnnotation(self.annotation)
+        vObj.setAnnotations(self.annotation)
         vObj.setIgnore(self.ignore)
         
         self._pushScope(vObj)
@@ -181,7 +181,7 @@ class SipParser:
             self.currentFunction.setArguments(self.argumentList())
         else:
             self.currentFunction.setCppArgs(self.arguments)
-        self.currentFunction.setAnnotation(self.annotation)
+        self.currentFunction.setAnnotations(self.annotation)
         self.arguments  = []
         self.annotation = []
 
@@ -364,7 +364,7 @@ class SipParser:
         """class_header : class_name annotation LBRACE
                         | class_name COLON base_list annotation LBRACE"""
         p[0] = p[1]
-        self.currentClass.setAnnotation(self.annotation)
+        self.currentClass.setAnnotations(self.annotation)
         self.annotation = []
         
     def p_class_name (self, p):

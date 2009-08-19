@@ -206,7 +206,7 @@ class SymbolData(object):
 
         def format(self):
             return self._argumentType + (" " + self._argumentName if self._argumentName is not None else "") + \
-                ("" if self._defaultValue is None else "="+self._defaultValue)
+                ("" if self._defaultValue is None else " = "+self._defaultValue)
             
     class Variable(_CppEntity):
         def __init__(self,parentScope, name, filename, lineno):
@@ -252,16 +252,19 @@ class SymbolData(object):
         def format(self,indent=0):
             accu = []
             accu.append(SymbolData._indentString(indent))
+            chars = 0
             if 'virtual' in self._qualifier:
                 accu.append("virtual ")
+                chars += 8
             if self._storage is not None:
                 accu.append(self._storage)
                 accu.append(" ")
+                chars += len(self._storage) + 1
                 
             ret = self._return.format()
             accu.append(ret)
-            if len(ret)<RETURN_INDENT:
-                accu.append(' ' * (RETURN_INDENT-len(ret)))
+            if (len(ret)+chars) < RETURN_INDENT:
+                accu.append(' ' * (RETURN_INDENT-len(ret)-chars))
             else:
                 accu.append(" ")
                 

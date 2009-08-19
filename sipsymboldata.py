@@ -24,7 +24,7 @@ class SymbolData(cppsymboldata.SymbolData):
 
     class _SipEntityExtra(object):
         def __init__(self):
-            self._annotation = None
+            self._annotations = None
             self._blocks = []
             self._ignore = False
             
@@ -34,8 +34,8 @@ class SymbolData(cppsymboldata.SymbolData):
         def setIgnore(self,ignore):
             self._ignore = ignore
             
-        def setAnnotation(self,annotation):
-            self._annotation = annotation
+        def setAnnotations(self,annotations):
+            self._annotations = annotations
             
         def setCppArgs(self,cppArgs):
             pass
@@ -66,9 +66,9 @@ class SymbolData(cppsymboldata.SymbolData):
                     accu.append(" : ")
                     accu.append(', '.join(self._bases))
                     
-                if self._annotation is not None and len(self._annotation)!=0:
+                if self._annotations is not None and len(self._annotations)!=0:
                     accu.append(' /')
-                    accu.append(','.join(self._annotation))
+                    accu.append(','.join(self._annotations))
                     accu.append('/')
                 accu.append("\n")
                 accu.append(pre)
@@ -95,7 +95,12 @@ class SymbolData(cppsymboldata.SymbolData):
             SymbolData._SipEntityExtra.__init__(self)
 
         def format(self,indent=0):
-            return self._formatIgnore(indent) + cppsymboldata.SymbolData.Function.format(self,indent) + \
+            annotations = ""
+            if self._annotations is not None and len(self._annotations)!=0:
+                annotations = ' /' + ', '.join(self._annotations) + '/'
+            
+            return self._formatIgnore(indent) + cppsymboldata.SymbolData.Function.format(self,indent)[:-2] + \
+                annotations + ";\n" + \
                 ''.join( (block.format(indent) for block in self._blocks))
 
     class Constructor(cppsymboldata.SymbolData.Constructor, _SipEntityExtra):

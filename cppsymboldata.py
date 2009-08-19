@@ -118,10 +118,10 @@ class SymbolData(object):
             pre = SymbolData._indentString(indent)
             accu = []
             accu.append(pre)
-            accu.append("enum ")
+            accu.append("enum")
             if self._name is not None:
-                    accu.append(self._name)
                     accu.append(" ")
+                    accu.append(self._name)
             accu.append("\n")
             accu.append(pre)
             accu.append("{\n")

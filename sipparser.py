@@ -172,7 +172,9 @@ class SipParser:
         instanceList = []
         for argTuple in self.arguments:
             vtype, name, init, annotation, template, exprElements = argTuple
-            instanceList.append(self.symbolData.Argument(vtype, name, init, annotation, template))
+            arg = self.symbolData.Argument(vtype, name, init, template)
+            arg.setAnnotations(annotation)
+            instanceList.append(arg)
         return instanceList
 
 
@@ -283,8 +285,7 @@ class SipParser:
                               | ID EQUALS ICONST
                               | ID EQUALS SCONST
                               | ID EQUALS HEXCONST"""
-                      
-        self.annotation.append (''.join (p [1:]))
+        self.annotation.append(''.join(p[1:]))
         
     def p_annotation_list (self, p):
         """annotation_list : annotation_element

@@ -88,6 +88,21 @@ class SymbolData(cppsymboldata.SymbolData):
                 accu.append(";\n")
             return ''.join(accu)
 
+    class Argument(cppsymboldata.SymbolData.Argument):
+        def __init__(self, argumentType, argumentName = None, argumentValue = None, template = None, defaultTypes = None):
+            cppsymboldata.SymbolData.Argument.__init__(self, argumentType, argumentName, argumentValue, template, defaultTypes)
+            self._annotations = None
+
+        def setAnnotations(self,annotations):
+            self._annotations = annotations
+            
+        def format(self):
+            annos = ""
+            if self._annotations is not None and len(self._annotations)!=0:
+                annos = " /" + ",".join(self._annotations) + "/"
+            return self._argumentType + (" " + self._argumentName if self._argumentName is not None else "") + \
+                annos + \
+                ("" if self._defaultValue is None else " = "+self._defaultValue)
 
     class Function(cppsymboldata.SymbolData.Function, _SipEntityExtra):
         def __init__(self, parentScope, name, filename, lineno):

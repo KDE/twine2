@@ -208,6 +208,13 @@ class TestSipParser(unittest.TestCase):
             """)
         print(self.syms.topScope().format())
 
+    def testFunctions7(self):
+        self.parser.parse(self.syms,
+            """
+            int DoFoo(int *x /Out/);
+            """)
+        print(self.syms.topScope().format())
+
     def testFunctionIgnore(self):
         self.parser.parse(self.syms,
             """

@@ -195,13 +195,12 @@ class SymbolData(object):
             return ''.join(accu)
 
     class Argument(object):
-        def __init__(self, argumentType, argumentName = None, argumentValue = None, annotation = None, template = None, defaultTypes = None):
+        def __init__(self, argumentType, argumentName = None, argumentValue = None, template = None, defaultTypes = None):
             self._argumentType = argumentType
             self._argumentName = argumentName
             self._defaultValue = argumentValue  # string (no leading '=') of default value/expression
             self._defaultTypes = defaultTypes   # any types pulled out of the default value expression
             self._functionPtr = None
-            self._annotation = annotation       # a list of annotations
             #self._attributes = Attributes ()
             self._template = template           # the parsed info from any template-type argument
 

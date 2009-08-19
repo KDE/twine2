@@ -146,7 +146,7 @@ class CppParser(object):
         return macro
     
     def argument(self, argumentType, argumentName = None, argumentValue = None):
-        self.arguments.append ((argumentType, argumentName, argumentValue, None, self.template, self.exprElements))
+        self.arguments.append ((argumentType, argumentName, argumentValue, self.template, self.exprElements))
         self.template = None
         self.exprElements = []
         return self.arguments
@@ -154,8 +154,8 @@ class CppParser(object):
     def argumentList(self):
         instanceList = []
         for argTuple in self.arguments:
-            vtype, name, init, annotation, template, exprElements = argTuple
-            instanceList.append(self.symbolData.Argument(vtype, name, init, annotation, template))
+            vtype, name, init, template, exprElements = argTuple
+            instanceList.append(self.symbolData.Argument(vtype, name, init, template))
         return instanceList
 
     def variableObject(self, name, vtype, init = None):

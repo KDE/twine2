@@ -996,22 +996,20 @@ class SipParser:
 
     def p_sip_stmt (self, p):
         'sip_stmt : sip_stmt_header SIPSTMT_BODY'
-        p[0] = '\n'.join (p [1:])
-        self.stateInfo.currentObject ().block = ('\n'.join (p [1:]))        
+        p[0] = '\n'.join(p[1:])
+        self._lastEntity().setBody('\n'.join(p[1:]))
         
     def p_sip_stmt_header (self, p):
         """sip_stmt_header : PERCENT SIPSTMT type_specifier
                            | PERCENT SIPSTMT qualified_id LPAREN qualified_id RPAREN"""
-        p [0] = '%%%s %s' % (p [2], ''.join (p [3:]))
-        sipTypeObj = SipTypeObject (p [3], self.lexer.lineno, self.stateInfo, p [2])
-        if len (p) == 7:
-            sipTypeObj.base = p [5]
-        if self.stateInfo.inTemplate:
+        p[0] = '%%%s %s' % (p[2], ''.join(p[3:]))
+        sipTypeObj = self.symbolData.SipType(self.scope, self.filename, self.lexer.lineno)
+        #if len(p) == 7:
+        #    sipTypeObj.base = p [5]
+        if self.inTemplate:
             sipTypeObj.templateParams = self.stateInfo.inTemplate
-            sipTypeObj.template       = self.template
+            sipTypeObj.template = self.template
             self.stateInfo.inTemplate = []
-        self.symbolData.objectList.append (sipTypeObj)
-        self.stateInfo.pushObject (sipTypeObj)
                 
     def p_cmodule (self, p):
         """cmodule : PERCENT CModule ID

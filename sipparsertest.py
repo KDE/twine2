@@ -364,6 +364,18 @@ public:
 """)
         print(self.syms.topScope().format())
 
+    def testMappedType(self):
+        self.parser.parse(self.syms,
+"""
+%MappedType QMap<Foo,Bar>
+{
+
+};
+
+""")
+        print(self.syms.topScope().format())
+
+
     def testLiveAmmo(self):
         with open("/home/sbe/devel/svn/kde/branches/KDE/4.3/kdebindings/python/pykde4/sip/kdecore/kurl.sip") as fhandle:
             text = fhandle.read()

@@ -186,3 +186,8 @@ class SymbolData(cppsymboldata.SymbolData):
         def format(self,indent=0):
             pre = SymbolData._indentString(indent)
             return pre + 'template <' + self._parameters + '>\n' + cppsymboldata.SymbolData._Scope.format(self,indent)
+            
+    class SipType(cppsymboldata.SymbolData._ScopedEntity, SipBlock):
+        def __init__(self, parentScope, filename, lineno):
+            cppsymboldata.SymbolData._ScopedEntity.__init__(self, parentScope, filename, lineno)
+            SymbolData.SipBlock.__init__(self, None)

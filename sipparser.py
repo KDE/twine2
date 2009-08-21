@@ -1001,13 +1001,16 @@ class SipParser:
         """sip_stmt_header : PERCENT SIPSTMT type_specifier
                            | PERCENT SIPSTMT qualified_id LPAREN qualified_id RPAREN"""
         p[0] = '%%%s %s' % (p[2], ''.join(p[3:]))
-        sipTypeObj = self.symbolData.SipType(self.scope, self.filename, self.lexer.lineno)
         #if len(p) == 7:
         #    sipTypeObj.base = p [5]
-        if self.inTemplate:
-            sipTypeObj.templateParams = self.stateInfo.inTemplate
-            sipTypeObj.template = self.template
-            self.stateInfo.inTemplate = []
+        if not self.inTemplate:
+            self.symbolData.SipType(self.scope, self.filename, self.lexer.lineno)
+        else:
+            template = self.symbolData.Template(self.scope, self.filename, self.lexer.lineno)
+            template.setParameters(self.inTemplate)
+            self.scope = template   # This is a bit of ugly to make the class appear inside the template scope.
+            self.symbolData.SipType(self.scope, self.filename, self.lexer.lineno)
+            self.inTemplate = []
                 
     def p_cmodule (self, p):
         """cmodule : PERCENT CModule ID

@@ -927,7 +927,7 @@ class SipParser:
                         | virtual_primary exception annotation cpp_args SEMI
                         | virtual_primary exception cpp_args SEMI"""
         self.setArguments(True)
-        self.stateInfo.currentObject ().attributes.functionQualifier = 'virtual'
+        self.currentFunction.addQualifier('virtual')
 
     def p_virtual_stmt3 (self, p):
         """virtual_stmt : virtual_primary CVQUAL annotation SEMI

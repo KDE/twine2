@@ -1081,11 +1081,13 @@ class SipParser:
 
     def p_import (self, p):
         'import : PERCENT Import FILENAME'
-        self.sipDirectiveObject ('Import', p [3])
+        directive = self.sipDirectiveObject('Import')
+        directive.setBody(p[3])
         
     def p_include (self, p):
         'include : PERCENT Include FILENAME'
-        self.sipDirectiveObject ('Include', p [3])
+        directive = self.sipDirectiveObject('Include')
+        directive.setBody(p[3])
         
     def p_license_annot (self, p):
         'license_annot : licenseAnnotation'
@@ -1098,16 +1100,19 @@ class SipParser:
         
     def p_license (self, p):
         'license : PERCENT License SLASH license_annot_list SLASH'
-        self.sipDirectiveObject ('License', p [4])
+        directive = self.sipDirectiveObject('License')
+        directive.setBody(p[4])
         
     def p_module (self, p):
         """module : PERCENT Module FILENAME
                   | PERCENT Module FILENAME ICONST"""
-        self.sipDirectiveObject ('Module', ",".join (p [3:]))
+        directive = self.sipDirectiveObject('Module')
+        directive.setBody(",".join(p[3:]))
                   
     def p_optional_include (self, p):
         'optional_include : PERCENT OptionalInclude FILENAME'
-        self.sipDirectiveObject ('OptionalInclude', p [3])
+        directive = self.sipDirectiveObject('OptionalInclude')
+        directive.setBody(p[3])
 
     def p_undelimited_id_list (self, p):
         """undelimited_id_list : ID
@@ -1116,15 +1121,18 @@ class SipParser:
         
     def p_platforms (self, p):
         'platforms : PERCENT Platforms LBRACE undelimited_id_list RBRACE'
-        self.sipDirectiveObject ('Platforms', p [4])
+        directive = self.sipDirectiveObject('Platforms')
+        directive.setBody(p[4])
         
     def p_sipOptions (self, p):
         'sipOptions : PERCENT SIPOptions LPAREN id_list RPAREN'
-        self.sipDirectiveObject ('SIPOptions', p [4])
+        directive = self.sipDirectiveObject('SIPOptions')
+        directive.setBody(p[4])
                     
     def p_timeline (self, p):
         'timeline : PERCENT Timeline LBRACE undelimited_id_list RBRACE'
-        self.sipDirectiveObject ('Timeline', p [4])
+        directive = self.sipDirectiveObject('Timeline')
+        directive.setBody(p[4])
         
     def p_object_ignore (self, p):
         'object_ignore : IG'

@@ -21,7 +21,7 @@ import sys
 import ply.yacc as yacc
 from siplexer import sipLexer, tokens, setStateInfoTarget
 
-class SipParser:
+class SipParser(object):
     def __init__ (self):
         self.lexer = sipLexer
         self.lexer.begin('variable')
@@ -35,7 +35,9 @@ class SipParser:
         self.scope = None
         self.access = "private"
         self.storage = None
-        
+
+        self.versionStack = [(None, None, None)]
+
         self.inTemplate = None
         self.lexState = 'variable'
         self.test = []
@@ -77,6 +79,14 @@ class SipParser:
 
     def _lastEntity(self):
         return self.scope.lastMember()
+
+    def _pushVersion(self, version):
+        self.versionStack.append(version)
+        
+    def _popVersion(self):
+        if len(self.versionStack)==0:
+            return (None, None, None)
+        return self.versionStack.pop()
 
     def object_id_list (self, id_list, obj, objType = None):
         idList = id_list.split (',')
@@ -1015,23 +1025,28 @@ class SipParser:
     def p_cmodule (self, p):
         """cmodule : PERCENT CModule ID
                    | PERCENT CModule ID ICONST"""
-        self.sipDirectiveObject ('CModule', ",".join (p [2:]))
+        directive = self.sipDirectiveObject ('CModule')
+        directive.setBody('%CModule' + ",".join (p [2:]))
 
     def p_comp_module (self, p):
         'comp_module : PERCENT CompositeModule ID'
-        self.sipDirectiveObject ('CompositeModule', p [2])
+        directive = self.sipDirectiveObject ('CompositeModule')
+        directive.setBody('%CompositeModule ' + p[2])
 
     def p_cons_module (self, p):
         'cons_module : PERCENT ConsolidatedModule ID'
-        self.sipDirectiveObject ('ConsolidatedModule', p [2])
+        directive = self.sipDirectiveObject ('ConsolidatedModule')
+        directive.setBody('%ConsolidatedModule ' +p[2])
         
     def p_feature (self, p):
         'feature : PERCENT Feature ID'
-        self.sipDirectiveObject ('Feature', p [3])
+        directive = self.sipDirectiveObject ('Feature')
+        directive.setBody('%Feature ' + p[3])
 
     def p_plugin (self, p):
         'plugin : PERCENT Plugin ID'
-        self.sipDirectiveObject ('Plugin', p [3])
+        directive = self.sipDirectiveObject ('Plugin')
+        directive.setBody('%Plugin ' + p[3])
 
     def p_defaultencoding (self, p):
         'defaultencoding : PERCENT DefaultEncoding STRING'
@@ -1045,7 +1060,7 @@ class SipParser:
     def p_if_expression (self, p):
         """if_expression : ored_qualifiers
                          | range"""
-        self.stateInfo.pushVersion ((self.versionLow, self.versionHigh, self.platform))
+        self._pushVersion( (self.versionLow, self.versionHigh, self.platform) )
 
     def p_ored_qualifiers (self, p):
         """ored_qualifiers : if_qualifier
@@ -1080,17 +1095,17 @@ class SipParser:
         
     def p_sip_end (self, p):
         'sip_end : PERCENT End'
-        self.versionLow, self.versionHigh, self.platform = self.stateInfo.popVersion ()
+        self.versionLow, self.versionHigh, self.platform = self._popVersion()
 
     def p_import (self, p):
         'import : PERCENT Import FILENAME'
         directive = self.sipDirectiveObject('Import')
-        directive.setBody(p[3])
+        directive.setBody('%Import ' + p[3])
         
     def p_include (self, p):
         'include : PERCENT Include FILENAME'
         directive = self.sipDirectiveObject('Include')
-        directive.setBody(p[3])
+        directive.setBody('%Include ' + p[3])
         
     def p_license_annot (self, p):
         'license_annot : licenseAnnotation'
@@ -1110,12 +1125,12 @@ class SipParser:
         """module : PERCENT Module FILENAME
                   | PERCENT Module FILENAME ICONST"""
         directive = self.sipDirectiveObject('Module')
-        directive.setBody(",".join(p[3:]))
+        directive.setBody("%" + " ".join(p[2:]))
                   
     def p_optional_include (self, p):
         'optional_include : PERCENT OptionalInclude FILENAME'
         directive = self.sipDirectiveObject('OptionalInclude')
-        directive.setBody(p[3])
+        directive.setBody('%OptionalInclude ' + p[3])
 
     def p_undelimited_id_list (self, p):
         """undelimited_id_list : ID
@@ -1125,17 +1140,17 @@ class SipParser:
     def p_platforms (self, p):
         'platforms : PERCENT Platforms LBRACE undelimited_id_list RBRACE'
         directive = self.sipDirectiveObject('Platforms')
-        directive.setBody(p[4])
+        directive.setBody('%Platforms {' + p[4] + '}')
         
     def p_sipOptions (self, p):
         'sipOptions : PERCENT SIPOptions LPAREN id_list RPAREN'
         directive = self.sipDirectiveObject('SIPOptions')
-        directive.setBody(p[4])
+        directive.setBody('%SIPOptions {' + p[4] + '}')
                     
     def p_timeline (self, p):
         'timeline : PERCENT Timeline LBRACE undelimited_id_list RBRACE'
         directive = self.sipDirectiveObject('Timeline')
-        directive.setBody(p[4])
+        directive.setBody('%Timeline {' + p[4] + '}')
         
     def p_object_ignore (self, p):
         'object_ignore : IG'

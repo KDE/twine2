@@ -169,4 +169,20 @@ class SymbolData(cppsymboldata.SymbolData):
             
         def format(self,indent=0):
             return self._comment
+
+    class Template(cppsymboldata.SymbolData._CppEntity,cppsymboldata.SymbolData._Scope):
+        def __init__(self, parentScope, filename, lineno):
+            cppsymboldata.SymbolData._CppEntity.__init__(self, parentScope, None, filename, lineno)
+            cppsymboldata.SymbolData._Scope.__init__(self)
+            self._parameters = None
             
+        def setParameters(self,parameters):
+            self._parameters = parameters
+            
+        def insertIntoScope(self, name, cppMember):
+            cppsymboldata.SymbolData._Scope.insertIntoScope(self,name,cppMember)
+            self._scope.insertIntoScope(name, self)
+            
+        def format(self,indent=0):
+            pre = SymbolData._indentString(indent)
+            return pre + 'template <' + self._parameters + '>\n' + cppsymboldata.SymbolData._Scope.format(self,indent)

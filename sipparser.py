@@ -36,6 +36,7 @@ class SipParser:
         self.access = "private"
         self.storage = None
         
+        self.inTemplate = None
         self.lexState = 'variable'
         self.test = []
         self.currentClass = None
@@ -372,7 +373,14 @@ class SipParser:
         """class_name : class ID
                       | struct ID
                       | union ID"""
-        self.classObject(p[2], p[1])
+        if self.inTemplate is None:
+            self.classObject(p[2], p[1])
+        else:
+            template = self.symbolData.Template(self.scope, self.filename, self.lexer.lineno)
+            template.setParameters(self.inTemplate)
+            self.scope = template   # This is a bit of ugly to make the class appear inside the template scope.
+            self.classObject(p[2], p[1])
+        
         self.access = 'private'
         
     def p_opaque_class (self, p):
@@ -963,7 +971,7 @@ class SipParser:
         
     def p_template_decl (self, p):
         'template_decl : template LT template_param_list GT'
-        self.stateInfo.inTemplate = ', '.join (self.templateParams)
+        self.inTemplate = ', '.join (self.templateParams)
         self.templateParams = []
 
 ##    def p_template_decl (self, p):

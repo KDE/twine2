@@ -287,6 +287,13 @@ class TestSipParser(unittest.TestCase):
             """)
         print(self.syms.topScope().format())
 
+    def testTypedef3(self):
+        self.parser.parse(self.syms,
+"""
+typedef QFlags<KCrash::CrashFlag> CrashFlags;
+""")
+        print(self.syms.topScope().format())
+
     def testSipDirective1(self):
         self.parser.parse(self.syms,
             """

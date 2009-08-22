@@ -720,9 +720,9 @@ class SipParser(object):
         
     def p_cast_operator_name1 (self, p):
         'cast_operator_name : operator type_specifier LPAREN RPAREN CVQUAL'
-        fObj = self.functionObject ('operator ' + p [2], p[2])
-        fObj.attributes.cv = p [5]
-        self.arguments  = []        
+        fObj = self.functionObject('operator ' + p [2], p[2])
+        fObj.addQualifier(p[5])
+        self.arguments = []
         
     def p_operator_name (self, p):
         """operator_name : operator_pfx PLUS LPAREN

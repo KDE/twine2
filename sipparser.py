@@ -434,15 +434,54 @@ class SipParser(object):
             name = None
         self.enumObject(name)
                     
-    def p_enumerator (self, p):
+    def p_enumerator1 (self, p):
         """enumerator : ID
-                      | ID ENUMINIT"""
-        if len(p) == 3:
-            enumerator = self.symbolData.Enumerator(p[1], p[2])
-        else:
-            enumerator = self.symbolData.Enumerator(p[1], None)
+                      | enumeratorcomment ID"""
+        if len(p)==3:
+            for item in p[1]:
+                self.currentEnum.appendEnumerator(item)
+        enumerator = self.symbolData.Enumerator(p[1 if len(p)==2 else 2], None)
         self.currentEnum.appendEnumerator(enumerator)
-            
+    
+    def p_enumerator2 (self, p):
+        """enumerator : ID ENUMINIT
+                      | enumeratorcomment ID ENUMINIT"""
+        if len(p)==4:
+            for item in p[1]:
+                self.currentEnum.appendEnumerator(item)
+            enumerator = self.symbolData.Enumerator(p[2], p[3])
+        else:
+            enumerator = self.symbolData.Enumerator(p[1], p[2])
+        self.currentEnum.appendEnumerator(enumerator)
+
+    def p_enumerator3 (self, p):
+        """enumerator : ID enumeratorcomment
+                      """
+        enumerator = self.symbolData.Enumerator(p[1], None)
+        self.currentEnum.appendEnumerator(enumerator)
+        for item in p[2]:
+            self.currentEnum.appendEnumerator(item)
+
+    def p_enumerator4 (self, p):
+        """enumerator : ID ENUMINIT enumeratorcomment"""
+        enumerator = self.symbolData.Enumerator(p[1], p[2])
+        self.currentEnum.appendEnumerator(enumerator)
+        for item in p[3]:
+            self.currentEnum.appendEnumerator(item)
+
+    def p_enumeratorcomment(self, p):
+        """enumeratorcomment : LINECOMMENT
+                             | CCOMMENT
+                             | BLANKLINE"""
+        p[0] = [self.symbolData.EnumeratorComment(p[1])]
+        
+    def p_enumeratorcomment2(self, p):
+        """enumeratorcomment : enumeratorcomment LINECOMMENT
+                             | enumeratorcomment CCOMMENT
+                             | enumeratorcomment BLANKLINE"""
+        p[1].append(self.symbolData.EnumeratorComment(p[2]))
+        p[0] = p[1]
+    
     def p_versioned_enumerator_start (self, p):
         'versioned_enumerator_start : sip_if enumerator'
         pass

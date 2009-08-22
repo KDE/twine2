@@ -263,6 +263,37 @@ class TestSipParser(unittest.TestCase):
             """)
         print(self.syms.topScope().format())
 
+    def testEnum2(self):
+        self.parser.parse(self.syms,
+            """
+            enum global {
+                earth,
+                orb,
+                globe,
+
+                universe
+            };
+            """,debugLevel=2)
+        print(self.syms.topScope().format())
+
+    def testEnum3(self):
+        self.parser.parse(self.syms,
+            """
+            enum global {
+
+                // just a comment.
+                earth,
+                orb,
+
+                // Wierd stuff.
+                globe,
+                universe
+
+                // le fin
+            };
+            """)
+        print(self.syms.topScope().format())
+
     def testEnumAnonymous(self):
         self.parser.parse(self.syms,
             """

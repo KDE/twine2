@@ -191,3 +191,44 @@ class SymbolData(cppsymboldata.SymbolData):
         def __init__(self, parentScope, filename, lineno):
             cppsymboldata.SymbolData._ScopedEntity.__init__(self, parentScope, filename, lineno)
             SymbolData.SipBlock.__init__(self, None)
+
+    class Enum(cppsymboldata.SymbolData.Enum):
+        def __init__(self, parentScope, name, filename, lineno):
+            cppsymboldata.SymbolData.Enum.__init__(self, parentScope, name, filename, lineno)
+
+        def format(self,indent=0):
+            pre = SymbolData._indentString(indent)
+            accu = []
+            accu.append(pre)
+            accu.append("enum")
+            if self._name is not None:
+                    accu.append(" ")
+                    accu.append(self._name)
+            accu.append("\n")
+            accu.append(pre)
+            accu.append("{\n")
+            
+            pre2 = SymbolData._indentString(indent+1)
+            num_enums = sum( (1 for e in self._enumerators if isinstance(e,cppsymboldata.SymbolData.Enumerator)) )
+            enum_count = 0
+            for item in self._enumerators:
+                accu.append(pre2)
+                if isinstance(item,cppsymboldata.SymbolData.Enumerator):
+                    accu.append(item.format())
+                    enum_count += 1
+                    if enum_count!=num_enums:
+                        accu.append(",")
+                    accu.append("\n")
+                else:
+                    accu.append(item.format())
+            accu.append(pre)
+            accu.append("};\n")
+            return ''.join(accu)
+        
+
+    class EnumeratorComment(object):
+        def __init__(self,body):
+            self._body = body
+            
+        def format(self):
+            return self._body

@@ -1,4 +1,5 @@
 #!/usr/bin/python2.5
+# -*- coding: utf-8 -*-
 ############################################################################
 # sealed.py                                                                #
 #                                                                          #
@@ -40,8 +41,9 @@ def sealed(func):
         if sealing_init.wedge_class is None:
             class wedge_class(self.__class__):
                 def __setattr__(self,name,value):
-                    if name not in self.__dict__:  
-                        raise AttributeError("No new attributes may be added to this object.")
+                    getattr(self,name)
+                    #if name not in self.__dict__:  
+                    #    raise AttributeError("No new attributes may be added to this object.")
                     super(wedge_class,self).__setattr__(name,value)
             sealing_init.wedge_class = wedge_class
             sealing_init.wedge_class.__name__ = self.__class__.__name__+" @sealed"

@@ -25,16 +25,22 @@ import cpplexer
 import pplexer
 
 class CppParser(object):
+    """Parser for C++ header files."""
+
     @sealed
     def __init__(self):
+        """Instantiate a new C++ parser."""
+        self._bareMacros = []
+        self._macros = []
+        self._preprocessorValues = {}
+        self._preprocessorSubstitutionMacros = []
+
         self.lexer = cpplexer.CppLexer()
         self.lexer.begin('variable')
         self._resetState()
         self.tokens = cpplexer.tokens
         yacc.yacc(module = self, tabmodule = "cppParserTab")
         self._parse = yacc.parse
-        self._preprocessValue = {}
-        self._preprocessSubstitutionMacros = []
 
     def _resetState(self):
         self.filename = None
@@ -56,26 +62,75 @@ class CppParser(object):
         self.exprElements   = []
         self.symbolData = None
         self.scope = None
-        
-    def setBareMacros(self,macroList):
-        self.lexer.lexmodule.setBareMacros(macroList)
 
-    def setMacros(self,macroList):
+    @property
+    def bareMacros(self):
+        """List of bare macro names.
+
+        A bare macro is C++ macro which takes no arguments. Any bare macros
+        are parsed and recorded in a `ScopedMacro` object."""
+        return self._bareMacros
+    @bareMacros.setter
+    def bareMacros(self,bareMacroList):
+        self._bareMacros = bareMacroList
+        self.lexer.lexmodule.setBareMacros(bareMacroList)
+
+    @property
+    def macros(self):
+        """List of macro names.
+
+        Any macros are parsed and recorded in a `ScopedMacro` object along
+        with their arguments."""
+        return self._macros
+    @macros.setter
+    def macros(self,macroList):
         self.lexer.lexmodule.setMacros(macroList)
+        self._macros = macroList
+
+    @property
+    def preprocessorValues(self):
+        """List of symbols and values to be used by the preprocessor.
+
+        This is a dict mapping string values to values which can be used when
+        evaluating preprocessor expressions."""
+        return self._preprocessorValues
+    @preprocessorValues.setter
+    def preprocessorValues(self,valueList):
+        self._preprocessorValues = valueList
         
-    def setPreprocessValues(self,valueList):
-        self._preprocessValue = valueList
-        
-    def setPreprocessSubstitutionMacros(self,macroList):
-        self._preprocessSubstitutionMacros = macroList
+    @property
+    def preprocessorSubstitutionMacros(self):
+        """Macros to be substituated by the C++ preprocessor.
+
+        This is a list of tuples. The first value is a string or regular
+        expression object which is used to match macros in the text, and
+        the second value is the substituation text."""
+        return self._preprocessorSubstitutionMacros
+    @preprocessorSubstitutionMacros.setter
+    def preprocessorSubstitutionMacros(self,macroList):
+        self._preprocessorSubstitutionMacros = macroList
         
     def parse(self, symbolData, text, filename=None, debugLevel = 0):
+        """Parse the given C++ header text
+        
+        Keyword arguments:
+        symbolData -- cppsymboldata.SymbolData instance. The parsed entities are added to this instance.
+        text -- String, the text to parse.
+        filename -- The filename belonging to the given text. This is used for error messages and can be None.
+        debugLevel -- Turns on debug messages from the lexer and parser. 0, the default, means no debug. 2 lists the
+                      tokens as they arrive.
+        
+        All of the top level things in the given text are parsed and placed inside the top scope inside the
+        symbolData. 
+        
+        If a parse error is encountered, the whole program is exited. Sorry.
+        """
         self._resetState()
 
         self.symbolData = symbolData
         self.scope = self.symbolData.topScope()
         
-        chewedText = pplexer.preprocess(text, self._preprocessValue, self.__compileMacros(self._preprocessSubstitutionMacros))
+        chewedText = pplexer.preprocess(text, self._preprocessorValues, self.__compileMacros(self._preprocessorSubstitutionMacros))
 
         self.lexer.input(chewedText)
         self.lexer.lineno = 1

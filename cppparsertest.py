@@ -283,7 +283,7 @@ class TestCppParser(unittest.TestCase):
         print(self.syms.topScope().format())
 
     def testMacro(self):
-        self.parser.setBareMacros( ["Q_OBJECT"] )
+        self.parser.bareMacros = ["Q_OBJECT"]
         self.parser.parse(self.syms,
             """
             class FooWidget : public QObject {
@@ -295,7 +295,7 @@ class TestCppParser(unittest.TestCase):
         print(self.syms.topScope().format())
 
     def testMacro2(self):
-        self.parser.setBareMacros( ["FOO_EXPORT"] )
+        self.parser.bareMacros = ["FOO_EXPORT"]
         self.parser.parse(self.syms,
             """
             class FOO_EXPORT FooWidget {
@@ -304,7 +304,7 @@ class TestCppParser(unittest.TestCase):
         print(self.syms.topScope().format())
 
     def testMacro3(self):
-        self.parser.setMacros( ["Q_DISABLE_COPY"] )
+        self.parser.macros = ["Q_DISABLE_COPY"]
         self.parser.parse(self.syms,
             """
             class FooWidget {
@@ -320,9 +320,9 @@ class TestCppParser(unittest.TestCase):
     def testLiveAmmo(self):
         with open("/home/sbe/devel/svn/kde/branches/KDE/4.3/kdeedu/marble/src/lib/MarbleMap.h") as fhandle:
             text = fhandle.read()
-        self.parser.setBareMacros(qtkdemacros.QtBareMacros(["MARBLE_EXPORT"]))
-        self.parser.setMacros(qtkdemacros.QtMacros())
-        self.parser.setPreprocessSubstitutionMacros(qtkdemacros.QtPreprocessSubstitutionMacros())
+        self.parser.bareMacros = qtkdemacros.QtBareMacros(["MARBLE_EXPORT"])
+        self.parser.macros = qtkdemacros.QtMacros()
+        self.parser.preprocessorSubstitutionMacros = qtkdemacros.QtPreprocessSubstitutionMacros()
         self.parser.parse(self.syms, text)
         print(self.syms.topScope().format())
 

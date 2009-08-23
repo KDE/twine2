@@ -22,7 +22,12 @@ import ply.yacc as yacc
 from siplexer import sipLexer, tokens, setStateInfoTarget
 
 class SipParser(object):
+    """Parser for SIP files
+    
+    See parse()."""
+    
     def __init__ (self):
+        """Create a new parser instance."""
         self.lexer = sipLexer
         self.lexer.begin('variable')
 
@@ -55,6 +60,20 @@ class SipParser(object):
         self.inTypedef = False
         
     def parse(self, symbolData, text, filename=None, debugLevel = 0):
+        """Parse the given SIP text
+        
+        Keyword arguments:
+        symbolData -- cppsymboldata.SymbolData instance. The parsed entities are added to this instance.
+        text -- String, the text to parse. It should be a valid SIP file / grammar.
+        filename -- The filename belonging to the given text. This is used for error messages and can be None.
+        debugLevel -- Turns on debug messages from the lexer and parser. 0, the default, means no debug. 2 lists the
+                      tokens as they arrive.
+        
+        All of the top level things in the given text are parsed and placed inside the top scope inside the
+        symbolData. 
+        
+        If a parse error is encountered, the whole program is exited. Sorry.
+        """
         self._resetState()
 
         self.symbolData = symbolData
@@ -62,7 +81,6 @@ class SipParser(object):
         
         self.test = []
         self.filename = filename
-        #setStateInfoTarget (stateInfo)
         sipLexer.input (text)
         sipLexer.lineno = 1
         sipLexer.lexpos = 0
@@ -1420,16 +1438,6 @@ for a few lines
 %End
 """
 
-    text = """
-class bar
-{
-public:
-    bar ();
-    explict bar(int x);
-;}
-"""
-
-
 #    text = """virtual bool operator<(const QListWidgetItem &other) const;
 #    """
 ##    void update(const QRectF & = QRectF(0.0, 0.0, 1.0e+9, 1.0e+9));
@@ -1444,12 +1452,3 @@ public:
 ##    // hello - I'm a C++ comment
 ##    static virtual unsigned short has_icon (someEnum zero /Transfer/ = flags(abc) | flags(xyz)) volatile/PyName=foo_bar, Transfer/;
 ##    """
-
-    
-    from symboldata import Data
-    from stateInfo import StateInfo
-
-    symbolData = Data ()
-    stateInfo  = StateInfo ()
-    parser = SipParser (True)
-    print "\n".join (parser.parse (symbolData, stateInfo, text, 2) [1])

@@ -154,14 +154,14 @@ class SymbolData(cppsymboldata.SymbolData):
             pre = SymbolData._indentString(indent)
             return self._body + '\n'
 
-    class SipDirective(cppsymboldata.SymbolData._ScopedEntity, SipBlock):
+    class SipDirective(cppsymboldata.SymbolData.ScopedEntity, SipBlock):
         def __init__(self, parentScope, name, filename, lineno):
-            cppsymboldata.SymbolData._ScopedEntity.__init__(self, parentScope, filename, lineno)
+            cppsymboldata.SymbolData.ScopedEntity.__init__(self, parentScope, filename, lineno)
             SymbolData.SipBlock.__init__(self, name)
             
-    class Comment(cppsymboldata.SymbolData._ScopedEntity):
+    class Comment(cppsymboldata.SymbolData.ScopedEntity):
         def __init__(self, parentScope, filename, lineno):
-            cppsymboldata.SymbolData._ScopedEntity.__init__(self, parentScope, filename, lineno)
+            cppsymboldata.SymbolData.ScopedEntity.__init__(self, parentScope, filename, lineno)
             self._comment = None
             
         def setValue(self,comment):
@@ -170,26 +170,26 @@ class SymbolData(cppsymboldata.SymbolData):
         def format(self,indent=0):
             return self._comment
 
-    class Template(cppsymboldata.SymbolData._CppEntity,cppsymboldata.SymbolData._Scope):
+    class Template(cppsymboldata.SymbolData._CppEntity,cppsymboldata.SymbolData.Scope):
         def __init__(self, parentScope, filename, lineno):
             cppsymboldata.SymbolData._CppEntity.__init__(self, parentScope, None, filename, lineno)
-            cppsymboldata.SymbolData._Scope.__init__(self)
+            cppsymboldata.SymbolData.Scope.__init__(self)
             self._parameters = None
             
         def setParameters(self,parameters):
             self._parameters = parameters
             
         def insertIntoScope(self, name, cppMember):
-            cppsymboldata.SymbolData._Scope.insertIntoScope(self,name,cppMember)
+            cppsymboldata.SymbolData.Scope.insertIntoScope(self,name,cppMember)
             self._scope.insertIntoScope(name, self)
             
         def format(self,indent=0):
             pre = SymbolData._indentString(indent)
-            return pre + 'template <' + self._parameters + '>\n' + cppsymboldata.SymbolData._Scope.format(self,indent)
+            return pre + 'template <' + self._parameters + '>\n' + cppsymboldata.SymbolData.Scope.format(self,indent)
             
-    class SipType(cppsymboldata.SymbolData._ScopedEntity, SipBlock):
+    class SipType(cppsymboldata.SymbolData.ScopedEntity, SipBlock):
         def __init__(self, parentScope, filename, lineno):
-            cppsymboldata.SymbolData._ScopedEntity.__init__(self, parentScope, filename, lineno)
+            cppsymboldata.SymbolData.ScopedEntity.__init__(self, parentScope, filename, lineno)
             SymbolData.SipBlock.__init__(self, None)
 
     class Enum(cppsymboldata.SymbolData.Enum):

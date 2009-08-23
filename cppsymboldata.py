@@ -20,6 +20,12 @@
 RETURN_INDENT = 24
 
 class SymbolData(object):
+    """Represent the contents of a C++ header file.
+     
+    This class and its nested classes can represent the contents of a C++
+    header file. `topScope()` returns the top level scope. From here you can
+    loop over the contents of the file.
+    """
     ACCESS_PUBLIC = object()
     ACCESS_PRIVATE = object()
     ACCESS_PROTECTED = object()
@@ -36,9 +42,13 @@ class SymbolData(object):
         ACCESS_TYPE_MAPPING_TO_NAME[value] = key
 
     def __init__(self):
-        self._topScope = self._Scope()
+        """Instantiate a new SymbolData."""
+        self._topScope = self.Scope()
 
     def topScope(self):
+        """Get the top most scope object.
+        
+        Returns a `Scope` object."""
         return self._topScope
 
     @classmethod
@@ -47,7 +57,10 @@ class SymbolData(object):
 
     # Query interface goes here.
 
-    class _Scope(object):
+    class Scope(object):
+        """Represents a scope which can hold other entities.
+        
+        This class isn't meant to be used directly but is typically subclassed."""
         def __init__(self):
             self._items = []
             self._names = {}
@@ -67,9 +80,10 @@ class SymbolData(object):
         def lastMember(self):
             return self._items[-1] if len(self._items)!=0 else None
             
-    class Namespace(_Scope):
+    class Namespace(Scope):
+        """Represents a C++ style namespace."""
         def __init__(self, parentScope, name, filename, lineno):
-            SymbolData._Scope.__init__(self)
+            SymbolData.Scope.__init__(self)
             self._scope = parentScope
             self._name = name
             self._filename = filename
@@ -78,18 +92,18 @@ class SymbolData(object):
             
         def format(self,indent=0):
             pre = SymbolData._indentString(indent)
-            return pre + "namespace " + self._name + " {\n" + SymbolData._Scope.format(self,indent+1) + pre + "};\n"
+            return pre + "namespace " + self._name + " {\n" + SymbolData.Scope.format(self,indent+1) + pre + "};\n"
 
-    class _ScopedEntity(object):
+    class ScopedEntity(object):
         def __init__(self, parentScope, filename, lineno):
             self._scope = parentScope
             self._filename = filename
             self._lineno = lineno
             self._scope.insertIntoScope(None, self)
 
-    class _CppEntity(_ScopedEntity):
+    class _CppEntity(ScopedEntity):
         def __init__(self, parentScope, name, filename, lineno):
-            SymbolData._ScopedEntity.__init__(self, parentScope, filename, lineno)
+            SymbolData.ScopedEntity.__init__(self, parentScope, filename, lineno)
             self._name = name
             self._access = SymbolData.ACCESS_PUBLIC
             self._scope.insertIntoScope(name, self)
@@ -145,9 +159,9 @@ class SymbolData(object):
             else:
                 return self._name + "=" + self._value
 
-    class CppClass(_Scope, _CppEntity):
+    class CppClass(Scope, _CppEntity):
         def __init__(self,parentScope, name, filename, lineno):
-            SymbolData._Scope.__init__(self)
+            SymbolData.Scope.__init__(self)
             SymbolData._CppEntity.__init__(self, parentScope, name, filename, lineno)
             self._bases = []
             self._opaque = False
@@ -209,6 +223,7 @@ class SymbolData(object):
                 ("" if self._defaultValue is None else " = "+self._defaultValue)
             
     class Variable(_CppEntity):
+        """Represents a single variable declaration."""
         def __init__(self,parentScope, name, filename, lineno):
             SymbolData._CppEntity.__init__(self, parentScope, name, filename, lineno)
             self._storage = None
@@ -227,6 +242,7 @@ class SymbolData(object):
             return pre + storage + self._argument.format() + ";\n"
 
     class Function(_CppEntity):
+        """Represents a C++ function or method if the parent scope is a class."""
         def __init__(self,parentScope, name, filename, lineno):
             SymbolData._CppEntity.__init__(self, parentScope, name, filename, lineno)
             self._return = None
@@ -280,6 +296,7 @@ class SymbolData(object):
             return ''.join(accu)
 
     class Constructor(Function):
+        """Represents a constructor."""
         def __init__(self,parentScope, name, filename, lineno):
             SymbolData.Function.__init__(self, parentScope, name, filename, lineno)
 
@@ -298,6 +315,7 @@ class SymbolData(object):
             return ''.join(accu)
             
     class Destructor(Function):
+        """Represents a destructor."""
         def __init__(self,parentScope, name, filename, lineno):
             SymbolData.Function.__init__(self, parentScope, name, filename, lineno)
 
@@ -306,9 +324,9 @@ class SymbolData(object):
             storage = self._storage+" " if self._storage is not None else ""
             return pre + storage + "~" + self._name + "();\n"
             
-    class Typedef(_Scope,_CppEntity):
+    class Typedef(Scope,_CppEntity):
         def __init__(self,parentScope, name, filename, lineno):
-            SymbolData._Scope.__init__(self)
+            SymbolData.Scope.__init__(self)
             SymbolData._CppEntity.__init__(self, parentScope, name, filename, lineno)
             self._argumentType = None
             

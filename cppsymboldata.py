@@ -16,6 +16,7 @@
 # along with this program; if not, write to the
 # Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+from sealed import sealed
 
 RETURN_INDENT = 24
 
@@ -41,6 +42,7 @@ class SymbolData(object):
     for (key,value) in ACCESS_TYPE_MAPPING_FROM_NAME.iteritems():
         ACCESS_TYPE_MAPPING_TO_NAME[value] = key
 
+    @sealed
     def __init__(self):
         """Instantiate a new SymbolData."""
         self._topScope = self.Scope()
@@ -61,6 +63,7 @@ class SymbolData(object):
         """Represents a scope which can hold other entities.
         
         This class isn't meant to be used directly but is typically subclassed."""
+        @sealed
         def __init__(self):
             self._items = []
             self._names = {}
@@ -82,6 +85,7 @@ class SymbolData(object):
             
     class Namespace(Scope):
         """Represents a C++ style namespace."""
+        @sealed
         def __init__(self, parentScope, name, filename, lineno):
             SymbolData.Scope.__init__(self)
             self._scope = parentScope
@@ -95,6 +99,7 @@ class SymbolData(object):
             return pre + "namespace " + self._name + " {\n" + SymbolData.Scope.format(self,indent+1) + pre + "};\n"
 
     class ScopedEntity(object):
+        @sealed
         def __init__(self, parentScope, filename, lineno):
             self._scope = parentScope
             self._filename = filename
@@ -102,6 +107,7 @@ class SymbolData(object):
             self._scope.insertIntoScope(None, self)
 
     class _CppEntity(ScopedEntity):
+        @sealed
         def __init__(self, parentScope, name, filename, lineno):
             SymbolData.ScopedEntity.__init__(self, parentScope, filename, lineno)
             self._name = name
@@ -121,6 +127,7 @@ class SymbolData(object):
             return self.format()
             
     class Enum(_CppEntity):
+        @sealed
         def __init__(self, parentScope, name, filename, lineno):
             SymbolData._CppEntity.__init__(self, parentScope, name, filename, lineno)
             self._enumerators = []
@@ -149,6 +156,7 @@ class SymbolData(object):
             return ''.join(accu)
             
     class Enumerator(object):
+        @sealed
         def __init__(self,name,value):
             self._name = name
             self._value = value
@@ -160,6 +168,7 @@ class SymbolData(object):
                 return self._name + "=" + self._value
 
     class CppClass(Scope, _CppEntity):
+        @sealed
         def __init__(self,parentScope, name, filename, lineno):
             SymbolData.Scope.__init__(self)
             SymbolData._CppEntity.__init__(self, parentScope, name, filename, lineno)
@@ -209,6 +218,7 @@ class SymbolData(object):
             return ''.join(accu)
 
     class Argument(object):
+        @sealed
         def __init__(self, argumentType, argumentName = None, argumentValue = None, template = None, defaultTypes = None):
             self._argumentType = argumentType
             self._argumentName = argumentName
@@ -224,6 +234,7 @@ class SymbolData(object):
             
     class Variable(_CppEntity):
         """Represents a single variable declaration."""
+        @sealed
         def __init__(self,parentScope, name, filename, lineno):
             SymbolData._CppEntity.__init__(self, parentScope, name, filename, lineno)
             self._storage = None
@@ -243,6 +254,7 @@ class SymbolData(object):
 
     class Function(_CppEntity):
         """Represents a C++ function or method if the parent scope is a class."""
+        @sealed
         def __init__(self,parentScope, name, filename, lineno):
             SymbolData._CppEntity.__init__(self, parentScope, name, filename, lineno)
             self._return = None
@@ -297,6 +309,7 @@ class SymbolData(object):
 
     class Constructor(Function):
         """Represents a constructor."""
+        @sealed
         def __init__(self,parentScope, name, filename, lineno):
             SymbolData.Function.__init__(self, parentScope, name, filename, lineno)
 
@@ -316,6 +329,7 @@ class SymbolData(object):
             
     class Destructor(Function):
         """Represents a destructor."""
+        @sealed
         def __init__(self,parentScope, name, filename, lineno):
             SymbolData.Function.__init__(self, parentScope, name, filename, lineno)
 
@@ -325,6 +339,7 @@ class SymbolData(object):
             return pre + storage + "~" + self._name + "();\n"
             
     class Typedef(Scope,_CppEntity):
+        @sealed
         def __init__(self,parentScope, name, filename, lineno):
             SymbolData.Scope.__init__(self)
             SymbolData._CppEntity.__init__(self, parentScope, name, filename, lineno)
@@ -344,6 +359,7 @@ class SymbolData(object):
                 return pre + "typedef\n" + " " + contents
                 
     class Macro(object):
+        @sealed
         def __init__(self, name):
             self._name = name
             
@@ -351,6 +367,7 @@ class SymbolData(object):
             return self._name
         
     class ScopedMacro(_CppEntity):
+        @sealed
         def __init__(self,parentScope, name, filename, lineno):
             SymbolData._CppEntity.__init__(self, parentScope, name, filename, lineno)
             self._argument = None

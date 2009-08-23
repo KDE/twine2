@@ -15,14 +15,16 @@
 # along with this program; if not, write to the
 # Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-
+from sealed import sealed
 import cppsymboldata
 
 class SymbolData(cppsymboldata.SymbolData):
+    @sealed
     def __init__(self):
         cppsymboldata.SymbolData.__init__(self)
 
     class _SipEntityExtra(object):
+        @sealed
         def __init__(self):
             self._annotations = None
             self._blocks = []
@@ -50,6 +52,7 @@ class SymbolData(cppsymboldata.SymbolData):
                 return ""
             
     class SipClass(cppsymboldata.SymbolData.CppClass, _SipEntityExtra):
+        @sealed
         def __init__(self,parentScope, name, filename, lineno):
             cppsymboldata.SymbolData.CppClass.__init__(self, parentScope, name, filename, lineno)
             SymbolData._SipEntityExtra.__init__(self)
@@ -89,6 +92,7 @@ class SymbolData(cppsymboldata.SymbolData):
             return ''.join(accu)
 
     class Argument(cppsymboldata.SymbolData.Argument):
+        @sealed
         def __init__(self, argumentType, argumentName = None, argumentValue = None, template = None, defaultTypes = None):
             cppsymboldata.SymbolData.Argument.__init__(self, argumentType, argumentName, argumentValue, template, defaultTypes)
             self._annotations = None
@@ -105,6 +109,7 @@ class SymbolData(cppsymboldata.SymbolData):
                 ("" if self._defaultValue is None else " = "+self._defaultValue)
 
     class Function(cppsymboldata.SymbolData.Function, _SipEntityExtra):
+        @sealed
         def __init__(self, parentScope, name, filename, lineno):
             cppsymboldata.SymbolData.Function.__init__(self,parentScope,name,filename,lineno)
             SymbolData._SipEntityExtra.__init__(self)
@@ -119,6 +124,7 @@ class SymbolData(cppsymboldata.SymbolData):
                 ''.join( (block.format(indent) for block in self._blocks))
 
     class Constructor(cppsymboldata.SymbolData.Constructor, _SipEntityExtra):
+        @sealed
         def __init__(self, parentScope, name, filename, lineno):
             cppsymboldata.SymbolData.Constructor.__init__(self,parentScope,name,filename,lineno)
             SymbolData._SipEntityExtra.__init__(self)
@@ -127,6 +133,7 @@ class SymbolData(cppsymboldata.SymbolData):
             return self._formatIgnore(indent) + cppsymboldata.SymbolData.Constructor.format(self,indent)
             
     class Destructor(cppsymboldata.SymbolData.Destructor, _SipEntityExtra):
+        @sealed
         def __init__(self, parentScope, name, filename, lineno):
             cppsymboldata.SymbolData.Destructor.__init__(self,parentScope,name,filename,lineno)
             SymbolData._SipEntityExtra.__init__(self)
@@ -135,6 +142,7 @@ class SymbolData(cppsymboldata.SymbolData):
             return self._formatIgnore(indent) + cppsymboldata.SymbolData.Destructor.format(self,indent)
             
     class Variable(cppsymboldata.SymbolData.Variable, _SipEntityExtra):
+        @sealed
         def __init__(self, parentScope, name, filename, lineno):
             cppsymboldata.SymbolData.Variable.__init__(self,parentScope,name,filename,lineno)
             SymbolData._SipEntityExtra.__init__(self)
@@ -143,6 +151,7 @@ class SymbolData(cppsymboldata.SymbolData):
             return self._formatIgnore(indent) + cppsymboldata.SymbolData.Variable.format(self,indent)
 
     class SipBlock(object):
+        @sealed
         def __init__(self, name):
             self._name = name
             self._body = None
@@ -155,11 +164,13 @@ class SymbolData(cppsymboldata.SymbolData):
             return self._body + '\n'
 
     class SipDirective(cppsymboldata.SymbolData.ScopedEntity, SipBlock):
+        @sealed
         def __init__(self, parentScope, name, filename, lineno):
             cppsymboldata.SymbolData.ScopedEntity.__init__(self, parentScope, filename, lineno)
             SymbolData.SipBlock.__init__(self, name)
             
     class Comment(cppsymboldata.SymbolData.ScopedEntity):
+        @sealed
         def __init__(self, parentScope, filename, lineno):
             cppsymboldata.SymbolData.ScopedEntity.__init__(self, parentScope, filename, lineno)
             self._comment = None
@@ -171,6 +182,7 @@ class SymbolData(cppsymboldata.SymbolData):
             return self._comment
 
     class Template(cppsymboldata.SymbolData._CppEntity,cppsymboldata.SymbolData.Scope):
+        @sealed
         def __init__(self, parentScope, filename, lineno):
             cppsymboldata.SymbolData._CppEntity.__init__(self, parentScope, None, filename, lineno)
             cppsymboldata.SymbolData.Scope.__init__(self)
@@ -188,11 +200,13 @@ class SymbolData(cppsymboldata.SymbolData):
             return pre + 'template <' + self._parameters + '>\n' + cppsymboldata.SymbolData.Scope.format(self,indent)
             
     class SipType(cppsymboldata.SymbolData.ScopedEntity, SipBlock):
+        @sealed
         def __init__(self, parentScope, filename, lineno):
             cppsymboldata.SymbolData.ScopedEntity.__init__(self, parentScope, filename, lineno)
             SymbolData.SipBlock.__init__(self, None)
 
     class Enum(cppsymboldata.SymbolData.Enum):
+        @sealed
         def __init__(self, parentScope, name, filename, lineno):
             cppsymboldata.SymbolData.Enum.__init__(self, parentScope, name, filename, lineno)
 
@@ -225,8 +239,8 @@ class SymbolData(cppsymboldata.SymbolData):
             accu.append("};\n")
             return ''.join(accu)
         
-
     class EnumeratorComment(object):
+        @sealed
         def __init__(self,body):
             self._body = body
             

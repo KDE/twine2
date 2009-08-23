@@ -18,6 +18,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 import sys
+from sealed import sealed
 import ply.yacc as yacc
 from siplexer import sipLexer, tokens, setStateInfoTarget
 
@@ -25,11 +26,12 @@ class SipParser(object):
     """Parser for SIP files
     
     See parse()."""
-    
+    @sealed
     def __init__ (self):
         """Create a new parser instance."""
         self.lexer = sipLexer
         self.lexer.begin('variable')
+        self._resetState()
 
         self.tokens = tokens        
         yacc.yacc(module = self, tabmodule = "sipParserTab")
@@ -45,10 +47,11 @@ class SipParser(object):
 
         self.inTemplate = None
         self.lexState = 'variable'
-        self.test = []
         self.currentClass = None
         self.currentFunction = None
         self.currentEnum = None
+        self.currentTypedef = None
+        self.exprElements = None
         self.arguments = []
         self.annotation = []
         self.versionLow = ""
@@ -58,6 +61,9 @@ class SipParser(object):
         self.templateParams = []
         self.template = None
         self.inTypedef = False
+        self.symbolData = None
+        self.scope = None
+        self.filename = None
         
     def parse(self, symbolData, text, filename=None, debugLevel = 0):
         """Parse the given SIP text
@@ -79,7 +85,6 @@ class SipParser(object):
         self.symbolData = symbolData
         self.scope = self.symbolData.topScope()
         
-        self.test = []
         self.filename = filename
         sipLexer.input (text)
         sipLexer.lineno = 1

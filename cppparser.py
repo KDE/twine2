@@ -19,11 +19,13 @@
 
 import sys
 import re
+from sealed import sealed
 import ply.yacc as yacc
 import cpplexer
 import pplexer
 
 class CppParser(object):
+    @sealed
     def __init__(self):
         self.lexer = cpplexer.CppLexer()
         self.lexer.begin('variable')
@@ -42,6 +44,8 @@ class CppParser(object):
         self.currentFunction = None
         self.currentEnum = None
         self.currentClass = None
+        self.currentTypedef = None
+        self.exprElement = None
         self.inTypedef = False
 
         self.arguments      = []
@@ -50,6 +54,8 @@ class CppParser(object):
         self.inline         = False
         self.template       = None
         self.exprElements   = []
+        self.symbolData = None
+        self.scope = None
         
     def setBareMacros(self,macroList):
         self.lexer.lexmodule.setBareMacros(macroList)

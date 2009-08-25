@@ -325,6 +325,15 @@ typedef QFlags<KCrash::CrashFlag> CrashFlags;
 """)
         print(self.syms.topScope().format())
 
+    def testTypedef4(self):
+        self.parser.parse(self.syms,
+"""
+//ig typedef foo bar;
+"""
+        )
+        print(self.syms.topScope().format())
+        
+
     def testSipDirective1(self):
         self.parser.parse(self.syms,
             """

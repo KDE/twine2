@@ -246,3 +246,12 @@ class SymbolData(cppsymboldata.SymbolData):
             
         def format(self):
             return self._body
+
+    class Typedef(cppsymboldata.SymbolData.Typedef, _SipEntityExtra):
+        @sealed
+        def __init__(self,parentScope, name, filename, lineno):
+            cppsymboldata.SymbolData.Typedef.__init__(self,parentScope, name, filename, lineno)
+            SymbolData._SipEntityExtra.__init__(self)
+            
+        def format(self,indent=0):
+            return self._formatIgnore(indent) + cppsymboldata.SymbolData.Typedef.format(self,indent)

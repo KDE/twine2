@@ -149,6 +149,7 @@ class SipParser(object):
     def typedefObject(self, typeName, newName):
         tdObj = self.symbolData.Typedef(self.scope, newName, self.filename, self.lexer.lineno)
         tdObj.setArgumentType(typeName)
+        tdObj.setIgnore(self.ignore)
 #        if typeName.startswith('QFlags<'):
 #            tdObj.template = Template('QFlags', typeName [7:-1])
 #       else:

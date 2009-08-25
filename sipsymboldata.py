@@ -130,8 +130,14 @@ class SymbolData(cppsymboldata.SymbolData):
             SymbolData._SipEntityExtra.__init__(self)
             
         def format(self,indent=0):
-            return self._formatIgnore(indent) + cppsymboldata.SymbolData.Constructor.format(self,indent)
+            annotations = ""
+            if self._annotations is not None and len(self._annotations)!=0:
+                annotations = ' /' + ', '.join(self._annotations) + '/'
             
+            return self._formatIgnore(indent) + cppsymboldata.SymbolData.Constructor.format(self,indent)[:-2] + \
+                annotations + ";\n" + \
+                ''.join( (block.format(indent) for block in self._blocks))
+
     class Destructor(cppsymboldata.SymbolData.Destructor, _SipEntityExtra):
         @sealed
         def __init__(self, parentScope, name, filename, lineno):
@@ -139,7 +145,13 @@ class SymbolData(cppsymboldata.SymbolData):
             SymbolData._SipEntityExtra.__init__(self)
             
         def format(self,indent=0):
-            return self._formatIgnore(indent) + cppsymboldata.SymbolData.Destructor.format(self,indent)
+            annotations = ""
+            if self._annotations is not None and len(self._annotations)!=0:
+                annotations = ' /' + ', '.join(self._annotations) + '/'
+            
+            return self._formatIgnore(indent) + cppsymboldata.SymbolData.Destructor.format(self,indent)[:-2] + \
+                annotations + ";\n" + \
+                ''.join( (block.format(indent) for block in self._blocks))
             
     class Variable(cppsymboldata.SymbolData.Variable, _SipEntityExtra):
         @sealed

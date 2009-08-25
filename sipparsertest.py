@@ -22,9 +22,9 @@
 import unittest
 import sipparser
 import sipsymboldata
-#import stateInfo
-
-#debug = False
+import os
+import os.path
+import subprocess
 
 class TestSipParser(unittest.TestCase):
     def setUp(self):
@@ -284,7 +284,7 @@ class TestSipParser(unittest.TestCase):
 
                 universe
             };
-            """,debugLevel=2)
+            """)
         print(self.syms.topScope().format())
 
     def testEnum3(self):
@@ -433,12 +433,27 @@ public:
 """)
         print(self.syms.topScope().format())
 
-
-    def testLiveAmmo(self):
-        with open("/home/sbe/devel/svn/kde/branches/KDE/4.3/kdebindings/python/pykde4/sip/kdecore/kurl.sip") as fhandle:
+    def testQtCoremod(self):
+        with open("/usr/share/sip/PyQt4/QtCore/QtCoremod.sip") as fhandle:
             text = fhandle.read()
         self.parser.parse(self.syms, text)
         print(self.syms.topScope().format())
+
+    def testFullCompare(self):
+        sipdir = "/home/sbe/devel/svn/kde/branches/KDE/4.3/kdebindings/python/pykde4/sip/kdecore/"
+        #sipdir = "/usr/share/sip/PyQt4/QtGui/"        
+        for filename in os.listdir(sipdir):
+             print(filename)
+             if filename.endswith(".sip"):
+                 filepath = os.path.join(sipdir,filename) 
+                 with open(filepath) as fhandle:
+                     text = fhandle.read()
+                     self.syms = sipsymboldata.SymbolData()
+                     self.parser.parse(self.syms, text)
+                     
+                     with open(filename+".v2",'w') as outhandle:
+                         outhandle.write(self.syms.topScope().format())
+                     subprocess.call(['diff','-dur',filepath,filename+".v2"])
 
 #        self.parser = sipparser.SipParser()
 

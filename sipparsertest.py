@@ -78,6 +78,17 @@ class TestSipParser(unittest.TestCase):
             """)
         print(self.syms.topScope().format())
 
+    def testClass7(self):
+        self.parser.parse(self.syms,
+            """
+            class Foo {
+                private:
+                    Foo(int x);
+                public:
+                    Foo();
+            };
+            """)
+        print(self.syms.topScope().format())
 
     def testOpaqueClass(self):
         self.parser.parse(self.syms,

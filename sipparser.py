@@ -1083,7 +1083,7 @@ class SipParser(object):
             template.setParameters(self.inTemplate)
             self.scope = template   # This is a bit of ugly to make the class appear inside the template scope.
             self.symbolData.SipType(self.scope, self.filename, self.lexer.lineno)
-            self.inTemplate = []
+            self.inTemplate = None
                 
     def p_cmodule (self, p):
         """cmodule : PERCENT CModule ID

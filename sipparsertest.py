@@ -433,6 +433,22 @@ public:
 """)
         print(self.syms.topScope().format())
 
+    def testMappedType2(self):
+        self.parser.parse(self.syms,
+"""
+template <TYPE1,TYPE2>
+%MappedType QMap<TYPE1,TYPE2>
+{
+
+};
+
+class Foo {
+
+};
+""")
+        print(self.syms.topScope().format())
+
+
     def testQtCoremod(self):
         with open("/usr/share/sip/PyQt4/QtCore/QtCoremod.sip") as fhandle:
             text = fhandle.read()

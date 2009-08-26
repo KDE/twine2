@@ -1042,7 +1042,7 @@ class SipParser(object):
         
     def p_template_decl (self, p):
         'template_decl : template LT template_param_list GT'
-        self.inTemplate = ', '.join (self.templateParams)
+        self.inTemplate = ','.join (self.templateParams)
         self.templateParams = []
 
 ##    def p_template_decl (self, p):

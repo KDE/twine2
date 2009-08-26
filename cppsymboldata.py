@@ -291,10 +291,10 @@ class SymbolData(object):
                 
             ret = self._return.format()
             accu.append(ret)
-            if (len(ret)+chars) < RETURN_INDENT:
+            if (len(ret)+chars) < (RETURN_INDENT-1):
                 accu.append(' ' * (RETURN_INDENT-len(ret)-chars))
             else:
-                accu.append(" ")
+                accu.append("  ")
                 
             accu.append(self._name)
             accu.append(" (")
@@ -319,8 +319,10 @@ class SymbolData(object):
             ret = (self._storage+" " if self._storage is not None else "") + \
                 ("explicit " if 'explicit' in self._qualifier else "")
             accu.append(ret)
-            if len(ret)<RETURN_INDENT:
+            if len(ret) < (RETURN_INDENT-1):
                 accu.append(' ' * (RETURN_INDENT-len(ret)))
+            else:
+                accu.append("  ")
             accu.append(self._name)
             accu.append(" (")
             accu.append(', '.join( (arg.format() for arg in self._arguments) ))

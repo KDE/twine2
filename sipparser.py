@@ -667,10 +667,10 @@ class SipParser(object):
         'typedef_function_ptr : typedef pointer_to_function'
         ptrType, name, args = p[2].split('|', 2)
         typedefObj = self.typedefObject(ptrType, name)
-        if args:
-            typedefObj.functionPtr = args.split (',')
-        else:
-            typedefObj.functionPtr = ['()']
+#        if args:
+#            typedefObj.functionPtr = args.split (',')
+#        else:
+#            typedefObj.functionPtr = ['()']
         self.inTypedef = True
         
     def p_array_variable (self, p):

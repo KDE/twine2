@@ -234,6 +234,13 @@ class TestSipParser(unittest.TestCase):
             void DontIgnoreThisFoo2();
             """)
         print(self.syms.topScope().format())
+        
+    def testOpaqueClassIgnore(self):
+        self.parser.parse(self.syms,
+            """
+            //ig class Foo;
+            """)
+        print(self.syms.topScope().format())
 
     def testOperator1(self):
         self.parser.parse(self.syms,

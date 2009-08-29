@@ -60,7 +60,11 @@ class SymbolData(cppsymboldata.SymbolData):
         def format(self,indent=0):
             pre = SymbolData._indentString(indent)
             accu = []
-            accu.append(pre)
+            
+            if self._ignore:
+                accu.append(self._formatIgnore(indent))
+            else:
+                accu.append(pre)
             accu.append("class ")
             
             accu.append(self._name)

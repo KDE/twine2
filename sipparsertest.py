@@ -241,6 +241,14 @@ class TestSipParser(unittest.TestCase):
             //ig class Foo;
             """)
         print(self.syms.topScope().format())
+        
+    def testTypedefIgnore(self):
+        self.parser.parse(self.syms,
+"""
+//ig    typedef QList<KProtocolInfo::Ptr> List;                                                                    
+    static QStringList      protocols ();                                                                          
+""")
+        print(self.syms.topScope().format())
 
     def testOperator1(self):
         self.parser.parse(self.syms,

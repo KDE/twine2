@@ -96,7 +96,7 @@ class SymbolData(object):
             
         def format(self,indent=0):
             pre = SymbolData._indentString(indent)
-            return pre + "namespace " + self._name + " {\n" + SymbolData.Scope.format(self,indent+1) + pre + "};\n"
+            return pre + "namespace " + self._name + "\n"+pre+"{\n" + SymbolData.Scope.format(self,indent) + pre + "};\n"
 
     class ScopedEntity(object):
         @sealed

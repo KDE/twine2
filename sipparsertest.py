@@ -25,80 +25,74 @@ import sipsymboldata
 import os
 import os.path
 import subprocess
+import re
+
+def CleanWhitespace(code):
+    return re.sub(r"\s+"," ",code).strip()
 
 class TestSipParser(unittest.TestCase):
     def setUp(self):
         self.parser = sipparser.SipParser()
         self.syms = sipsymboldata.SymbolData()
+        
+    def mirrorTest(self,code):
+        self.parser.parse(self.syms, code);
+        new_code = self.syms.topScope().format()
+        if CleanWhitespace(new_code)!=CleanWhitespace(code):
+            self.fail("Output code doesn't match input code.\n---- Original:\n" + code + "\n---- Result:" + new_code)
 
     def testClass0(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             class Foo {
             };
             """)
-        print(self.syms.topScope().format())
 
     def testClass1(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             class Foo {
-                Foo();
+                Foo ();
             };
             """)
-        print(self.syms.topScope().format())
-
-    def testClass2(self):
-        self.parser.parse(self.syms,
-            """
-            class Foo {
-                public:
-            };""")
-        print(self.syms.topScope().format())
 
     def testClass3(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             class Foo : Bar {
             };""")
-        print(self.syms.topScope().format())
 
     def testClass5(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             class Foo : Bar, Zyzz {
             };""")
-        print(self.syms.topScope().format())
 
     def testClass6(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             class Foo /Abstract/ {
             };
             """)
-        print(self.syms.topScope().format())
 
     def testClass7(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             class Foo {
-                private:
-                    Foo(int x);
+                    Foo (int x);
                 public:
-                    Foo();
+                    Foo ();
             };
             """)
-        print(self.syms.topScope().format())
 
     def testOpaqueClass(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             class OpaqueFoo;
             """)
-        print(self.syms.topScope().format())
 
     def testClassVariable(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             class Foo {
                 public:
@@ -108,178 +102,156 @@ class TestSipParser(unittest.TestCase):
                 protected:
                     int protected_z;
             };""")
-        print(self.syms.topScope().format())
 
     def testClassVariable2(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             class Foo {
                 public:
-                    int x=0;
+                    int x = 0;
             };""")
-        print(self.syms.topScope().format())
 
     def testClassVariable3(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             class Foo {
                 static int x;
                 const int y;
             };""")
-        print(self.syms.topScope().format())
 
     def testClassConstructor2(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             class Foo {
-                Foo(int x,int y);
+                Foo (int x, int y);
             };""")
-        print(self.syms.topScope().format())
 
     def testClassConstructor3(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             class Foo {
-                explicit Foo(int x);
+                explicit Foo (int x);
             };""")
-        print(self.syms.topScope().format())
 
     def testClassDestructor1(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             class Foo {
-                ~Foo();
+                ~Foo ();
             };""")
-        print(self.syms.topScope().format())
 
     def testClassMethod(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             class Foo {
-                int getFooValue(int x);
+                int getFooValue (int x);
             };""")
-        print(self.syms.topScope().format())
 
     def testClassVirtualMethod(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             class Foo {
-                virtual int getFooValue(int x);
+                virtual int getFooValue (int x);
             };""")
-        print(self.syms.topScope().format())
 
     def testClassPureVirtualMethod(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             class Foo {
-                virtual int getFooValue(int x)=0;
+                virtual int getFooValue (int x)=0;
             };""")
-        print(self.syms.topScope().format())
 
     def testFunctions(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """
-            int DoFoo(int x);
-            void StopFoo();
+            int DoFoo (int x);
+            void StopFoo ();
             """)
-        print(self.syms.topScope().format())
 
     def testFunctions2(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """
-            const int *DoFoo(int x);
+            const int* DoFoo (int x);
             """)
-        print(self.syms.topScope().format())
 
     def testFunctions3(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """
-            QString& FooConst() const;
+            QString& FooConst () const;
             """)
-        print(self.syms.topScope().format())
 
     def testFunctions4(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """
-            void Foo(unsigned long x);
+            void Foo (unsigned long x);
             """)
-        print(self.syms.topScope().format())
 
     def testFunctions5(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """
-            void Foo(long x[5]);
+            void Foo (long x [5]);
             """)
-        print(self.syms.topScope().format())
 
     def testFunctions6(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             void* foo (int, double (*doublePtr)(float, QString*));
             """)
-        print(self.syms.topScope().format())
 
     def testFunctions7(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """
-            int DoFoo(int *x /Out/);
+            int DoFoo (int* x /Out/);
             """)
-        print(self.syms.topScope().format())
 
     def testFunctionIgnore(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """
-            void DontIgnoreThisFoo();
-            //ig int DoIgnoreMeFoo(int x);
-            void DontIgnoreThisFoo2();
+            void DontIgnoreThisFoo ();
+            //ig int DoIgnoreMeFoo (int x);
+            void DontIgnoreThisFoo2 ();
             """)
-        print(self.syms.topScope().format())
         
     def testOpaqueClassIgnore(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             //ig class Foo;
             """)
-        print(self.syms.topScope().format())
         
     def testTypedefIgnore(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
 """
 //ig    typedef QList<KProtocolInfo::Ptr> List;                                                                    
     static QStringList      protocols ();                                                                          
 """)
-        print(self.syms.topScope().format())
 
     def testOperator1(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             class Foo {
                 bool operator == (int);
             };
             """)
-        print(self.syms.topScope().format())
 
     def testOperator2(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             class Foo {
                 virtual bool operator == (int);
             };
             """)
-        print(self.syms.topScope().format())
 
     def testNamespace(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             namespace FooSpace {
-                int DoFoo(int x);
-                void StopFoo();
+                int DoFoo (int x);
+                void StopFoo ();
             };
             """)
-        print(self.syms.topScope().format())
 
     def testEnum(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             enum global {
                 earth,
@@ -287,10 +259,9 @@ class TestSipParser(unittest.TestCase):
                 globe
             };
             """)
-        print(self.syms.topScope().format())
 
     def testEnum2(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             enum global {
                 earth,
@@ -300,10 +271,9 @@ class TestSipParser(unittest.TestCase):
                 universe
             };
             """)
-        print(self.syms.topScope().format())
 
     def testEnum3(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             enum global {
 
@@ -318,10 +288,9 @@ class TestSipParser(unittest.TestCase):
                 // le fin
             };
             """)
-        print(self.syms.topScope().format())
 
     def testEnumAnonymous(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             enum {
                 earth,
@@ -329,39 +298,32 @@ class TestSipParser(unittest.TestCase):
                 globe
             };
             """)
-        print(self.syms.topScope().format())
 
     def testTypedef1(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             typedef QString& stringref;
             """)
-        print(self.syms.topScope().format())
     
     def testTypedef2(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """typedef QObject** objPtrPtr;
             """)
-        print(self.syms.topScope().format())
 
     def testTypedef3(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
 """
 typedef QFlags<KCrash::CrashFlag> CrashFlags;
 """)
-        print(self.syms.topScope().format())
 
     def testTypedef4(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
 """
 //ig typedef foo bar;
-"""
-        )
-        print(self.syms.topScope().format())
-        
+""")
 
     def testSipDirective1(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """
 class Foo {
     %TypeHeaderCode
@@ -369,52 +331,46 @@ class Foo {
     %End
 };
 """)
-        print(self.syms.topScope().format())
 
     def testMethodCode1(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """
-int DoFoo(int x);
+int DoFoo (int x);
 %MethodCode
 // Method code is here.
 
 // Ends here.
 %End
 """)
-        print(self.syms.topScope().format())
 
     def testTemplate(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             QList<int> intlist;
             """)
-        print(self.syms.topScope().format())
 
     def testLineComment1(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
 """
 // Just a line comment.
 """)
-        print(self.syms.topScope().format())
 
     def testLineComment2(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
 """
 /* Just a C comment. */
 """)
-        print(self.syms.topScope().format())
 
     def testBlankLine(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
 """
 // Start, then blank
   
 // End
 """)
-        print(self.syms.topScope().format())
 
     def testBlankLine2(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
 """
 class Foo {
 %ConvertToSubClassCode
@@ -424,21 +380,19 @@ class Foo {
 %End
 };
 """)
-        print(self.syms.topScope().format())
 
     def testTemplate(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
 """
 template <Bar>
 class Foo {
 public:
-    static QString deref(Bar i);
+    static QString deref (Bar i);
 };
 """)
-        print(self.syms.topScope().format())
 
     def testMappedType(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
 """
 %MappedType QMap<Foo,Bar>
 {
@@ -446,10 +400,9 @@ public:
 };
 
 """)
-        print(self.syms.topScope().format())
 
     def testMappedType2(self):
-        self.parser.parse(self.syms,
+        self.mirrorTest(
 """
 template <TYPE1,TYPE2>
 %MappedType QMap<TYPE1,TYPE2>
@@ -461,16 +414,21 @@ class Foo {
 
 };
 """)
-        print(self.syms.topScope().format())
 
+    def testCppSigs1(self):
+        self.mirrorTest("""
+class Foo {
+        ItemDouble (const QString& _group, const QString& _key, double reference, double defaultValue = 0) [(const QString& _group, const QString& _key, double& reference, double defaultValue = 0)];         
+};
+""")
 
-    def testQtCoremod(self):
+    def xtestQtCoremod(self):
         with open("/usr/share/sip/PyQt4/QtCore/QtCoremod.sip") as fhandle:
             text = fhandle.read()
         self.parser.parse(self.syms, text)
         print(self.syms.topScope().format())
 
-    def testFullCompare(self):
+    def xtestFullCompare(self):
         sipdir = "/home/sbe/devel/svn/kde/branches/KDE/4.3/kdebindings/python/pykde4/sip/kdecore/"
         #sipdir = "/usr/share/sip/PyQt4/QtGui/"        
         for filename in os.listdir(sipdir):
@@ -484,7 +442,7 @@ class Foo {
                      
                      with open(filename+".v2",'w') as outhandle:
                          outhandle.write(self.syms.topScope().format())
-                     subprocess.call(['diff','-dur',filepath,filename+".v2"])
+                     subprocess.call(['diff','-durb',filepath,filename+".v2"])
 
 #        self.parser = sipparser.SipParser()
 

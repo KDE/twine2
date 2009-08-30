@@ -338,7 +338,7 @@ class SymbolData(object):
         def format(self,indent=0):
             pre = SymbolData._indentString(indent)
             storage = self._storage+" " if self._storage is not None else ""
-            return pre + storage + "~" + self._name + "();\n"
+            return pre + storage + "~" + self._name + " ();\n"
             
     class Typedef(Scope,_CppEntity):
         @sealed

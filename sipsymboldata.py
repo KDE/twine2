@@ -29,6 +29,7 @@ class SymbolData(cppsymboldata.SymbolData):
             self._annotations = None
             self._blocks = []
             self._ignore = False
+            self._cppargs = None
             
         def isIgnore(self):
             return self._ignore
@@ -40,7 +41,7 @@ class SymbolData(cppsymboldata.SymbolData):
             self._annotations = annotations
             
         def setCppArgs(self,cppArgs):
-            pass
+            self._cppargs = cppArgs
 
         def addBlock(self, block):
             self._blocks.append(block)
@@ -50,7 +51,13 @@ class SymbolData(cppsymboldata.SymbolData):
                 return "//ig" + (" " if indent==0 else "")
             else:
                 return ""
-            
+                
+        def _formatCppArgs(self):
+            if self._cppargs is not None:
+                return " [(" + ", ".join(item.format() for item in self._cppargs) + ")]"
+            else:
+                return ""
+
     class SipClass(cppsymboldata.SymbolData.CppClass, _SipEntityExtra):
         @sealed
         def __init__(self,parentScope, name, filename, lineno):
@@ -139,7 +146,7 @@ class SymbolData(cppsymboldata.SymbolData):
                 annotations = ' /' + ', '.join(self._annotations) + '/'
             
             return self._formatIgnore(indent) + cppsymboldata.SymbolData.Constructor.format(self,indent)[:-2] + \
-                annotations + ";\n" + \
+                annotations + self._formatCppArgs() + ";\n" + \
                 ''.join( (block.format(indent) for block in self._blocks))
 
     class Destructor(cppsymboldata.SymbolData.Destructor, _SipEntityExtra):

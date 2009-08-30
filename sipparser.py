@@ -52,7 +52,6 @@ class SipParser(object):
         self.currentEnum = None
         self.currentTypedef = None
         self.exprElements = None
-        self.arguments = []
         self.annotation = []
         self.versionLow = ""
         self.versionHigh = ""
@@ -174,7 +173,6 @@ class SipParser(object):
         self._pushScope(vObj)
         
         self.template = None
-        self.arguments = []
         self.annotation = []
         self.ignore = False
         return vObj
@@ -190,39 +188,26 @@ class SipParser(object):
             functionObj.setReturn(returnArg)
         functionObj.setAccess(self.access)
         functionObj.setIgnore(self.ignore)
+        self.ignore = False
         
         self.currentFunction = functionObj
         
         #functionObj.templateParams = self.stateInfo.inTemplate
         #self.inTemplate = []
-        self.ignore = False
         self.lexer.begin ('function')
         return functionObj
         
     def argument(self, argumentType, argumentName = None, argumentValue = None, annotation = []):
-        self.arguments.append ((argumentType, argumentName, argumentValue, annotation, None, None))
-        self.template = None
-        self.exprElements = []
-        return self.arguments
+        return (argumentType, argumentName, argumentValue, annotation, None, None)
 
-    def argumentList(self):
+    def argumentList(self,arguments):
         instanceList = []
-        for argTuple in self.arguments:
+        for argTuple in arguments:
             vtype, name, init, annotation, template, exprElements = argTuple
             arg = self.symbolData.Argument(vtype, name, init, template)
             arg.setAnnotations(annotation)
             instanceList.append(arg)
         return instanceList
-
-
-    def setArguments(self, cpp = False, ctor = False):
-        if not cpp:
-            self.currentFunction.setArguments(self.argumentList())
-        else:
-            self.currentFunction.setCppArgs(self.arguments)
-        self.currentFunction.setAnnotations(self.annotation)
-        self.arguments  = []
-        self.annotation = []
 
     def sipBlockObject(self, name):
         blockObj = self.symbolData.SipBlock(name)
@@ -279,7 +264,6 @@ class SipParser(object):
         #self.stateInfo.lexState  = 'variable'
         #self.stateInfo.inTypedef = False
         #self.stateInfo.ignore    = self.ignore           
-        #self.arguments  = []
         #self.annotation = []
     
     def p_member_comment (self, p):
@@ -367,7 +351,6 @@ class SipParser(object):
         self.lexState  = 'variable'
         self.inTypedef = False
         self.ignore    = self.ignore          
-        self.arguments  = []
         self.template   = None
         
     def p_class_member_comment (self, p):
@@ -725,15 +708,17 @@ class SipParser(object):
                               
     def p_argument_list0 (self, p):
         """argument_list : argument_specifier"""
-        p [0] = [p [1]]
+        p [0] = [p[1]]
         
     def p_argument_list1 (self, p):
-        """argument_list : argument_list COMMA argument_specifier
-                         | argument_list COMMA type_specifier"""
-        if p [0]:
-            p [0].append (p [3])
-        else:
-            p [0] = [p [3]]
+        """argument_list : argument_list COMMA argument_specifier"""
+        p[0] = p[1]
+        p[1].append(p[3])
+            
+    def p_argument_list2 (self, p):
+        """argument_list : argument_list COMMA type_specifier"""
+        p[0] = p[1]
+        p[1].append(self.argument(p[3]))
             
     def p_exception_element (self, p):
         'exception_element : qualified_id'
@@ -751,14 +736,14 @@ class SipParser(object):
     def p_variable_decl0 (self, p):
         """variable_decl : argument_specifier SEMI
                          | argument_specifier annotation SEMI"""
-        vtype, name, init = p[1][0][:3]
+        vtype, name, init = p[1][:3]
         self.variableObject(name, vtype, init)
         self._popScope()
-                         
+
     def p_variable_decl1 (self, p):
         """variable_decl : STORAGE argument_specifier SEMI
                          | STORAGE argument_specifier annotation SEMI"""
-        vtype, name, init = p[2][0][:3]                 
+        vtype, name, init = p[2][:3]                 
         varObj = self.variableObject(name, vtype, init) 
         varObj.setStorage(p[1])
         self._popScope()
@@ -766,12 +751,10 @@ class SipParser(object):
     def p_function_name0 (self, p):
         'function_name : type_specifier ID LPAREN'
         self.functionObject (p [2], p[1])
-        self.arguments = []
         
     def p_function_name1 (self, p):
         'function_name : STORAGE type_specifier ID LPAREN'
         fObj = self.functionObject (p [3], p[2])
-        self.arguments = []
         fObj.setStorage(p[1])
 
     def p_operator_pfx (self, p):
@@ -781,13 +764,11 @@ class SipParser(object):
     def p_cast_operator_name0 (self, p):
         'cast_operator_name : operator type_specifier LPAREN RPAREN'
         self.functionObject ('operator ' + p [2], p[2])
-        self.arguments  = []
         
     def p_cast_operator_name1 (self, p):
         'cast_operator_name : operator type_specifier LPAREN RPAREN CVQUAL'
         fObj = self.functionObject('operator ' + p [2], p[2])
         fObj.addQualifier(p[5])
-        self.arguments = []
         
     def p_operator_name (self, p):
         """operator_name : operator_pfx PLUS LPAREN
@@ -829,19 +810,24 @@ class SipParser(object):
                          | operator_pfx NE LPAREN"""
         n = len (p) - 1
         self.functionObject ('operator ' + "".join (p [2:n]), p[1])
-        self.arguments  = []
         
     def p_operator_primary0 (self, p):
-        """operator_primary : operator_name argument_list RPAREN
-                            | operator_name RPAREN
-                            | cast_operator_name"""
-        self.setArguments()
+        """operator_primary : operator_name argument_list RPAREN"""
+        self.currentFunction.setArguments(self.argumentList(p[2]))
 
     def p_operator_primary1 (self, p):
-        """operator_primary : virtual operator_name argument_list RPAREN
-                            | virtual operator_name RPAREN
+        """operator_primary : operator_name RPAREN
+                            | cast_operator_name"""
+        pass
+        
+    def p_operator_primary2 (self, p):
+        """operator_primary : virtual operator_name RPAREN
                             | virtual cast_operator_name"""
-        self.setArguments ()
+        self.currentFunction.addQualifier('virtual')
+
+    def p_operator_primary3 (self, p):
+        """operator_primary : virtual operator_name argument_list RPAREN"""
+        self.currentFunction.setArguments(self.argumentList(p[3]))
         self.currentFunction.addQualifier('virtual')
 
     def p_operator_stmt0 (self, p):
@@ -853,7 +839,10 @@ class SipParser(object):
                          | operator_primary exception cpp_args SEMI
                          | operator_primary annotation cpp_args  SEMI
                          | operator_primary exception annotation cpp_args SEMI"""
-        self.setArguments (True)
+
+
+        self.currentFunction.setAnnotations(self.annotation)
+        self.annotation = []
         
     def p_operator_stmt1 (self, p):
         """operator_stmt : operator_primary CVQUAL SEMI
@@ -864,28 +853,25 @@ class SipParser(object):
                          | operator_primary CVQUAL exception cpp_args SEMI
                          | operator_primary CVQUAL annotation cpp_args SEMI
                          | operator_primary CVQUAL exception annotation cpp_args SEMI"""
-        self.setArguments(True)
+        self.currentFunction.setAnnotations(self.annotation)
+        self.annotation = []
         self.currentFunction.addQualifier(p[2])
 
     def p_ctor_name0 (self, p):
         'ctor_name : ID LPAREN'
         self.functionObject(p[1], 'ctor')
-        self.arguments = []
         
     def p_ctor_name1 (self, p):
         'ctor_name : explicit ID LPAREN'
         fo = self.functionObject (p [2], 'ctor')
         fo.addQualifier('explicit')
-        self.arguments = []
 
     def p_dtor_name (self, p):
         'dtor_name : TILDE ID'
         self.functionObject(p [2], 'dtor')
-        self.arguments = []
         
     def p_virtual_dtor_name (self, p):
         'virtual_dtor_name : virtual dtor_name'
-        self.arguments = []
                             
     def p_function_decl (self, p):
         """function_decl : ctor_stmt
@@ -896,70 +882,93 @@ class SipParser(object):
                          | pure_virtual"""
         pass
                                  
-    def p_function_primary (self, p):
-        """function_primary : function_name RPAREN
-                            | function_name argument_list RPAREN"""
-                            
-        self.setArguments ()
-            
-    def p_function_primary (self, p):
-        """function_primary : function_name RPAREN
-                            | function_name argument_list RPAREN"""
-        self.setArguments()
+    def p_function_primary0(self, p):
+        """function_primary : function_name argument_list RPAREN"""
+        self.currentFunction.setArguments(self.argumentList(p[2]))
  
+    def p_function_primary1(self, p):
+        """function_primary : function_name RPAREN"""
+        pass
+
     def p_cpp_args (self, p):
         'cpp_args : LBRACKET type_specifier cpp_arg_list RBRACKET'
-        self.arguments.insert (0, (p [2], None, None, None, None, None))
         pass
+        #self.arguments.insert (0, (p [2], None, None, None, None, None))
         
-    def p_cpp_arg_list (self, p):
-        """cpp_arg_list : LPAREN argument_list RPAREN
-                        | LPAREN RPAREN"""
-        pass
+    def p_cpp_arg_list1 (self, p):
+        """cpp_arg_list : LPAREN argument_list RPAREN"""
+        p[0] = p[2]
+        
+    def p_cpp_arg_list2 (self, p):
+        """cpp_arg_list : LPAREN RPAREN"""
+        p[0] = []
         
     def p_cpp_ctor_args (self, p):
         'cpp_ctor_args : LBRACKET cpp_arg_list RBRACKET'
-        pass
+        p[0] = p[2]
                 
-    def p_function_stmt0 (self, p):
+    def p_function_stmt0(self, p):
         """function_stmt : function_primary stmt_end
                          | function_primary exception stmt_end
                          | function_primary annotation stmt_end
-                         | function_primary exception annotation stmt_end
-                         | function_primary cpp_args stmt_end
+                         | function_primary exception annotation stmt_end"""
+        self.currentFunction.setAnnotations(self.annotation)
+        self.annotation = []
+                         
+    def p_function_stmt1(self, p):
+        """function_stmt : function_primary cpp_args stmt_end
                          | function_primary exception cpp_args stmt_end
                          | function_primary annotation cpp_args stmt_end
                          | function_primary exception annotation cpp_args stmt_end"""
-        self.setArguments (True)
+        self.currentFunction.setAnnotations(self.annotation)
+        self.annotation = []
+        print(repr(p[-2]))
         
-    def p_function_stmt1 (self, p):
+    def p_function_stmt2(self, p):
         """function_stmt : function_primary CVQUAL stmt_end
                          | function_primary CVQUAL exception stmt_end
                          | function_primary CVQUAL annotation stmt_end
-                         | function_primary CVQUAL exception annotation stmt_end
-                         | function_primary CVQUAL cpp_args stmt_end
+                         | function_primary CVQUAL exception annotation stmt_end"""
+        self.currentFunction.addQualifier(p[2])
+        self.currentFunction.setAnnotations(self.annotation)
+        self.annotation = []
+                         
+    def p_function_stmt3(self, p):
+        """function_stmt : function_primary CVQUAL cpp_args stmt_end
                          | function_primary CVQUAL exception cpp_args stmt_end
                          | function_primary CVQUAL annotation cpp_args stmt_end
                          | function_primary CVQUAL exception annotation cpp_args stmt_end"""
         self.currentFunction.addQualifier(p[2])
-        self.setArguments (True)
+        self.currentFunction.setAnnotations(self.annotation)
+        self.annotation = []
+        print(repr(p[-2]))
         
-    def p_function_stmt2 (self, p):
+    def p_function_stmt4(self, p):
         'function_stmt : function_primary EQUALS ICONST stmt_end'
-        self.setArguments (True)
+        self.currentFunction.setAnnotations(self.annotation)
+        self.annotation = []
         self.currentFunction.addQualifier('virtual')
 
-    def p_ctor_primary (self, p):
-        """ctor_primary : ctor_name RPAREN
-                        | ctor_name argument_list RPAREN"""                        
-        self.setArguments(False, True)
+    def p_ctor_primary0(self, p):
+        """ctor_primary : ctor_name RPAREN"""
+        pass
+
+    def p_ctor_primary1(self, p):
+        """ctor_primary : ctor_name argument_list RPAREN"""
+        self.currentFunction.setArguments(self.argumentList(p[2]))
         
-    def p_ctor_stmt (self, p):
+    def p_ctor_stmt1 (self, p):
         """ctor_stmt : ctor_primary stmt_end
-                     | ctor_primary annotation stmt_end
-                     | ctor_primary cpp_ctor_args stmt_end
+                     | ctor_primary annotation stmt_end"""
+        self.currentFunction.setAnnotations(self.annotation)
+        self.annotation = []
+        
+    def p_ctor_stmt2 (self, p):
+        """ctor_stmt : ctor_primary cpp_ctor_args stmt_end
                      | ctor_primary annotation cpp_ctor_args stmt_end"""
-        self.setArguments (True, True)
+        self.currentFunction.setAnnotations(self.annotation)
+        self.annotation = []
+        self.currentFunction.setCppArgs(self.argumentList(p[-2]))
         
     def p_dtor_primary0 (self, p):
         'dtor_primary : dtor_name LPAREN RPAREN'
@@ -973,15 +982,20 @@ class SipParser(object):
         'dtor_stmt : dtor_primary stmt_end'
         pass
         
-    def p_virtual_primary (self, p):
+    def p_virtual_primary0(self, p):
         """virtual_primary : virtual function_name RPAREN
-                           | virtual function_name argument_list RPAREN
-                           | STORAGE virtual function_name RPAREN
-                           | STORAGE virtual function_name argument_list RPAREN"""
-        self.setArguments()
+                           | STORAGE virtual function_name RPAREN"""
         if p [1] != 'virtual':
             self.currentFunction.setStorage(p[1])
             
+    def p_virtual_primary1(self, p):
+        """virtual_primary : virtual function_name argument_list RPAREN
+                           | STORAGE virtual function_name argument_list RPAREN"""
+        if p[1] != 'virtual':
+            self.currentFunction.setStorage(p[1])
+            self.currentFunction.setArguments(self.argumentList(p[4]))
+        else:
+            self.currentFunction.setArguments(self.argumentList(p[3]))
         
     def p_virtual_stmt0 (self, p):
         """virtual_stmt : virtual_primary SEMI
@@ -1001,7 +1015,8 @@ class SipParser(object):
                         | virtual_primary exception annotation SEMI
                         | virtual_primary exception annotation cpp_args SEMI
                         | virtual_primary exception cpp_args SEMI"""
-        self.setArguments(True)
+        self.currentFunction.setAnnotations(self.annotation)
+        self.annotation = []
         self.currentFunction.addQualifier('virtual')
 
     def p_virtual_stmt3 (self, p):
@@ -1011,7 +1026,8 @@ class SipParser(object):
                         | virtual_primary CVQUAL exception annotation SEMI
                         | virtual_primary CVQUAL exception annotation cpp_args SEMI
                         | virtual_primary CVQUAL exception cpp_args SEMI"""
-        self.setArguments (True)
+        self.currentFunction.setAnnotations(self.annotation)
+        self.annotation = []
         self.currentFunction.addQualifier('virtual')
         self.currentFunction.addQualifier(p[2])
         
@@ -1020,7 +1036,8 @@ class SipParser(object):
                                | EQUALS ICONST annotation
                                | EQUALS ICONST annotation cpp_args
                                | EQUALS ICONST cpp_args"""
-        self.setArguments (True)
+        self.currentFunction.setAnnotations(self.annotation)
+        self.annotation = []
 
     def p_pure_virtual (self, p):
         """pure_virtual : virtual_primary pure_virtual_suffix SEMI

@@ -228,6 +228,15 @@ class SymbolData(object):
             #self._attributes = Attributes ()
             self._template = template           # the parsed info from any template-type argument
 
+        def argumentType(self):
+            return self._argumentType
+            
+        def name(self):
+            return self._argumentName
+            
+        def defaultValue(self):
+            return self._defaultValue
+
         def format(self):
             return self._argumentType + (" " + self._argumentName if self._argumentName is not None else "") + \
                 ("" if self._defaultValue is None else " = "+self._defaultValue)

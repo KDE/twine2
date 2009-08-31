@@ -615,31 +615,16 @@ class SipParser(object):
         'typedef_simple : typedef type_specifier ID'
         self.typedefObject(p [2], p [3])
         self.inTypedef = True
-                                        
-    def p_pointer_to_function_pfx (self, p):
-        """pointer_to_function_pfx : ASTERISK FUNCPTR
-                                   | type_specifier FUNCPTR"""
-        if p[1] == '*':
-            p [0] = '*%s' % p[2]
-        else:
-            p [0] = " ".join (p[1:])
-        
-    def p_pointer_to_function_name (self, p):
-        'pointer_to_function_name : pointer_to_function_pfx ID'
-        p [0] = "|".join ([p[1], p[2]])
         
     def p_pointer_to_function_args (self, p):
         """pointer_to_function_args : RPAREN LPAREN type_specifier_list
                                     | RPAREN LPAREN empty"""
         p [0] = p [3]
-        
-    def p_pointer_to_function (self, p):
-        'pointer_to_function : pointer_to_function_name pointer_to_function_args RPAREN'
-        if p [2]:
-            p [0] = "|".join ([p [1], p [2]])
-        else:
-            p [0] = "|".join ([p [1], ""])
                 
+    def p_pointer_to_function2(self, p):
+        """pointer_to_function : type_specifier FUNCPTR ID pointer_to_function_args RPAREN"""
+        p[0] = self.symbolData.FunctionArgument(p[3], p[1], p[4])
+
     def p_typedef_function_ptr (self, p):
         'typedef_function_ptr : typedef pointer_to_function'
         ptrType, name, args = p[2].split('|', 2)
@@ -675,8 +660,7 @@ class SipParser(object):
         
     def p_argument_specifier4 (self, p):
         'argument_specifier : pointer_to_function'
-        argType, name, args = p [1].split ('|', 2)
-        p [0] = self.argument ('$fp' + argType, name, args)
+        p[0] = p[1]
         
     def p_argument_specifier5 (self, p):
         'argument_specifier : type_specifier annotation'
@@ -829,8 +813,6 @@ class SipParser(object):
                          | operator_primary exception cpp_args SEMI
                          | operator_primary annotation cpp_args  SEMI
                          | operator_primary exception annotation cpp_args SEMI"""
-
-
         self.currentFunction.setAnnotations(self.annotation)
         self.annotation = []
         
@@ -883,7 +865,6 @@ class SipParser(object):
     def p_cpp_args (self, p):
         'cpp_args : LBRACKET type_specifier cpp_arg_list RBRACKET'
         pass
-        #self.arguments.insert (0, (p [2], None, None, None, None, None))
         
     def p_cpp_arg_list1 (self, p):
         """cpp_arg_list : LPAREN argument_list RPAREN"""

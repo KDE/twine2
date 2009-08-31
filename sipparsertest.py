@@ -195,7 +195,7 @@ class TestSipParser(unittest.TestCase):
     def testFunctions6(self):
         self.mirrorTest(
             """
-            void* foo (int, double (*doublePtr)(float, QString*));
+            void* foo (int, double (*doublePtr)(float,QString*));
             """)
 
     def testFunctions7(self):

@@ -119,6 +119,16 @@ class SymbolData(cppsymboldata.SymbolData):
                 annos + \
                 ("" if self._defaultValue is None else " = "+self._defaultValue)
 
+    class FunctionArgument(Argument):
+        @sealed
+        def __init__(self, argumentName, returnType, functionArguments):
+            SymbolData.Argument.__init__(self,None, argumentName)
+            self._returnType = returnType
+            self._functionArguments = functionArguments
+            
+        def format(self):
+            return self._returnType + " (*" + self._argumentName + ")("+self._functionArguments+")"
+
     class Function(cppsymboldata.SymbolData.Function, _SipEntityExtra):
         @sealed
         def __init__(self, parentScope, name, filename, lineno):

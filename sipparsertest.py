@@ -225,6 +225,15 @@ class TestSipParser(unittest.TestCase):
     static QStringList      protocols ();                                                                          
 """)
 
+    def testTypedefIgnore2(self):
+        self.mirrorTest("""
+class KLibrary : QLibrary
+{
+public:
+//ig     typedef void (* void_function_ptr)();
+};
+""")
+
     def testOperator1(self):
         self.mirrorTest(
             """

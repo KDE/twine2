@@ -315,15 +315,13 @@ class SymbolData(cppsymboldata.SymbolData):
             self._functionArgument = functionArgument
             
         def format(self,indent=0):
-            return self._formatIgnore(indent) + "typedef "+ self._functionArgument.format() + ";\n"
+            pre = SymbolData._indentString(indent)
+            return self._formatIgnore(indent) + pre + "typedef "+ self._functionArgument.format() + ";\n"
             
     class Namespace(cppsymboldata.SymbolData.Namespace):
         @sealed
         def __init__(self, parentScope, name, filename, lineno):
             cppsymboldata.SymbolData.Namespace.__init__(self, parentScope, name, filename, lineno)
-            
-        def format(self,indent=0):
-            pre = SymbolData._indentString(indent)
             
         def format(self,indent=0):
             pre = SymbolData._indentString(indent)

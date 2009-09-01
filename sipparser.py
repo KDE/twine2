@@ -616,10 +616,13 @@ class SipParser(object):
         self.typedefObject(p [2], p [3])
         self.inTypedef = True
         
-    def p_pointer_to_function_args (self, p):
-        """pointer_to_function_args : RPAREN LPAREN type_specifier_list
-                                    | RPAREN LPAREN empty"""
-        p [0] = p [3]
+    def p_pointer_to_function_args1(self, p):
+        """pointer_to_function_args : RPAREN LPAREN type_specifier_list"""
+        p[0] = p[3]
+                
+    def p_pointer_to_function_args2(self, p):
+        """pointer_to_function_args : RPAREN LPAREN empty"""
+        p[0] = ""
                 
     def p_pointer_to_function2(self, p):
         """pointer_to_function : type_specifier FUNCPTR ID pointer_to_function_args RPAREN"""
@@ -627,13 +630,15 @@ class SipParser(object):
 
     def p_typedef_function_ptr (self, p):
         'typedef_function_ptr : typedef pointer_to_function'
-        ptrType, name, args = p[2].split('|', 2)
-        typedefObj = self.typedefObject(ptrType, name)
-#        if args:
-#            typedefObj.functionPtr = args.split (',')
-#        else:
-#            typedefObj.functionPtr = ['()']
+        tdObj = self.symbolData.FunctionPointerTypedef(self.scope, p[2], self.filename, self.lexer.lineno)
+        tdObj.setIgnore(self.ignore)
+        self.ignore = False
+        tdObj.setAccess(self.access)
+
         self.inTypedef = True
+        
+        self._pushScope(tdObj)
+        self.currentTypedef = tdObj
         
     def p_array_variable (self, p):
         'array_variable : ID ARRAYOP'

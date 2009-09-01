@@ -288,3 +288,12 @@ class SymbolData(cppsymboldata.SymbolData):
             
         def format(self,indent=0):
             return self._formatIgnore(indent) + cppsymboldata.SymbolData.Typedef.format(self,indent)
+            
+    class FunctionPointerTypedef(Typedef):
+        @sealed
+        def __init__(self,parentScope, functionArgument, filename, lineno):
+            SymbolData.Typedef.__init__(self,parentScope, functionArgument.name(), filename, lineno)
+            self._functionArgument = functionArgument
+            
+        def format(self,indent=0):
+            return self._formatIgnore(indent) + "typedef "+ self._functionArgument.format() + ";\n"

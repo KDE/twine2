@@ -322,6 +322,11 @@ typedef QFlags<KCrash::CrashFlag> CrashFlags;
 //ig typedef foo bar;
 """)
 
+    def testTypedef5(self):
+        self.mirrorTest("""
+//ig typedef void (*KdeCleanUpFunction)();
+""")
+
     def testSipDirective1(self):
         self.mirrorTest(
             """
@@ -428,7 +433,7 @@ class Foo {
         self.parser.parse(self.syms, text)
         print(self.syms.topScope().format())
 
-    def xtestFullCompare(self):
+    def testFullCompare(self):
         sipdir = "/home/sbe/devel/svn/kde/branches/KDE/4.3/kdebindings/python/pykde4/sip/kdecore/"
         #sipdir = "/usr/share/sip/PyQt4/QtGui/"        
         for filename in os.listdir(sipdir):

@@ -57,6 +57,7 @@ class SipParser(object):
         self.versionHigh = ""
         self.platform = ""
         self.ignore = False
+        self.force = False
         self.templateParams = []
         self.template = None
         self.inTypedef = False
@@ -135,6 +136,7 @@ class SipParser(object):
         class_.setAccess(self.access)    
         class_.setIgnore(self.ignore)
         self.ignore = False
+        class_.setForce(self.force)
         self.currentClass = class_
         self._pushScope(class_)
 
@@ -150,6 +152,8 @@ class SipParser(object):
         tdObj.setArgumentType(typeName)
         tdObj.setIgnore(self.ignore)
         self.ignore = False
+        tdObj.setForce(self.force)
+        
 #        if typeName.startswith('QFlags<'):
 #            tdObj.template = Template('QFlags', typeName [7:-1])
 #       else:
@@ -169,12 +173,12 @@ class SipParser(object):
         vObj.setAnnotations(self.annotation)
         vObj.setIgnore(self.ignore)
         self.ignore = False
+        vObj.setForce(self.force)
         
         self._pushScope(vObj)
         
         self.template = None
         self.annotation = []
-        self.ignore = False
         return vObj
     
     def functionObject (self, name, returns):
@@ -189,6 +193,7 @@ class SipParser(object):
         functionObj.setAccess(self.access)
         functionObj.setIgnore(self.ignore)
         self.ignore = False
+        functionObj.setForce(self.force)
         
         self.currentFunction = functionObj
         
@@ -634,6 +639,7 @@ class SipParser(object):
         tdObj.setIgnore(self.ignore)
         self.ignore = False
         tdObj.setAccess(self.access)
+        tdObj.setForce(self.force)
 
         self.inTypedef = True
         
@@ -1214,11 +1220,11 @@ class SipParser(object):
 
     def p_object_force (self, p):
         'object_force : FORCE'
-        pass
+        self.force = True
 
     def p_object_end (self, p):
         'object_end : END'
-        pass
+        self.force = False
 
 # expression handling for argument default values - just parses and
 # then reassembles the default value expression (no evaluation)

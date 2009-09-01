@@ -30,12 +30,19 @@ class SymbolData(cppsymboldata.SymbolData):
             self._blocks = []
             self._ignore = False
             self._cppargs = None
+            self._force = False
             
         def isIgnore(self):
             return self._ignore
             
         def setIgnore(self,ignore):
             self._ignore = ignore
+            
+        def setForce(self,force):
+            self._force = force
+            
+        def force(self):
+            return self._force
             
         def setAnnotations(self,annotations):
             self._annotations = annotations
@@ -89,13 +96,24 @@ class SymbolData(cppsymboldata.SymbolData):
                 accu.append("{\n")
 
                 access = SymbolData.ACCESS_PRIVATE
+                force = False
                 for item in self._items:
-                    if isinstance(item,cppsymboldata.SymbolData._CppEntity) and item.access() is not access:
-                        accu.append(pre)
-                        accu.append(item.formatAccess())
-                        accu.append(":\n")
-                        access = item.access()
+                    if isinstance(item,cppsymboldata.SymbolData._CppEntity):
+                        if item.access() is not access:
+                            accu.append(pre)
+                            accu.append(item.formatAccess())
+                            accu.append(":\n")
+                            access = item.access()
+                        if item.force()!=force:
+                            if not force:
+                                accu.append("//force\n")
+                            else:
+                                accu.append("//end\n")
+                            force = not force
                     accu.append(item.format(indent+1))
+                if force:
+                    accu.append("//end\n")
+                
                 accu.append(pre)
                 accu.append("};\n")
             else:
@@ -297,3 +315,38 @@ class SymbolData(cppsymboldata.SymbolData):
             
         def format(self,indent=0):
             return self._formatIgnore(indent) + "typedef "+ self._functionArgument.format() + ";\n"
+            
+    class Namespace(cppsymboldata.SymbolData.Namespace):
+        @sealed
+        def __init__(self, parentScope, name, filename, lineno):
+            cppsymboldata.SymbolData.Namespace.__init__(self, parentScope, name, filename, lineno)
+            
+        def format(self,indent=0):
+            pre = SymbolData._indentString(indent)
+            
+        def format(self,indent=0):
+            pre = SymbolData._indentString(indent)
+            accu = []
+            accu.append(pre)
+            accu.append("namespace ")
+            accu.append(self._name)
+            accu.append("\n")
+            accu.append(pre)
+            accu.append("{\n")
+           
+            force = False
+            for item in self._items:
+                if isinstance(item,cppsymboldata.SymbolData._CppEntity):
+                    if item.force()!=force:
+                        if not force:
+                            accu.append("//force\n")
+                        else:
+                            accu.append("//end\n")
+                        force = not force
+                accu.append(item.format(indent))
+            if force:
+                accu.append("//end\n")
+            
+            accu.append(pre)
+            accu.append("};\n")
+            return "".join(accu)

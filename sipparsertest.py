@@ -427,6 +427,29 @@ class Foo {
 };
 """)
 
+    def testForce(self):
+        self.mirrorTest("""
+class Foo {
+public:
+    Foo ();
+    int bar ();
+//force
+    int forceBar ();
+//end
+};
+""")
+
+    def testForce2(self):
+        self.mirrorTest("""
+namespace Foo {
+    int bar ();
+//force
+    int forceBar ();
+//end
+    int bar2 ();
+};
+""")
+
     def xtestQtCoremod(self):
         with open("/usr/share/sip/PyQt4/QtCore/QtCoremod.sip") as fhandle:
             text = fhandle.read()

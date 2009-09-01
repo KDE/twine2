@@ -256,11 +256,12 @@ class SymbolData(cppsymboldata.SymbolData):
             cppsymboldata.SymbolData.ScopedEntity.__init__(self, parentScope, filename, lineno)
             SymbolData.SipBlock.__init__(self, None)
 
-    class Enum(cppsymboldata.SymbolData.Enum):
+    class Enum(cppsymboldata.SymbolData.Enum, _SipEntityExtra):
         @sealed
         def __init__(self, parentScope, name, filename, lineno):
             cppsymboldata.SymbolData.Enum.__init__(self, parentScope, name, filename, lineno)
-
+            SymbolData._SipEntityExtra.__init__(self)
+            
         def format(self,indent=0):
             pre = SymbolData._indentString(indent)
             accu = []

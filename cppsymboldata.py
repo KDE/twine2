@@ -83,21 +83,6 @@ class SymbolData(object):
         def lastMember(self):
             return self._items[-1] if len(self._items)!=0 else None
             
-    class Namespace(Scope):
-        """Represents a C++ style namespace."""
-        @sealed
-        def __init__(self, parentScope, name, filename, lineno):
-            SymbolData.Scope.__init__(self)
-            self._scope = parentScope
-            self._name = name
-            self._filename = filename
-            self._lineno = lineno
-            self._scope.insertIntoScope(name, self)
-            
-        def format(self,indent=0):
-            pre = SymbolData._indentString(indent)
-            return pre + "namespace " + self._name + "\n"+pre+"{\n" + SymbolData.Scope.format(self,indent) + pre + "};\n"
-
     class ScopedEntity(object):
         @sealed
         def __init__(self, parentScope, filename, lineno):
@@ -105,6 +90,18 @@ class SymbolData(object):
             self._filename = filename
             self._lineno = lineno
             self._scope.insertIntoScope(None, self)
+
+    class Namespace(ScopedEntity,Scope):
+        """Represents a C++ style namespace."""
+        @sealed
+        def __init__(self, parentScope, name, filename, lineno):
+            SymbolData.Scope.__init__(self)
+            SymbolData.ScopedEntity.__init__(self, parentScope, filename, lineno)
+            self._name = name
+            
+        def format(self,indent=0):
+            pre = SymbolData._indentString(indent)
+            return pre + "namespace " + self._name + "\n"+pre+"{\n" + SymbolData.Scope.format(self,indent) + pre + "};\n"
 
     class _CppEntity(ScopedEntity):
         @sealed

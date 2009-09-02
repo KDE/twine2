@@ -232,11 +232,12 @@ class SymbolData(cppsymboldata.SymbolData):
         def format(self,indent=0):
             return self._comment
 
-    class Template(cppsymboldata.SymbolData._CppEntity,cppsymboldata.SymbolData.Scope):
+    class Template(cppsymboldata.SymbolData._CppEntity,cppsymboldata.SymbolData.Scope,_SipEntityExtra):
         @sealed
         def __init__(self, parentScope, filename, lineno):
             cppsymboldata.SymbolData._CppEntity.__init__(self, parentScope, None, filename, lineno)
             cppsymboldata.SymbolData.Scope.__init__(self)
+            SymbolData._SipEntityExtra.__init__(self)
             self._parameters = None
             
         def setParameters(self,parameters):

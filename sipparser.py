@@ -875,7 +875,7 @@ class SipParser(object):
 
     def p_cpp_args (self, p):
         'cpp_args : LBRACKET type_specifier cpp_arg_list RBRACKET'
-        pass
+        p[0] = (p[2],p[3])
         
     def p_cpp_arg_list1 (self, p):
         """cpp_arg_list : LPAREN argument_list RPAREN"""
@@ -904,6 +904,8 @@ class SipParser(object):
                          | function_primary exception annotation cpp_args stmt_end"""
         self.currentFunction.setAnnotations(self.annotation)
         self.annotation = []
+        self.currentFunction.setCppReturn(p[-2][0])
+        self.currentFunction.setCppArgs(p[-2][1])
         
     def p_function_stmt2(self, p):
         """function_stmt : function_primary CVQUAL stmt_end
@@ -922,6 +924,8 @@ class SipParser(object):
         self.currentFunction.addQualifier(p[2])
         self.currentFunction.setAnnotations(self.annotation)
         self.annotation = []
+        self.currentFunction.setCppReturn(p[-2][0])
+        self.currentFunction.setCppArgs(p[-2][1])
         
     def p_function_stmt4(self, p):
         'function_stmt : function_primary EQUALS ICONST stmt_end'
@@ -990,35 +994,56 @@ class SipParser(object):
 
     def p_virtual_stmt2 (self, p):
         """virtual_stmt : virtual_primary annotation SEMI
-                        | virtual_primary annotation cpp_args SEMI
-                        | virtual_primary cpp_args SEMI
-                        | virtual_primary exception annotation SEMI
-                        | virtual_primary exception annotation cpp_args SEMI
-                        | virtual_primary exception cpp_args SEMI"""
+                        | virtual_primary exception annotation SEMI"""
         self.currentFunction.setAnnotations(self.annotation)
         self.annotation = []
         self.currentFunction.addQualifier('virtual')
 
     def p_virtual_stmt3 (self, p):
+        """virtual_stmt : virtual_primary annotation cpp_args SEMI
+                        | virtual_primary cpp_args SEMI
+                        | virtual_primary exception annotation cpp_args SEMI
+                        | virtual_primary exception cpp_args SEMI"""
+        self.currentFunction.setAnnotations(self.annotation)
+        self.annotation = []
+        self.currentFunction.addQualifier('virtual')
+        self.currentFunction.setCppReturn(p[-2][0])
+        self.currentFunction.setCppArgs(p[-2][1])
+        
+    def p_virtual_stmt4 (self, p):
         """virtual_stmt : virtual_primary CVQUAL annotation SEMI
-                        | virtual_primary CVQUAL annotation cpp_args SEMI
+                        | virtual_primary CVQUAL exception annotation SEMI"""
+        self.currentFunction.setAnnotations(self.annotation)
+        self.annotation = []
+        self.currentFunction.addQualifier('virtual')
+        self.currentFunction.addQualifier(p[2])
+
+    def p_virtual_stmt5 (self, p):
+        """virtual_stmt : virtual_primary CVQUAL annotation cpp_args SEMI
                         | virtual_primary CVQUAL cpp_args SEMI
-                        | virtual_primary CVQUAL exception annotation SEMI
                         | virtual_primary CVQUAL exception annotation cpp_args SEMI
                         | virtual_primary CVQUAL exception cpp_args SEMI"""
         self.currentFunction.setAnnotations(self.annotation)
         self.annotation = []
         self.currentFunction.addQualifier('virtual')
         self.currentFunction.addQualifier(p[2])
+        self.currentFunction.setCppReturn(p[-2][0])
+        self.currentFunction.setCppArgs(p[-2][1])
         
-    def p_pure_virtual_suffix (self, p):
+    def p_pure_virtual_suffix1(self, p):
         """pure_virtual_suffix : EQUALS ICONST
-                               | EQUALS ICONST annotation
-                               | EQUALS ICONST annotation cpp_args
-                               | EQUALS ICONST cpp_args"""
+                               | EQUALS ICONST annotation"""
         self.currentFunction.setAnnotations(self.annotation)
         self.annotation = []
 
+    def p_pure_virtual_suffix2(self, p):
+        """pure_virtual_suffix : EQUALS ICONST annotation cpp_args
+                               | EQUALS ICONST cpp_args"""
+        self.currentFunction.setAnnotations(self.annotation)
+        self.annotation = []
+        self.currentFunction.setCppReturn(p[-1][0])
+        self.currentFunction.setCppArgs(p[-1][1])
+        
     def p_pure_virtual (self, p):
         """pure_virtual : virtual_primary pure_virtual_suffix SEMI
                         | virtual_primary CVQUAL pure_virtual_suffix SEMI

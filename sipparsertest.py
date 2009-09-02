@@ -436,6 +436,13 @@ class Foo {
 };
 """)
 
+    def testCppSigs2(self):
+        self.mirrorTest("""
+class Foo {
+        int itemDouble (const QString& _group, const QString& _key, double reference, double defaultValue = 0)  [int (const QString& _group, const QString& _key, double& reference, double defaultValue = 0)];         
+};
+""")
+
     def testForce(self):
         self.mirrorTest("""
 class Foo {

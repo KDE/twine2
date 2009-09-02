@@ -30,6 +30,7 @@ class SymbolData(cppsymboldata.SymbolData):
             self._blocks = []
             self._ignore = False
             self._cppargs = None
+            self._cppreturn = None
             self._force = False
             
         def isIgnore(self):
@@ -49,7 +50,10 @@ class SymbolData(cppsymboldata.SymbolData):
             
         def setCppArgs(self,cppArgs):
             self._cppargs = cppArgs
-
+            
+        def setCppReturn(self,cppreturn):
+            self._cppreturn = cppreturn
+            
         def addBlock(self, block):
             self._blocks.append(block)
             
@@ -61,7 +65,8 @@ class SymbolData(cppsymboldata.SymbolData):
                 
         def _formatCppArgs(self):
             if self._cppargs is not None:
-                return " [(" + ", ".join(item.format() for item in self._cppargs) + ")]"
+                return (" [(" if self._cppreturn is None else "  [" + self._cppreturn + " (") + \
+                    ", ".join(item.format() for item in self._cppargs) + ")]"
             else:
                 return ""
 
@@ -159,7 +164,7 @@ class SymbolData(cppsymboldata.SymbolData):
                 annotations = ' /' + ', '.join(self._annotations) + '/'
             
             return self._formatIgnore(indent) + cppsymboldata.SymbolData.Function.format(self,indent)[:-2] + \
-                annotations + ";\n" + \
+                annotations + self._formatCppArgs() + ";\n" + \
                 ''.join( (block.format(indent) for block in self._blocks))
 
     class Constructor(cppsymboldata.SymbolData.Constructor, _SipEntityExtra):
@@ -189,7 +194,7 @@ class SymbolData(cppsymboldata.SymbolData):
                 annotations = ' /' + ', '.join(self._annotations) + '/'
             
             return self._formatIgnore(indent) + cppsymboldata.SymbolData.Destructor.format(self,indent)[:-2] + \
-                annotations + ";\n" + \
+                annotations + self._formatCppArgs() + ";\n" + \
                 ''.join( (block.format(indent) for block in self._blocks))
             
     class Variable(cppsymboldata.SymbolData.Variable, _SipEntityExtra):

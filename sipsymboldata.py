@@ -72,7 +72,7 @@ class SymbolData(cppsymboldata.SymbolData):
 
     class SipClass(cppsymboldata.SymbolData.CppClass, _SipEntityExtra):
         @sealed
-        def __init__(self,parentScope, name, filename, lineno):
+        def __init__(self,parentScope, name, filename=None, lineno=-1):
             cppsymboldata.SymbolData.CppClass.__init__(self, parentScope, name, filename, lineno)
             SymbolData._SipEntityExtra.__init__(self)
 
@@ -154,7 +154,7 @@ class SymbolData(cppsymboldata.SymbolData):
 
     class Function(cppsymboldata.SymbolData.Function, _SipEntityExtra):
         @sealed
-        def __init__(self, parentScope, name, filename, lineno):
+        def __init__(self, parentScope, name, filename=None, lineno=-1):
             cppsymboldata.SymbolData.Function.__init__(self,parentScope,name,filename,lineno)
             SymbolData._SipEntityExtra.__init__(self)
 
@@ -169,7 +169,7 @@ class SymbolData(cppsymboldata.SymbolData):
 
     class Constructor(cppsymboldata.SymbolData.Constructor, _SipEntityExtra):
         @sealed
-        def __init__(self, parentScope, name, filename, lineno):
+        def __init__(self, parentScope, name, filename=None, lineno=-1):
             cppsymboldata.SymbolData.Constructor.__init__(self,parentScope,name,filename,lineno)
             SymbolData._SipEntityExtra.__init__(self)
             
@@ -184,7 +184,7 @@ class SymbolData(cppsymboldata.SymbolData):
 
     class Destructor(cppsymboldata.SymbolData.Destructor, _SipEntityExtra):
         @sealed
-        def __init__(self, parentScope, name, filename, lineno):
+        def __init__(self, parentScope, name, filename=None, lineno=-1):
             cppsymboldata.SymbolData.Destructor.__init__(self,parentScope,name,filename,lineno)
             SymbolData._SipEntityExtra.__init__(self)
             

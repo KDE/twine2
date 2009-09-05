@@ -66,13 +66,13 @@ class SymbolData(object):
         @sealed
         def __init__(self):
             self._items = []
-            self._names = {}
+            #self._names = {}
 
         def insertIntoScope(self, name, cppMember):
             if cppMember not in self._items:
                 self._items.append(cppMember)
-            if name is not None:
-                self._names[name] = cppMember
+            #if name is not None:
+            #    self._names[name] = cppMember
 
         def __str__(self):
             return '\n'.join( (str(item) for item in self._items) )
@@ -82,6 +82,21 @@ class SymbolData(object):
 
         def lastMember(self):
             return self._items[-1] if len(self._items)!=0 else None
+            
+        def __len__(self):
+            return len(self._items)
+        
+        def __getitem__(self,key):
+            return self._items[key]
+            
+        def __setitem__(self, key, value):
+            self._items[key] = value
+            
+        def __iter__(self):
+            return self._items.__iter__()
+            
+        def append(self,item):
+            self._items.append(item)
             
     class ScopedEntity(object):
         @sealed
@@ -110,9 +125,15 @@ class SymbolData(object):
             self._name = name
             self._access = SymbolData.ACCESS_PUBLIC
             self._scope.insertIntoScope(name, self)
-
+            
+        def name(self):
+            return self._name
+            
         def setAccess(self,typeName):
-            self._access = SymbolData.ACCESS_TYPE_MAPPING_FROM_NAME[typeName]
+            if typeName in SymbolData.ACCESS_TYPE_MAPPING_TO_NAME.keys():
+                self._access = typeName
+            else:
+                self._access = SymbolData.ACCESS_TYPE_MAPPING_FROM_NAME[typeName]
 
         def access(self):
             return self._access
@@ -166,7 +187,7 @@ class SymbolData(object):
 
     class CppClass(Scope, _CppEntity):
         @sealed
-        def __init__(self,parentScope, name, filename, lineno):
+        def __init__(self,parentScope, name, filename=None, lineno=-1):
             SymbolData.Scope.__init__(self)
             SymbolData._CppEntity.__init__(self, parentScope, name, filename, lineno)
             self._bases = []
@@ -181,7 +202,10 @@ class SymbolData(object):
             
         def addMacro(self,macro):
             self._macros.append(macro)
-                
+            
+        def macros(self):
+            return self._macros
+            
         def format(self,indent=0):
             pre = SymbolData._indentString(indent)
             accu = []
@@ -278,7 +302,10 @@ class SymbolData(object):
             return self._return
 
         def setArguments(self,arguments):
-            self._arguments = arguments
+            self._arguments = tuple(arguments)
+
+        def arguments(self):
+            return self._arguments
 
         def addQualifier(self,qualifier):
             self._qualifier.add(qualifier)

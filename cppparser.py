@@ -238,6 +238,7 @@ class CppParser(object):
             functionObj = self.symbolData.Function(self.scope, name, self.filename, self.lexer.lineno)
             returnArg = self.symbolData.Argument(returns)
             functionObj.setReturn(returnArg)
+        functionObj.setAccess(self.access)
 
         #self.template = None
         self.exprElements = []

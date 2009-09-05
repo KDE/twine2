@@ -199,7 +199,7 @@ class SymbolData(cppsymboldata.SymbolData):
             
     class Variable(cppsymboldata.SymbolData.Variable, _SipEntityExtra):
         @sealed
-        def __init__(self, parentScope, name, filename, lineno):
+        def __init__(self, parentScope, name, filename=None, lineno=-1):
             cppsymboldata.SymbolData.Variable.__init__(self,parentScope,name,filename,lineno)
             SymbolData._SipEntityExtra.__init__(self)
             

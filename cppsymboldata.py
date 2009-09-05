@@ -272,10 +272,16 @@ class SymbolData(object):
 
         def setArgument(self, argument):
             self._argument = argument
-
+            
+        def argument(self):
+            return self._argument
+            
         def setStorage(self,storage):
             self._storage = storage
             # "auto", "register", "static", "extern", "mutable"
+            
+        def storage(self):
+            return self._storage
             
         def format(self,indent=0):
             pre = SymbolData._indentString(indent)
@@ -295,6 +301,9 @@ class SymbolData(object):
         def setStorage(self,storage):
             self._storage = storage
 
+        def storage(self):
+            return self._storage
+            
         def setReturn(self,return_):
             self._return = return_
 

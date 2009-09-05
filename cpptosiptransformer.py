@@ -36,24 +36,30 @@ class CppToSipTransformer(object):
         
     def _convertScope(self,cppScope,destScope):
         for item in cppScope:
-            print("==================================")
-            print(item.format())
+            #print("==================================")
+            #print(item.format())
             if isinstance(item,cppsymboldata.SymbolData.CppClass):
                 self._convertClass(item,destScope)
                 
             elif isinstance(item,cppsymboldata.SymbolData.Function):
-                if isinstance(item,cppsymboldata.SymbolData.Constructor):
-                    sipFunction = self._sipsym.Constructor(destScope,item.name())
-                elif isinstance(item,cppsymboldata.SymbolData.Destructor):
-                    sipFunction = self._sipsym.Destructor(destScope,item.name())
-                else:
-                    sipFunction = self._sipsym.Function(destScope,item.name())
-                    sipFunction.setReturn(item.return_())
-                sipFunction.setAccess(item.access())
-                sipFunction.setArguments( [self._convertArgument(x) for x in item.arguments()] )
-            
-        print("==================================")
-                    
+                self._convertFunction(item,destScope)
+                
+            elif isinstance(item,cppsymboldata.SymbolData.Variable):
+                self._convertVariable(item,destScope)
+
+    def _convertFunction(self,cppFunction,destScope):
+        if isinstance(cppFunction,cppsymboldata.SymbolData.Constructor):
+            sipFunction = self._sipsym.Constructor(destScope,cppFunction.name())
+        elif isinstance(cppFunction,cppsymboldata.SymbolData.Destructor):
+            sipFunction = self._sipsym.Destructor(destScope,cppFunction.name())
+        else:
+            sipFunction = self._sipsym.Function(destScope,cppFunction.name())
+            sipFunction.setReturn(cppFunction.return_())
+        sipFunction.setAccess(cppFunction.access())
+        sipFunction.setArguments( [self._convertArgument(x) for x in cppFunction.arguments()] )
+        if cppFunction.storage()=='static':
+            sipFunction.setStorage('static')
+                   
     def _convertClass(self,cppClass,parentScope):
         if not self._isClassExported(cppClass):
             return None
@@ -70,4 +76,10 @@ class CppToSipTransformer(object):
     def _convertArgument(self,cppArgument):
         return self._sipsym.Argument(cppArgument.argumentType(), cppArgument.name(), cppArgument.defaultValue())
 
+    def _convertVariable(self,cppVariable,parentScope):
+        sipVariable = self._sipsym.Variable(parentScope, cppVariable.name())
+        sipVariable.setArgument(self._convertArgument(cppVariable.argument()))
+        if cppVariable.storage()=='static':
+            sipVariable.setStorage('static')
+        return sipVariable
         

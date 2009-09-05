@@ -35,13 +35,13 @@ class TestCppToSipTransformer(unittest.TestCase):
             
         syms = cppsymboldata.SymbolData()
         parser.parse(syms,cpptext)
-        print("-------------------------------------")
+        print("Cpp----------------------------------")
         print(syms.topScope().format())
-        print("-------------------------------------")
         
         transformer = cpptosiptransformer.CppToSipTransformer()
         transformer.setExportMacros(exportMacros)
         siptree = transformer.convert(syms)
+        print("Sip----------------------------------")
         print(siptree.topScope().format())
         return siptree
         
@@ -74,6 +74,25 @@ public:
 };
 """)
 
+    def testVariable(self):
+        self.convert("""
+int bar;
+""")
+
+    def testStaticVariable(self):
+        self.convert("""
+static int staticBar;
+""")
+
+    def testFunction(self):
+        self.convert("""
+int FunctionBar();
+""")
+
+    def testStaticFunction(self):
+        self.convert("""
+static int StaticFunctionBar();
+""")
 
 if __name__ == '__main__':
     unittest.main()

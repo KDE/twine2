@@ -114,6 +114,9 @@ class SymbolData(object):
             SymbolData.ScopedEntity.__init__(self, parentScope, filename, lineno)
             self._name = name
             
+        def name(self):
+            return self._name
+            
         def format(self,indent=0):
             pre = SymbolData._indentString(indent)
             return pre + "namespace " + self._name + "\n"+pre+"{\n" + SymbolData.Scope.format(self,indent) + pre + "};\n"

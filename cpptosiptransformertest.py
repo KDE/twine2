@@ -94,5 +94,13 @@ int FunctionBar();
 static int StaticFunctionBar();
 """)
 
+    def testNamespace(self):
+        self.convert("""
+namespace FooSpace {
+    int bar;
+}
+""")
+    
+
 if __name__ == '__main__':
     unittest.main()

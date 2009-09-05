@@ -47,6 +47,9 @@ class CppToSipTransformer(object):
             elif isinstance(item,cppsymboldata.SymbolData.Variable):
                 self._convertVariable(item,destScope)
 
+            elif isinstance(item,cppsymboldata.SymbolData.Namespace):
+                self._convertNamespace(item,destScope)
+
     def _convertFunction(self,cppFunction,destScope):
         if isinstance(cppFunction,cppsymboldata.SymbolData.Constructor):
             sipFunction = self._sipsym.Constructor(destScope,cppFunction.name())
@@ -82,4 +85,8 @@ class CppToSipTransformer(object):
         if cppVariable.storage()=='static':
             sipVariable.setStorage('static')
         return sipVariable
+    
+    def _convertNamespace(self,cppNamespace,parentScope):
+        sipNamespace = self._sipsym.Namespace(parentScope, cppNamespace.name())
+        self._convertScope(cppNamespace,sipNamespace)
         

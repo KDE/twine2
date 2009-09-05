@@ -326,7 +326,7 @@ class SymbolData(cppsymboldata.SymbolData):
             
     class Namespace(cppsymboldata.SymbolData.Namespace):
         @sealed
-        def __init__(self, parentScope, name, filename, lineno):
+        def __init__(self, parentScope, name, filename=None, lineno=-1):
             cppsymboldata.SymbolData.Namespace.__init__(self, parentScope, name, filename, lineno)
             
         def format(self,indent=0):

@@ -82,6 +82,7 @@ class CppToSipTransformer(object):
             return None
     
         sipClass = self._sipsym.SipClass(parentScope, cppClass.name())
+        sipClass.setBases(cppClass.bases())
         self._convertScope(cppClass,sipClass)
     
     def _isClassExported(self,cppClass):

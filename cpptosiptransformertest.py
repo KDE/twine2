@@ -75,6 +75,14 @@ public:
 };
 """)
 
+    def testClass2(self):
+        self.convert("""
+class Foo : public Bar {
+public:
+    Foo();
+};
+""")
+
     def testVariable(self):
         self.convert("""
 int bar;

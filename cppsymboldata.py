@@ -221,6 +221,12 @@ class SymbolData(object):
         def addBase(self, base):
             self._bases.append(base)
             
+        def setBases(self,baseList):
+            self._bases = baseList
+        
+        def bases(self):
+            return self._bases
+        
         def setOpaque(self,opaque):
             self._opaque = opaque
             

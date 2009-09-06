@@ -264,7 +264,7 @@ class SymbolData(cppsymboldata.SymbolData):
 
     class Enum(cppsymboldata.SymbolData.Enum, _SipEntityExtra):
         @sealed
-        def __init__(self, parentScope, name, filename, lineno):
+        def __init__(self, parentScope, name, filename=None, lineno=-1):
             cppsymboldata.SymbolData.Enum.__init__(self, parentScope, name, filename, lineno)
             SymbolData._SipEntityExtra.__init__(self)
             

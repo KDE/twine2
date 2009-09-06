@@ -154,7 +154,22 @@ class SymbolData(object):
             self._enumerators = []
             
         def appendEnumerator(self,enumerator):
+            self.append(enumerator)
+            
+        def append(self,enumerator):
             self._enumerators.append(enumerator)
+            
+        def __len__(self):
+            return len(self._enumerators)
+        
+        def __getitem__(self,key):
+            return self._enumerators[key]
+            
+        def __setitem__(self, key, value):
+            self._enumerators[key] = value
+            
+        def __iter__(self):
+            return self._enumerators.__iter__()
             
         def format(self,indent=0):
             pre = SymbolData._indentString(indent)
@@ -181,6 +196,12 @@ class SymbolData(object):
         def __init__(self,name,value):
             self._name = name
             self._value = value
+            
+        def name(self):
+            return self._name
+            
+        def value(self):
+            return self._value
             
         def format(self):
             if self._value is None:

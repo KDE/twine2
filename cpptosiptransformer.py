@@ -50,6 +50,9 @@ class CppToSipTransformer(object):
             elif isinstance(item,cppsymboldata.SymbolData.Namespace):
                 self._convertNamespace(item,destScope)
 
+            elif isinstance(item,cppsymboldata.SymbolData.Enum):
+                self._convertEnum(item,destScope)
+
     def _convertFunction(self,cppFunction,destScope):
         if isinstance(cppFunction,cppsymboldata.SymbolData.Constructor):
             sipFunction = self._sipsym.Constructor(destScope,cppFunction.name())
@@ -89,4 +92,8 @@ class CppToSipTransformer(object):
     def _convertNamespace(self,cppNamespace,parentScope):
         sipNamespace = self._sipsym.Namespace(parentScope, cppNamespace.name())
         self._convertScope(cppNamespace,sipNamespace)
-        
+    
+    def _convertEnum(self,cppEnum,parentScope):
+        sipEnum = self._sipsym.Enum(parentScope, cppEnum.name())
+        for item in cppEnum:
+            sipEnum.append(item)

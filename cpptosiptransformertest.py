@@ -101,6 +101,16 @@ namespace FooSpace {
 }
 """)
     
+    def testEnum(self):
+        self.convert("""
+enum global {
+    earth,
+    orb,
+    globe
+};
+""")
+        
+
 
 if __name__ == '__main__':
     unittest.main()

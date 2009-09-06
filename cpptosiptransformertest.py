@@ -124,5 +124,18 @@ private:
 };
 """)
 
+    def testOperators(self):
+        self.convert("""
+class Foo {
+public:
+    Foo();
+    int operator /(int div);
+    
+    int operator ++();
+   
+};
+""")
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -54,12 +54,20 @@ class CppToSipTransformer(object):
                 self._convertEnum(item,destScope)
 
     def _convertFunction(self,cppFunction,destScope):
-        if cppFunction.access()==cppsymboldata.SymbolData.ACCESS_PRIVATE:
+        isCtor = isinstance(cppFunction,cppsymboldata.SymbolData.Constructor)
+        isDtor = isinstance(cppFunction,cppsymboldata.SymbolData.Destructor)
+        
+        # Private funcions/methods are not copied.
+        if cppFunction.access()==cppsymboldata.SymbolData.ACCESS_PRIVATE and not isCtor and not isDtor:
             return
             
-        if isinstance(cppFunction,cppsymboldata.SymbolData.Constructor):
+        # Ignore these operators.
+        if cppFunction.name() in ['operator =', 'operator ++', 'operator --']:
+            return
+            
+        if isCtor:
             sipFunction = self._sipsym.Constructor(destScope,cppFunction.name())
-        elif isinstance(cppFunction,cppsymboldata.SymbolData.Destructor):
+        elif isDtor:
             sipFunction = self._sipsym.Destructor(destScope,cppFunction.name())
         else:
             sipFunction = self._sipsym.Function(destScope,cppFunction.name())

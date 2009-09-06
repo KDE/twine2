@@ -54,6 +54,9 @@ class CppToSipTransformer(object):
                 self._convertEnum(item,destScope)
 
     def _convertFunction(self,cppFunction,destScope):
+        if cppFunction.access()==cppsymboldata.SymbolData.ACCESS_PRIVATE:
+            return
+            
         if isinstance(cppFunction,cppsymboldata.SymbolData.Constructor):
             sipFunction = self._sipsym.Constructor(destScope,cppFunction.name())
         elif isinstance(cppFunction,cppsymboldata.SymbolData.Destructor):

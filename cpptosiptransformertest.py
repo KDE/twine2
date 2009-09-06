@@ -60,8 +60,9 @@ public:
 class EXPORT_FOO Foo {
 public:
     Foo();
-private:
+protected:
     Foo(int x);
+   
 };
 """,exportMacros=["EXPORT_FOO"])
 
@@ -110,7 +111,18 @@ enum global {
 };
 """)
         
-
+    def testPrivate(self):
+        self.convert("""
+class Foo {
+public:
+    Foo();
+    int bar();
+    
+private:
+    int barzor();
+   
+};
+""")
 
 if __name__ == '__main__':
     unittest.main()

@@ -71,7 +71,7 @@ class CppToSipTransformer(object):
             sipFunction = self._sipsym.Destructor(destScope,cppFunction.name())
         else:
             sipFunction = self._sipsym.Function(destScope,cppFunction.name())
-            sipFunction.setReturn(cppFunction.return_())
+            sipFunction.setReturn(self._convertArgument(cppFunction.return_()))
         sipFunction.setAccess(cppFunction.access())
         sipFunction.setArguments( [self._convertArgument(x) for x in cppFunction.arguments()] )
         if cppFunction.storage()=='static':
@@ -92,7 +92,14 @@ class CppToSipTransformer(object):
         return True
 
     def _convertArgument(self,cppArgument):
-        return self._sipsym.Argument(cppArgument.argumentType(), cppArgument.name(), cppArgument.defaultValue())
+        argumentType = cppArgument.argumentType()
+        argumentType = {
+            'short int': 'short',
+            'unsigned short int': 'unsigned short',
+            'long unsigned int': 'unsigned long'
+            }.get(argumentType,argumentType)
+        
+        return self._sipsym.Argument(argumentType, cppArgument.name(), cppArgument.defaultValue())
 
     def _convertVariable(self,cppVariable,parentScope):
         sipVariable = self._sipsym.Variable(parentScope, cppVariable.name())

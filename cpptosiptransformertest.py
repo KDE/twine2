@@ -144,6 +144,10 @@ public:
 };
 """)
 
+    def testArgumentTypes(self):
+        self.convert("""
+short int port;
+""")
 
 if __name__ == '__main__':
     unittest.main()

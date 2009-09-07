@@ -22,6 +22,26 @@ class SymbolData(cppsymboldata.SymbolData):
     @sealed
     def __init__(self):
         cppsymboldata.SymbolData.__init__(self)
+        self._classIndex = None
+        
+    def lookupClass(self,name):
+        if self._classIndex is None:
+            self._buildClassIndex()
+
+        return self._classIndex[name]
+
+    def _buildClassIndex(self):
+        self._classIndex = {}
+        self._indexScope(self.topScope())
+        for scope in self._scopes:
+            self._indexScope(scope)
+
+    def _indexScope(self,scope):
+        for item in scope:
+            if isinstance(item,SymbolData.SipClass):
+                self._classIndex[item.name()] = item
+            elif isinstance(item,SymbolData.Namespace):
+                self._indexScope(self,item)
 
     class _SipEntityExtra(object):
         @sealed
@@ -75,6 +95,21 @@ class SymbolData(cppsymboldata.SymbolData):
         def __init__(self,parentScope, name, filename=None, lineno=-1):
             cppsymboldata.SymbolData.CppClass.__init__(self, parentScope, name, filename, lineno)
             SymbolData._SipEntityExtra.__init__(self)
+
+        def allSuperClassNames(self):
+            """Get all super class names
+            
+            A set of super class names."""
+            symbolData = self._symbolData()
+            allBases = set()
+            for name in self._bases:
+                allBases.add(name)
+                
+                class_ = symbolData.lookupClass(name)
+                if class_ is not None:
+                    allBases.update(class_.allSuperClassNames())
+                    
+            return allBases
 
         def format(self,indent=0):
             pre = SymbolData._indentString(indent)

@@ -466,6 +466,24 @@ namespace Foo {
 };
 """)
 
+    def testSuperClassQueries(self):
+        self.parser.parse(self.syms, """
+class Bar {};
+class Zyzz : Bar {};
+class Foo : Zyzz {
+
+};
+""")
+        bar = self.syms.lookupClass("Bar")
+        self.assertTrue(bar is not None)
+        self.assertTrue(bar.allSuperClassNames() is not None)
+        self.assertTrue(len(bar.allSuperClassNames())==0)
+        foo = self.syms.lookupClass("Foo")
+        self.assertTrue(foo is not None)
+        fooBases = foo.allSuperClassNames()
+        self.assertTrue(fooBases is not None)
+        self.assertTrue(len(fooBases)==2)
+        
     def xtestQtCoremod(self):
         with open("/usr/share/sip/PyQt4/QtCore/QtCoremod.sip") as fhandle:
             text = fhandle.read()

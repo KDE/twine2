@@ -45,13 +45,19 @@ class SymbolData(object):
     @sealed
     def __init__(self):
         """Instantiate a new SymbolData."""
-        self._topScope = self.Scope()
-
+        self._topScope = self.TopLevelScope(self)
+        self._scopes = []
+        
     def topScope(self):
         """Get the top most scope object.
         
         Returns a `Scope` object."""
         return self._topScope
+
+    def newScope(self):
+        scope = self.TopLevelScope(self)
+        self._scopes.append(scope)
+        return scope
 
     @classmethod
     def _indentString(cls, indent):
@@ -98,6 +104,15 @@ class SymbolData(object):
         def append(self,item):
             self._items.append(item)
             
+    class TopLevelScope(Scope):
+        @sealed
+        def __init__(self,symbolData):
+            SymbolData.Scope.__init__(self)
+            self._symbolDataPtr = symbolData
+            
+        def _symbolData(self):
+            return self._symbolDataPtr
+    
     class ScopedEntity(object):
         @sealed
         def __init__(self, parentScope, filename, lineno):
@@ -105,7 +120,10 @@ class SymbolData(object):
             self._filename = filename
             self._lineno = lineno
             self._scope.insertIntoScope(None, self)
-
+            
+        def _symbolData(self):
+            return self._scope._symbolData()
+        
     class Namespace(ScopedEntity,Scope):
         """Represents a C++ style namespace."""
         @sealed
@@ -225,6 +243,9 @@ class SymbolData(object):
             self._bases = baseList
         
         def bases(self):
+            """List of base class names
+            
+            Returns a list of string base class names."""
             return self._bases
         
         def setOpaque(self,opaque):

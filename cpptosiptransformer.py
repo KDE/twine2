@@ -99,7 +99,13 @@ class CppToSipTransformer(object):
             'long unsigned int': 'unsigned long'
             }.get(argumentType,argumentType)
         
-        return self._sipsym.Argument(argumentType, cppArgument.name(), cppArgument.defaultValue())
+        defaultValue = cppArgument.defaultValue()
+        if defaultValue=='true':
+            defaultValue = '1'
+        if defaultValue=='false':
+            defaultValue = '0'
+            
+        return self._sipsym.Argument(argumentType, cppArgument.name(), defaultValue)
 
     def _convertVariable(self,cppVariable,parentScope):
         sipVariable = self._sipsym.Variable(parentScope, cppVariable.name())

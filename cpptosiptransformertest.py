@@ -149,5 +149,14 @@ public:
 short int port;
 """)
 
+    def testDefaultArgs(self):
+        self.convert("""
+class Foo {
+public:
+    int port(bool frazzle=true);
+};
+""")
+
+
 if __name__ == '__main__':
     unittest.main()

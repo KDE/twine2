@@ -40,7 +40,10 @@ class SipParser(object):
     def _resetState(self):
         self._scopeStack = []
         self.scope = None
-        self.access = "private"
+        
+        self.access = "public"
+        self._accessStack = []
+        
         self.storage = None
 
         self.versionStack = [(None, None, None)]
@@ -100,6 +103,13 @@ class SipParser(object):
     def _popScope(self):
         self.scope = self._scopeStack.pop()
 
+    def _pushAccess(self, newAccess):
+        self._accessStack.append(self.access)
+        self.access = newAccess
+        
+    def _popAccess(self):
+        self.access = self._accessStack.pop()
+        
     def _lastEntity(self):
         return self.scope.lastMember()
 
@@ -319,6 +329,7 @@ class SipParser(object):
         """class_decl : class_header class_member_list RBRACE stmt_end
                       | opaque_class
                       | class_header RBRACE stmt_end"""
+        self._popAccess()
         self._popScope()
 
     def p_class_decl1 (self, p):
@@ -327,6 +338,7 @@ class SipParser(object):
             self.object_id_list (p [4], p [1])
         else:
             self.object_id_list (p [4], 'class')
+        self._popScope()
         self._popScope()
         
     def p_class_member (self, p):
@@ -377,6 +389,7 @@ class SipParser(object):
         """class_header : class_name LBRACE
                         | class_name COLON base_list LBRACE"""
         p [0] = p [1]
+        self._pushAccess('private')
     
     def p_class_header1 (self, p):
         """class_header : class_name annotation LBRACE
@@ -384,6 +397,7 @@ class SipParser(object):
         p[0] = p[1]
         self.currentClass.setAnnotations(self.annotation)
         self.annotation = []
+        self._pushAccess('private')
         
     def p_class_name (self, p):
         """class_name : class ID
@@ -396,8 +410,6 @@ class SipParser(object):
             template.setParameters(self.inTemplate)
             self.scope = template   # This is a bit of ugly to make the class appear inside the template scope.
             self.classObject(p[2], p[1])
-        
-        self.access = 'private'
         
     def p_opaque_class (self, p):
         """opaque_class : class qualified_id SEMI

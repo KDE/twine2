@@ -204,6 +204,22 @@ class TestSipParser(unittest.TestCase):
             int DoFoo (int* x /Out/);
             """)
 
+    def testAccess(self):
+        self.mirrorTest(
+            """
+            void PlainPreFunc ();
+            class Foo {
+                public:
+                    class Bar {
+                        private:
+                            void privateBar();
+                    };
+                    void publicFoo();
+            };
+            void PlainPostFunc ();
+            """)
+    
+
     def testFunctionIgnore(self):
         self.mirrorTest(
             """

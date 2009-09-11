@@ -25,9 +25,13 @@ class CppToSipTransformer(object):
     def __init__(self):
         self._sipsym = None
         self._exportMacros = None
+        self._ignoredBaseClasses = []
         
     def setExportMacros(self, macroList):
         self._exportMacros = set(macroList) if macroList is not None else None
+        
+    def setIgnoreBaseClasses(self, baseClassList):
+        self._ignoredBaseClasses = baseClassList if baseClassList is not None else []
         
     def convert(self, cpptree):
         self._sipsym = sipsymboldata.SymbolData()
@@ -82,7 +86,7 @@ class CppToSipTransformer(object):
             return None
     
         sipClass = self._sipsym.SipClass(parentScope, cppClass.name())
-        sipClass.setBases(cppClass.bases())
+        sipClass.setBases( [base for base in cppClass.bases() if base not in self._ignoredBaseClasses] )
         self._convertScope(cppClass,sipClass)
     
     def _isClassExported(self,cppClass):

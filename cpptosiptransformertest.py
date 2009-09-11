@@ -30,7 +30,7 @@ class TestCppToSipTransformer(unittest.TestCase):
     def setUp(self):
         pass
         
-    def convert(self, cpptext, exportMacros=None):
+    def convert(self, cpptext, exportMacros=None, ignoreBases=None):
         parser = cppparser.CppParser()
         if exportMacros is not None:
             parser.bareMacros = exportMacros
@@ -42,6 +42,7 @@ class TestCppToSipTransformer(unittest.TestCase):
         
         transformer = cpptosiptransformer.CppToSipTransformer()
         transformer.setExportMacros(exportMacros)
+        transformer.setIgnoreBaseClasses(ignoreBases)
         siptree = transformer.convert(syms)
         print("Sip----------------------------------")
         print(siptree.topScope().format())
@@ -182,6 +183,15 @@ class Foo {
 };
 """,
         [cpptosiptransformer.MethodAnnotationRule("ctor","QWidget*","parent","Transfer")])
+
+    def testIgnoreBases(self):
+        self.convert("""
+
+class Foo : public Bar, public Zyzz {
+   
+};
+""",ignoreBases=["Zyzz"])
+
 
 if __name__ == '__main__':
     unittest.main()

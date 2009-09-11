@@ -169,6 +169,9 @@ class SymbolData(cppsymboldata.SymbolData):
         def setAnnotations(self,annotations):
             self._annotations = annotations
             
+        def annotations(self):
+            return self._annotations
+        
         def format(self):
             annos = ""
             if self._annotations is not None and len(self._annotations)!=0:

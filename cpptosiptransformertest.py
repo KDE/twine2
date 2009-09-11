@@ -23,6 +23,8 @@ import unittest
 import cppparser
 import cppsymboldata
 import cpptosiptransformer
+import sipparser
+import sipsymboldata
 
 class TestCppToSipTransformer(unittest.TestCase):
     def setUp(self):
@@ -44,6 +46,20 @@ class TestCppToSipTransformer(unittest.TestCase):
         print("Sip----------------------------------")
         print(siptree.topScope().format())
         return siptree
+        
+    def annotate(self, siptext, rules):
+        parser = sipparser.SipParser()
+        syms = sipsymboldata.SymbolData()
+        parser.parse(syms,siptext)
+        
+        print("Sip----------------------------------")
+        print(syms.topScope().format())
+        annotator = cpptosiptransformer.SipAnnotator()
+        annotator.setMethodAnnotationRules(rules)
+        annotator.applyRules(syms.topScope())
+        
+        print("Sip output---------------------------")
+        print(syms.topScope().format())
         
     def testConstructor(self):
         self.convert("""
@@ -157,6 +173,15 @@ public:
 };
 """)
 
+
+    def testAnnotate(self):
+        self.annotate("""
+class Foo {
+    public:
+        Foo(QWidget *parent);
+};
+""",
+        [cpptosiptransformer.MethodAnnotationRule("ctor","QWidget*","parent","Transfer")])
 
 if __name__ == '__main__':
     unittest.main()

@@ -122,3 +122,66 @@ class CppToSipTransformer(object):
         sipEnum = self._sipsym.Enum(parentScope, cppEnum.name())
         for item in cppEnum:
             sipEnum.append(item)
+
+class MethodAnnotationRule(object):
+    @sealed
+    def __init__(self,methodTypeMatch,parameterTypeMatch,parameterNameMatch,annotations):
+        self._methodTypeMatch = methodTypeMatch
+        
+        if parameterTypeMatch=='*':
+            self._parameterTypeMatch = None
+        else:
+            self._parameterTypeMatch = set([parameterTypeMatch]) if isinstance(parameterTypeMatch,str) else set(parameterTypeMatch)
+        
+        self._parameterNameMatch = set([parameterNameMatch]) if isinstance(parameterNameMatch,str) else set(parameterNameMatch)
+        self._annotations = [annotations] if isinstance(annotations,str) else annotations
+       
+    def apply(self,symbolData,sipFunction):
+        matchCtor = self._methodTypeMatch in ('ctor','all')
+        matchDtor = self._methodTypeMatch in ('dtor','all')
+        matchAny = self._methodTypeMatch=='all'
+
+        if (matchCtor and isinstance(sipFunction,symbolData.Constructor)) or \
+                (matchDtor and isinstance(sipFunction,symbolData.Destructor)) or \
+                matchAny:
+            for argument in sipFunction.arguments():
+                if self._parameterTypeMatch is None or argument.argumentType() in self._parameterTypeMatch:
+                    if argument.name() in self._parameterNameMatch:
+                        newAnnotations = list(argument.annotations())
+                        for anno in self._annotations:
+                            if anno not in newAnnotations:
+                                newAnnotations.append(anno)
+                                argument.setAnnotations(newAnnotations)
+            
+    def __str__(self):
+        return "ClassMatch: " + repr(self._classMatch) + " MethodTypeMatch: " + methodTypeMatch + \
+            " MethodNameMatch: " + repr(methodNameMatch) + " Annotations: " + repr(self._annotations)
+
+class SipAnnotator(object):
+    @sealed
+    def __init__(self):
+        self._methodAnnotationRules = None
+        self._sipsym = sipsymboldata.SymbolData()
+
+    def setMethodAnnotationRules(self,rules):
+        self._methodAnnotationRules = rules
+        
+    def applyRules(self,sipTree):
+        for item in sipTree:
+            if isinstance(item,self._sipsym.SipClass):
+                self._applyRulesToClass(item)
+                
+    def _applyRulesToClass(self,sipClass):
+        for item in sipClass:
+            if isinstance(item,self._sipsym.Function):
+                self._applyRulesToFunction(self._methodAnnotationRules,item)
+            elif isinstance(item,self._sipsym.Constructor):
+                self._applyRulesToFunction(self._methodAnnotationRules,item)
+            elif isinstance(item,self._sipsym.Destructor):
+                self._applyRulesToFunction(self._methodAnnotationRules,item)
+                
+        self.applyRules(sipClass)
+        
+    def _applyRulesToFunction(self,rules,sipFunction):
+        for rule in rules:
+            rule.apply(self._sipsym, sipFunction)

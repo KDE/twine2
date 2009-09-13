@@ -32,7 +32,6 @@ class SymbolData(cppsymboldata.SymbolData):
 
     def _buildClassIndex(self):
         self._classIndex = {}
-        self._indexScope(self.topScope())
         for scope in self._scopes:
             self._indexScope(scope)
 
@@ -159,6 +158,9 @@ class SymbolData(cppsymboldata.SymbolData):
             else:
                 accu.append(";\n")
             return ''.join(accu)
+
+        def __str__(self):
+            return "<SipClass '%s'>" % (self.name(),)
 
     class Argument(cppsymboldata.SymbolData.Argument):
         @sealed

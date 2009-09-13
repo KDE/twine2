@@ -45,14 +45,7 @@ class SymbolData(object):
     @sealed
     def __init__(self):
         """Instantiate a new SymbolData."""
-        self._topScope = self.TopLevelScope(self)
         self._scopes = []
-        
-    def topScope(self):
-        """Get the top most scope object.
-        
-        Returns a `Scope` object."""
-        return self._topScope
 
     def newScope(self):
         scope = self.TopLevelScope(self)

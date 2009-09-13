@@ -501,8 +501,8 @@ class Foo : Zyzz {
     def xtestQtCoremod(self):
         with open("/usr/share/sip/PyQt4/QtCore/QtCoremod.sip") as fhandle:
             text = fhandle.read()
-        self.parser.parse(self.syms, text)
-        print(self.syms.topScope().format())
+        scope = self.parser.parse(self.syms, text)
+        print(scope.format())
 
     def testFullCompare(self):
         sipdir = "/home/sbe/devel/svn/kde/branches/KDE/4.3/kdebindings/python/pykde4/sip/kdecore/"

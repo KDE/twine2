@@ -77,7 +77,10 @@ class SipParser(object):
         filename -- The filename belonging to the given text. This is used for error messages and can be None.
         debugLevel -- Turns on debug messages from the lexer and parser. 0, the default, means no debug. 2 lists the
                       tokens as they arrive.
-        
+
+        Returns:
+        -- Newly created `Scope` object containing the parsed data.
+
         All of the top level things in the given text are parsed and placed inside the top scope inside the
         symbolData. 
         
@@ -86,7 +89,7 @@ class SipParser(object):
         self._resetState()
 
         self.symbolData = symbolData
-        self.scope = self.symbolData.topScope()
+        self.scope = self.symbolData.newScope()
         
         self.filename = filename
         sipLexer.input (text)
@@ -94,7 +97,7 @@ class SipParser(object):
         sipLexer.lexpos = 0
     
         result = self._parse(debug = debugLevel, lexer = self.lexer)
-        return result
+        return self.scope
         
     def _pushScope(self, newScope):
         self._scopeStack.append(self.scope)
@@ -416,6 +419,7 @@ class SipParser(object):
                         | class qualified_id annotation SEMI
                         | class_name SEMI
                         | class_name annotation SEMI"""
+        self._pushAccess('private')
         self.currentClass.setOpaque(True)
     
     def p_base_list_element (self, p):

@@ -120,6 +120,9 @@ class CppParser(object):
         debugLevel -- Turns on debug messages from the lexer and parser. 0, the default, means no debug. 2 lists the
                       tokens as they arrive.
         
+        Returns:
+        -- Newly created `Scope` object containing the parsed data.
+        
         All of the top level things in the given text are parsed and placed inside the top scope inside the
         symbolData. 
         
@@ -128,16 +131,16 @@ class CppParser(object):
         self._resetState()
 
         self.symbolData = symbolData
-        self.scope = self.symbolData.topScope()
+        self.scope = self.symbolData.newScope()
         
         chewedText = pplexer.preprocess(text, self._preprocessorValues, self.__compileMacros(self._preprocessorSubstitutionMacros))
 
         self.lexer.input(chewedText)
         self.lexer.lineno = 1
-        self.lexer.lexpos = 0 
+        self.lexer.lexpos = 0
 
         result = self._parse(debug = debugLevel, lexer = self.lexer)
-        return result
+        return self.scope
         
     def __compileMacros(self, macroList):
         # Convert the list of macros to regular expressions. Macro which are

@@ -36,8 +36,8 @@ class TestSipParser(unittest.TestCase):
         self.syms = sipsymboldata.SymbolData()
         
     def mirrorTest(self,code):
-        self.parser.parse(self.syms, code);
-        new_code = self.syms.topScope().format()
+        scope = self.parser.parse(self.syms, code, debugLevel=0);
+        new_code = scope.format()
         if CleanWhitespace(new_code)!=CleanWhitespace(code):
             self.fail("Output code doesn't match input code.\n---- Original:\n" + code + "\n---- Result:" + new_code)
 
@@ -206,18 +206,16 @@ class TestSipParser(unittest.TestCase):
 
     def testAccess(self):
         self.mirrorTest(
-            """
-            void PlainPreFunc ();
-            class Foo {
-                public:
-                    class Bar {
-                        private:
-                            void privateBar();
-                    };
-                    void publicFoo();
-            };
-            void PlainPostFunc ();
-            """)
+            """void PlainPreFunc ();
+class Foo {
+    public:
+        class Bar {
+                void privateBar ();
+        };
+        void publicFoo ();
+};
+void PlainPostFunc ();
+""")
     
 
     def testFunctionIgnore(self):
@@ -246,7 +244,7 @@ class TestSipParser(unittest.TestCase):
 class KLibrary : QLibrary
 {
 public:
-//ig     typedef void (* void_function_ptr)();
+//ig     typedef void (*void_function_ptr)();
 };
 """)
 

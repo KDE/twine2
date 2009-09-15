@@ -189,3 +189,125 @@ class SipAnnotator(object):
     def _applyRulesToFunction(self,rules,sipFunction):
         for rule in rules:
             rule.apply(self._sipsym, sipFunction)
+
+class _UpdateConvertToSubClassCodeDirectives(object):
+    def __init__(self,symbolData,scopeList,ignoreClassList):
+        self._symbolData = symbolData
+        self._scopeList = scopeList
+        self._ignoreClassList = ignoreClassList
+        self._subclassList = None
+        self._classToSubclassMapping = None
+
+    def run(self):
+        if len(self._scopeList)==0:
+            return
+        
+        # Collect all of the classes that we need to consider.
+        self._classList = self._findClasses(self._scopeList)
+        self._subclassList = [class_ for class_ in self._classList
+            if len(class_.bases())!=0 and class_.name() not in self._ignoreClassList]
+        
+        # Build a mapping from class objects to their subclasses.
+        self._classToSubclassMapping = {}
+        for class_ in self._subclassList:
+            for baseName in class_.bases():
+                base = self._symbolData.lookupClass(baseName)
+                subClassList = self._classToSubclassMapping.setdefault(base,[])
+                subClassList.append(class_)
+        
+        # Figure out which superclass heirachies need ConvertToSubClassCode.
+        # The top of a heirachy tree has no subclasses (i.e. doesn't appear in _subclassList) but
+        # will appear in _classToSubclassMapping.
+        commonSuperClasses = set(self._classToSubclassMapping.keys()) - set(self._subclassList)
+        
+        for class_ in commonSuperClasses:
+            self._insertCTSCC(class_)
+
+    def _generateCTSCC(self,class_):
+        return "%%ConvertToSubClassCode\n    // CTSCC for subclasses of '%s'\n    sipClass = NULL;\n%s%%End\n" % (class_.name(),self._generateCTSCCPart(class_))
+            
+    def _generateCTSCCPart(self,class_,indent="",joiner=""):
+        accu = []
+        if class_ in self._subclassList:
+            accu.append(indent)
+            accu.append(joiner)
+            accu.append("if (dynamic_cast<")
+            accu.append(class_.name())
+            accu.append("*>(sipCpp)) {\n")
+            accu.append(indent)
+            accu.append("    sipClass = sipClass_")
+            accu.append(class_.name())
+            accu.append(";\n")
+        
+        joiner = ""
+        subclasses = self._classToSubclassMapping.get(class_,[])
+        def namekey(class_): return class_.name()
+        subclasses.sort(key=namekey)
+        
+        for subclass in subclasses:
+            accu.append(self._generateCTSCCPart(subclass,indent+"    ",joiner))
+            joiner = "else "
+            
+        if class_ in self._subclassList:
+            accu.append(indent)
+            accu.append("}\n")
+            
+        return "".join(accu)
+        
+    def _insertCTSCC(self,class_):
+        subclasses = self._findAllSubclasses(class_)
+        
+        # Find an existing %ConvertToSubClassCode block.
+        for subclass in subclasses:
+            directive = self._findDirective(subclass,"%ConvertToSubClassCode")
+            if directive is not None:
+                break
+        else:
+            # Create a new %ConvertToSubClassCode block.
+            # Try the root first.
+            if class_ in self._classList:
+                directiveClass = class_
+            else:
+                # Choose a subclass, use the first one by name.
+                def namekey(class_): return class_.name()
+                subclasses.sort(key=namekey)
+                directiveClass = subclasses[0]
+            directive = self._symbolData.SipDirective(directiveClass,"%ConvertToSubClassCode")
+        directive.setBody(self._generateCTSCC(class_))
+        
+    def _findDirective(self,class_,directiveName):
+        for item in class_:
+            if isinstance(item,self._symbolData.SipDirective):
+                if item.name()==directiveName:
+                    return item
+        return None
+
+    def _findAllSubclasses(self,class_):
+        result = []
+        if class_ in self._subclassList:
+            result.append(class_)
+        for subclass in self._classToSubclassMapping.get(class_,[]):
+            result.extend(self._findAllSubclasses(subclass))
+        return result
+        
+    def _findClasses(self,scope):
+        classList = []
+        for item in scope:
+            if isinstance(item,self._symbolData.SipClass):
+                classList.append(item)
+            if isinstance(item,self._symbolData.Scope):
+                classList.extend(self._findClasses(item))
+        return classList
+
+def UpdateConvertToSubClassCodeDirectives(symbolData,scopeList,ignoreClassList=[]):
+    """Insert of update CTSCC directives
+    
+    Insert or update the Sip ConvertToSubClassCode directives in the given list of scopes.
+    
+    Keyword arguments:
+    symbolData -- 
+    scopeList -- List of scopes containing the classes which need to be updated.
+    ignoreClassList -- List of class names which should be ignored.
+    """
+    _UpdateConvertToSubClassCodeDirectives(symbolData,scopeList,ignoreClassList).run()
+    

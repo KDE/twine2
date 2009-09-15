@@ -192,6 +192,33 @@ class Foo : public Bar, public Zyzz {
 };
 """,ignoreBases=["Zyzz"])
 
+    def testCTSCC(self):
+        parser = sipparser.SipParser()
+        syms = sipsymboldata.SymbolData()
+        globalScope = parser.parse(syms,"""
+class QWidget {};
+class QObject {};
+class QBar : QWidget {};
+""")
+        scope = parser.parse(syms,"""
+class Foo {
+};
+class FooSub : Foo {
+};
+class BarWidget : QBar {
+};
+
+class Zyzz : BarWidget {
+
+};
+class SteelBar : QBar {};
+class Bob : QObject {};
+""")
+        annotator = cpptosiptransformer.SipAnnotator()
+        cpptosiptransformer.UpdateConvertToSubClassCodeDirectives(syms,[scope],["Zyzz"])
+        
+        print("Sip----------------------------------")
+        print(scope.format())
 
 if __name__ == '__main__':
     unittest.main()

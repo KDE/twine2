@@ -127,6 +127,7 @@ class CppToSipTransformer(object):
         for item in cppEnum:
             sipEnum.append(item)
 
+###########################################################################
 class MethodAnnotationRule(object):
     @sealed
     def __init__(self,methodTypeMatch,parameterTypeMatch,parameterNameMatch,annotations):
@@ -189,6 +190,20 @@ class SipAnnotator(object):
     def _applyRulesToFunction(self,rules,sipFunction):
         for rule in rules:
             rule.apply(self._sipsym, sipFunction)
+
+###########################################################################
+
+def UpdateConvertToSubClassCodeDirectives(symbolData,scopeList,ignoreClassList=[]):
+    """Insert of update CTSCC directives
+    
+    Insert or update the Sip ConvertToSubClassCode directives in the given list of scopes.
+    
+    Keyword arguments:
+    symbolData -- 
+    scopeList -- List of scopes containing the classes which need to be updated.
+    ignoreClassList -- List of class names which should be ignored.
+    """
+    _UpdateConvertToSubClassCodeDirectives(symbolData,scopeList,ignoreClassList).run()
 
 class _UpdateConvertToSubClassCodeDirectives(object):
     def __init__(self,symbolData,scopeList,ignoreClassList):
@@ -298,16 +313,4 @@ class _UpdateConvertToSubClassCodeDirectives(object):
             if isinstance(item,self._symbolData.Scope):
                 classList.extend(self._findClasses(item))
         return classList
-
-def UpdateConvertToSubClassCodeDirectives(symbolData,scopeList,ignoreClassList=[]):
-    """Insert of update CTSCC directives
-    
-    Insert or update the Sip ConvertToSubClassCode directives in the given list of scopes.
-    
-    Keyword arguments:
-    symbolData -- 
-    scopeList -- List of scopes containing the classes which need to be updated.
-    ignoreClassList -- List of class names which should be ignored.
-    """
-    _UpdateConvertToSubClassCodeDirectives(symbolData,scopeList,ignoreClassList).run()
     

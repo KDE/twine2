@@ -67,6 +67,9 @@ class SymbolData(cppsymboldata.SymbolData):
         def setAnnotations(self,annotations):
             self._annotations = annotations
             
+        def annotations(self):
+            return self._annotations
+            
         def setCppArgs(self,cppArgs):
             self._cppargs = cppArgs
             
@@ -261,7 +264,7 @@ class SymbolData(cppsymboldata.SymbolData):
 
     class SipDirective(cppsymboldata.SymbolData.ScopedEntity, SipBlock):
         @sealed
-        def __init__(self, parentScope, name, filename, lineno):
+        def __init__(self, parentScope, name, filename=None, lineno=-1):
             cppsymboldata.SymbolData.ScopedEntity.__init__(self, parentScope, filename, lineno)
             SymbolData.SipBlock.__init__(self, name)
             

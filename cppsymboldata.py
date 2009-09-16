@@ -117,6 +117,12 @@ class SymbolData(object):
         def _symbolData(self):
             return self._scope._symbolData()
         
+        def sourceLocation(self):
+            if self._filename is not None:
+                return "%s:%i" % (self._filename,self._lineno)
+            else:
+                return "???:%i" % (self._lineno,)
+        
     class Namespace(ScopedEntity,Scope):
         """Represents a C++ style namespace."""
         @sealed

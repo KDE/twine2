@@ -314,3 +314,44 @@ class _UpdateConvertToSubClassCodeDirectives(object):
                 classList.extend(self._findClasses(item))
         return classList
     
+###########################################################################
+def SanityCheckSip(symbolData,scopeList):
+    _SanityCheckSip(symbolData,scopeList).run()
+    
+class _SanityCheckSip(object):
+    def __init__(self,symbolData,scopeList):
+        self._symbolData = symbolData
+        self._scopeList = scopeList
+        
+    def run(self):
+        for scope in self._scopeList:
+            self._checkScope(scope)
+            
+    def _checkScope(self,scope):
+        for item in scope:
+            if isinstance(item,self._symbolData.SipClass):
+                self._checkClass(item)
+            elif isinstance(item,self._symbolData.Function):
+                self._checkFunction(item)
+                
+    def _checkClass(self,sipClass):
+        # Check the base classes.
+        for baseName in sipClass.bases():
+            try:
+                self._symbolData.lookupClass(baseName)
+            except KeyError:
+                print("Error: %s Unknown base class '%s'" % (sipClass.sourceLocation(),baseName))
+    
+        for item in sipClass:
+            if isinstance(item,self._symbolData.Constructor) or isinstance(item,self._symbolData.Destructor) or \
+            isinstance(item,self._symbolData.Function):
+                self._checkFunction(item)
+
+    def _checkFunction(self,function):
+        if function.isIgnore():
+            return
+
+        for arg in function.arguments():
+            if arg.argumentType().endswith('&') and 'In' not in arg.annotations() and 'Out' not in arg.annotations():
+                print("Error: %s Parameter '%s' requires a /In/ or /Out/ annotation." % (function.sourceLocation(),arg.name()))
+                

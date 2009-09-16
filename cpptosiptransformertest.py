@@ -62,6 +62,15 @@ class TestCppToSipTransformer(unittest.TestCase):
         print("Sip output---------------------------")
         print(syms.topScope().format())
         
+    def sanityCheck(self, siptext):
+        parser = sipparser.SipParser()
+        syms = sipsymboldata.SymbolData()
+        scope = parser.parse(syms,siptext)
+        
+        cpptosiptransformer.SanityCheckSip(syms,[scope])
+        print("Sip----------------------------------")
+        print(scope.format())
+        
     def testConstructor(self):
         self.convert("""
 #include <foo.h>
@@ -219,6 +228,18 @@ class Bob : QObject {};
         
         print("Sip----------------------------------")
         print(scope.format())
+
+    def testSanityCheck(self):
+        self.sanityCheck("""
+class Foo : QWidget {};
+""")
+
+    def testSanityCheck2(self):
+        self.sanityCheck("""
+void badFoo(int& bar);
+void goodFoo(int& bar /In/);
+""")
+
 
 if __name__ == '__main__':
     unittest.main()

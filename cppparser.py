@@ -129,7 +129,8 @@ class CppParser(object):
         If a parse error is encountered, the whole program is exited. Sorry.
         """
         self._resetState()
-
+        self.filename = filename
+        
         self.symbolData = symbolData
         self.scope = self.symbolData.newScope()
         

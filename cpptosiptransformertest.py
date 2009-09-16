@@ -36,31 +36,33 @@ class TestCppToSipTransformer(unittest.TestCase):
             parser.bareMacros = exportMacros
             
         syms = cppsymboldata.SymbolData()
-        parser.parse(syms,cpptext)
+        scope = parser.parse(syms,cpptext)
         print("Cpp----------------------------------")
-        print(syms.topScope().format())
+        print(scope.format())
         
         transformer = cpptosiptransformer.CppToSipTransformer()
         transformer.setExportMacros(exportMacros)
         transformer.setIgnoreBaseClasses(ignoreBases)
-        siptree = transformer.convert(syms)
+        
+        sipsym = sipsymboldata.SymbolData()
+        sipscope = transformer.convert(scope,sipsym)
         print("Sip----------------------------------")
-        print(siptree.topScope().format())
-        return siptree
+        print(sipscope.format())
+        return sipscope
         
     def annotate(self, siptext, rules):
         parser = sipparser.SipParser()
         syms = sipsymboldata.SymbolData()
-        parser.parse(syms,siptext)
+        scope = parser.parse(syms,siptext)
         
         print("Sip----------------------------------")
-        print(syms.topScope().format())
+        print(scope.format())
         annotator = cpptosiptransformer.SipAnnotator()
         annotator.setMethodAnnotationRules(rules)
-        annotator.applyRules(syms.topScope())
+        annotator.applyRules(scope)
         
         print("Sip output---------------------------")
-        print(syms.topScope().format())
+        print(scope.format())
         
     def sanityCheck(self, siptext):
         parser = sipparser.SipParser()

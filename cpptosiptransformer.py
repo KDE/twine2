@@ -33,10 +33,11 @@ class CppToSipTransformer(object):
     def setIgnoreBaseClasses(self, baseClassList):
         self._ignoredBaseClasses = baseClassList if baseClassList is not None else []
         
-    def convert(self, cpptree):
-        self._sipsym = sipsymboldata.SymbolData()
-        self._convertScope(cpptree.topScope(),self._sipsym.topScope())
-        return self._sipsym
+    def convert(self, cppScope, sipsymboldata):
+        self._sipsym = sipsymboldata
+        sipScope = self._sipsym.newScope()
+        self._convertScope(cppScope,sipScope)
+        return sipScope
         
     def _convertScope(self,cppScope,destScope):
         for item in cppScope:

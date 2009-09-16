@@ -325,6 +325,24 @@ class TestCppParser(unittest.TestCase):
             """)
         print(scope.format())
 
+    def testMacro4(self):
+        self.parser.bareMacros = ["KGGZMOD_EXPORT"]
+        scope = self.parser.parse(self.syms,
+            """
+class Module
+{
+public:
+    Module(const QString &name);
+    ~Module();
+
+    enum State
+    {
+            created,
+            done
+    };
+};
+            """)
+        print(scope.format())
 
     def testLiveAmmo(self):
         with open("/home/sbe/devel/svn/kde/branches/KDE/4.3/kdeedu/marble/src/lib/MarbleMap.h") as fhandle:

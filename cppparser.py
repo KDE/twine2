@@ -349,7 +349,7 @@ class CppParser(object):
                         | skip_macro"""
         #if self.stateInfo.lexState != 'operator':
         #   self.lexer.begin (self.stateInfo.lexState)
-        #self.stateInfo.lexState  = 'variable'
+        self.lexer.lexstate  = 'variable'
         #self.stateInfo.inTypedef = False
 
         self.arguments   = []

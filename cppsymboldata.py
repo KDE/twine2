@@ -102,9 +102,16 @@ class SymbolData(object):
         def __init__(self,symbolData):
             SymbolData.Scope.__init__(self)
             self._symbolDataPtr = symbolData
+            self._headerFilename = None
             
         def _symbolData(self):
             return self._symbolDataPtr
+    
+        def setHeaderFilename(self,filename):
+            self._headerFilename = filename
+    
+        def headerFilename(self):
+            return self._headerFilename
     
     class ScopedEntity(object):
         @sealed

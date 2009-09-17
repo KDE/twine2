@@ -36,6 +36,17 @@ class CppToSipTransformer(object):
     def convert(self, cppScope, sipsymboldata):
         self._sipsym = sipsymboldata
         sipScope = self._sipsym.newScope()
+        sipScope.setHeaderFilename(cppScope.headerFilename())
+        
+        if sipScope.headerFilename() is not None:
+            includeDirective = self._sipsym.SipDirective(sipScope,"%ModuleHeaderCode")
+            includeDirective.setBody(
+"""%%ModuleHeaderCode
+#include <%s>
+%%End
+""" % (sipScope.headerFilename(),))
+            #sipScope.append(includeDirective)
+        
         self._convertScope(cppScope,sipScope)
         return sipScope
         

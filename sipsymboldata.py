@@ -257,7 +257,10 @@ class SymbolData(cppsymboldata.SymbolData):
 
         def setBody(self, body):
             self._body = body
-
+            
+        def body(self):
+            return self._body
+            
         def format(self,indent=0):
             pre = SymbolData._indentString(indent)
             return self._body + '\n'

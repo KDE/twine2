@@ -203,6 +203,14 @@ class Foo : public Bar, public Zyzz {
 };
 """,ignoreBases=["Zyzz"])
 
+    def testPrivateVars(self):
+        self.convert("""
+class Statistics {
+private:
+    StatisticsPrivate* d;
+};
+""")
+
     def testCTSCC(self):
         parser = sipparser.SipParser()
         syms = sipsymboldata.SymbolData()

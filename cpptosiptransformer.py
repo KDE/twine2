@@ -113,10 +113,14 @@ class CppToSipTransformer(object):
         return self._sipsym.Argument(argumentType, cppArgument.name(), defaultValue)
 
     def _convertVariable(self,cppVariable,parentScope):
+        if cppVariable.access()==cppsymboldata.SymbolData.ACCESS_PRIVATE:
+            return
+            
         sipVariable = self._sipsym.Variable(parentScope, cppVariable.name())
         sipVariable.setArgument(self._convertArgument(cppVariable.argument()))
         if cppVariable.storage()=='static':
             sipVariable.setStorage('static')
+        sipVariable.setAccess(cppVariable.access())
         return sipVariable
     
     def _convertNamespace(self,cppNamespace,parentScope):

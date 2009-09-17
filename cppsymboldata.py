@@ -250,6 +250,9 @@ class SymbolData(object):
         def setOpaque(self,opaque):
             self._opaque = opaque
             
+        def opaque(self):
+            return self._opaque
+            
         def addMacro(self,macro):
             self._macros.append(macro)
             

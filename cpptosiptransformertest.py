@@ -211,6 +211,11 @@ private:
 };
 """)
 
+    def testOpaqueClasses(self):
+        self.convert("""
+class Statistics;
+""")
+
     def testCTSCC(self):
         parser = sipparser.SipParser()
         syms = sipsymboldata.SymbolData()

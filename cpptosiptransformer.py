@@ -83,7 +83,7 @@ class CppToSipTransformer(object):
             sipFunction.setStorage('static')
                    
     def _convertClass(self,cppClass,parentScope):
-        if not self._isClassExported(cppClass):
+        if not self._isClassExported(cppClass) or cppClass.opaque():
             return None
     
         sipClass = self._sipsym.SipClass(parentScope, cppClass.name())

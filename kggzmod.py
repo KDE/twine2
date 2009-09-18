@@ -33,9 +33,10 @@ tk = toolkit.ModuleGenerator(
     macros=qtkdemacros.QtMacros(),
     bareMacros=qtkdemacros.QtBareMacros(["KGGZMOD_EXPORT"]),
     
-    # Sip
+    # Sip generation
     sipImportDirs=["/usr/share/sip/PyQt4/"],
-    sipImports=["QtCore/QtCoremod.sip"])
+    sipImports=["QtCore/QtCoremod.sip"],
+    copyrightNotice=qtkdemacros.copyrightNotice())
     
 tk.run()
 #print(repr(tk.extractCmakeListsHeaders()))

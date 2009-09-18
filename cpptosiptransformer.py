@@ -26,6 +26,8 @@ class CppToSipTransformer(object):
         self._sipsym = None
         self._exportMacros = None
         self._ignoredBaseClasses = []
+        self._copyrightNotice = None
+        self._cppScope = None
         
     def setExportMacros(self, macroList):
         self._exportMacros = set(macroList) if macroList is not None else None
@@ -33,19 +35,19 @@ class CppToSipTransformer(object):
     def setIgnoreBaseClasses(self, baseClassList):
         self._ignoredBaseClasses = baseClassList if baseClassList is not None else []
         
+    def setCopyrightNotice(self,noticeText):
+        self._copyrightNotice = noticeText
+        
     def convert(self, cppScope, sipsymboldata):
+        self._cppScope = cppScope
         self._sipsym = sipsymboldata
         sipScope = self._sipsym.newScope()
         sipScope.setHeaderFilename(cppScope.headerFilename())
         
-        if sipScope.headerFilename() is not None:
-            includeDirective = self._sipsym.SipDirective(sipScope,"%ModuleHeaderCode")
-            includeDirective.setBody(
-"""%%ModuleHeaderCode
-#include <%s>
-%%End
-""" % (sipScope.headerFilename(),))
-            #sipScope.append(includeDirective)
+        if self._copyrightNotice is not None:
+            for line in self._copyrightNotice.split('\n'):
+                comment = self._sipsym.Comment(sipScope)
+                comment.setValue(line+'\n')
         
         self._convertScope(cppScope,sipScope)
         return sipScope
@@ -99,6 +101,15 @@ class CppToSipTransformer(object):
     
         sipClass = self._sipsym.SipClass(parentScope, cppClass.name())
         sipClass.setBases( [base for base in cppClass.bases() if base not in self._ignoredBaseClasses] )
+        
+        if self._cppScope.headerFilename() is not None:
+            includeDirective = self._sipsym.SipDirective(sipClass,"%TypeHeaderCode")
+            includeDirective.setBody(
+"""%%TypeHeaderCode
+#include <%s>
+%%End
+""" % (self._cppScope.headerFilename(),))
+        
         self._convertScope(cppClass,sipClass)
     
     def _isClassExported(self,cppClass):

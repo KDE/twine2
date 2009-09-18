@@ -29,7 +29,7 @@ class ModuleGenerator(object):
     @sealed
     def __init__(self,module,cmakelists=[],ignoreHeaders=[],outputDirectory=None,
             preprocessSubstitutionMacros=[],macros=[],bareMacros=[],exportMacros=None,ignoreBases=None,
-            sipImportDirs=[],sipImports=[]):
+            sipImportDirs=[],sipImports=[],copyrightNotice=None):
             
         self._module = module
         self._cmakelists = [cmakelists] if isinstance(cmakelists,str) else cmakelists
@@ -51,6 +51,7 @@ class ModuleGenerator(object):
         self._transformer = cpptosiptransformer.CppToSipTransformer()
         self._transformer.setExportMacros(exportMacros)
         self._transformer.setIgnoreBaseClasses(ignoreBases)
+        self._transformer.setCopyrightNotice(copyrightNotice)
         
         self._sipImportDirs = sipImportDirs
         self._sipImports = sipImports
@@ -92,6 +93,7 @@ class ModuleGenerator(object):
                 text = fhandle.read()
             basename = os.path.basename(filename)
             scope = self._cppParser.parse(self._symbolData, text, filename=filename)
+            scope.setHeaderFilename(basename)
             headerScopeTuples.append( (basename,scope) )
             #print(scope.format())
         return headerScopeTuples

@@ -273,7 +273,7 @@ class SymbolData(cppsymboldata.SymbolData):
             
     class Comment(cppsymboldata.SymbolData.ScopedEntity):
         @sealed
-        def __init__(self, parentScope, filename, lineno):
+        def __init__(self, parentScope, filename=None, lineno=-1):
             cppsymboldata.SymbolData.ScopedEntity.__init__(self, parentScope, filename, lineno)
             self._comment = None
             

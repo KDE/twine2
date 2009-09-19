@@ -29,7 +29,7 @@ class ModuleGenerator(object):
     @sealed
     def __init__(self,module,cmakelists=[],ignoreHeaders=[],outputDirectory=None,
             preprocessSubstitutionMacros=[],macros=[],bareMacros=[],exportMacros=None,ignoreBases=None,
-            sipImportDirs=[],sipImports=[],copyrightNotice=None):
+            sipImportDirs=[],sipImports=[],copyrightNotice=None,annotationRules=[]):
             
         self._module = module
         self._cmakelists = [cmakelists] if isinstance(cmakelists,str) else cmakelists
@@ -53,11 +53,16 @@ class ModuleGenerator(object):
         self._transformer.setIgnoreBaseClasses(ignoreBases)
         self._transformer.setCopyrightNotice(copyrightNotice)
         
+        self._copyrightNotice = copyrightNotice
+        
         self._sipImportDirs = sipImportDirs
         self._sipImports = sipImports
         
         self._sipParser = sipparser.SipParser()
         self._sipSymbolData = sipsymboldata.SymbolData()
+        
+        self._annotator = cpptosiptransformer.SipAnnotator()
+        self._annotator.setMethodAnnotationRules(annotationRules)
         
     def run(self):
         print("Extracting header file list from CMake.")
@@ -71,6 +76,11 @@ class ModuleGenerator(object):
         
         print("Convering header files into Sip files.")
         moduleSipScopes = self._convertCppToSip(headerScopeTuples)
+        
+        print("Annotating Sip files.")
+        self._annotateSipScopes(moduleSipScopes)
+        
+        print(self._indexSip(moduleSipScopes))
         
         for scope in moduleSipScopes:
             print(scope.format())
@@ -146,3 +156,37 @@ class ModuleGenerator(object):
             sipScopes.append(sipscope)
         return sipScopes
         
+    def _annotateSipScopes(self,moduleSipScopes):
+        for scope in moduleSipScopes:
+            self._annotator.applyRules(scope)
+        
+    def _indexSip(self,scopes):
+        accu = []
+        
+        if self._copyrightNotice is not None:
+            accu.append(self._copyrightNotice)
+        
+        accu.append("\n%Module ")
+        accu.append(self._module)
+        accu.append("\n\n")
+        
+        accu.append("%ModuleHeaderCode\n")
+        accu.append("#pragma GCC visibility push(default)\n")
+        accu.append("%End\n\n")
+        
+        # %Import
+        for sipImport in self._sipImports:
+            accu.append("%Import ")
+            accu.append(sipImport)
+            accu.append("\n")
+        accu.append("\n")
+        
+        for scope in scopes:
+            accu.append("%Include ")
+            accu.append(scope.headerFilename()[:-2]+".sip")
+            accu.append("\n")
+        
+        return ''.join(accu)
+
+def AnnotationRule(methodTypeMatch,parameterTypeMatch,parameterNameMatch,annotations):
+    return cpptosiptransformer.MethodAnnotationRule(methodTypeMatch,parameterTypeMatch,parameterNameMatch,annotations)

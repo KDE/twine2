@@ -21,7 +21,7 @@ import toolkit
 import qtkdemacros
 
 tk = toolkit.ModuleGenerator(
-    module="kggzmod",
+    module="PyKDE4.kggzmod",
     outputDirectory="kggzmod",
     
     # .h file extraction
@@ -36,7 +36,10 @@ tk = toolkit.ModuleGenerator(
     # Sip generation
     sipImportDirs=["/usr/share/sip/PyQt4/"],
     sipImports=["QtCore/QtCoremod.sip"],
-    copyrightNotice=qtkdemacros.copyrightNotice())
+    copyrightNotice=qtkdemacros.copyrightNotice(),
     
+    #annotationRules=[toolkit.AnnotationRule()]
+    )
+
 tk.run()
 #print(repr(tk.extractCmakeListsHeaders()))

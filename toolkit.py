@@ -23,6 +23,7 @@ import sipparser
 import sipsymboldata
 import cpptosiptransformer
 from sealed import sealed
+import os
 import os.path
 
 class ModuleGenerator(object):
@@ -82,11 +83,25 @@ class ModuleGenerator(object):
         
         print("Computing 'Convert To Sub Class Code'.")
         cpptosiptransformer.UpdateConvertToSubClassCodeDirectives(self._sipSymbolData,moduleSipScopes,[])
+
+        print("Sanity check.")
+        cpptosiptransformer.SanityCheckSip(self._sipSymbolData,moduleSipScopes)
+
+        print("Writing Sip files.")
+        if self._outputDirectory is not None:
+
+            if os.path.exists(self._outputDirectory) and not os.path.isdir(self._outputDirectory):
+                print("Error: Output directory '%s' is not a directory.")
+            else:
+                if not os.path.exists(self._outputDirectory):
+                    os.mkdir(self._outputDirectory)
+                self._writeScopes(moduleSipScopes)
+                self._writeIndexSip(moduleSipScopes)
+        else:        
+            print("Warning: Skipping writing because no output directory was specified.")
         
-        print(self._indexSip(moduleSipScopes))
-        
-        for scope in moduleSipScopes:
-            print(scope.format())
+        #for scope in moduleSipScopes:
+        #    print(scope.format())
         print("Done.")
         
     def extractCmakeListsHeaders(self):
@@ -163,6 +178,23 @@ class ModuleGenerator(object):
         for scope in moduleSipScopes:
             self._annotator.applyRules(scope)
         
+    def _convertHeaderNameToSip(self,headerName):
+        return headerName[:-2]+".sip"
+        
+    def _writeScopes(self,moduleSipScopes):
+        for scope in moduleSipScopes:
+            fullPath = os.path.join(self._outputDirectory,self._convertHeaderNameToSip(scope.headerFilename()))
+            with open(fullPath,'w') as fhandle:
+                fhandle.write(scope.format())
+                
+    def _writeIndexSip(self,scopes):
+        moduleName = self._module
+        if '.' in self._module:
+            moduleName = self._module[self._module.rfind('.')+1:]
+        fullFilename = os.path.join(self._outputDirectory,moduleName) + "mod.sip"
+        with open(fullFilename,'w') as fhandle:
+            fhandle.write(self._indexSip(scopes))
+        
     def _indexSip(self,scopes):
         accu = []
         
@@ -186,7 +218,7 @@ class ModuleGenerator(object):
         
         for scope in scopes:
             accu.append("%Include ")
-            accu.append(scope.headerFilename()[:-2]+".sip")
+            accu.append(self._convertHeaderNameToSip(scope.headerFilename()))
             accu.append("\n")
         
         return ''.join(accu)

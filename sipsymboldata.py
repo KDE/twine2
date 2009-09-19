@@ -254,7 +254,10 @@ class SymbolData(cppsymboldata.SymbolData):
         def __init__(self, name):
             self._name = name
             self._body = None
-
+            
+        def name(self):
+            return self._name
+        
         def setBody(self, body):
             self._body = body
             

@@ -244,6 +244,25 @@ class Bob : QObject {};
         print("Sip----------------------------------")
         print(scope.format())
 
+    def testCTSCC2(self):
+        parser = sipparser.SipParser()
+        syms = sipsymboldata.SymbolData()
+        globalScope = parser.parse(syms,"""
+class QWidget {};
+""")
+        scope = parser.parse(syms,"""
+namespace FooSpace {
+    class Foo : QWidget {
+    };
+};
+""")
+        annotator = cpptosiptransformer.SipAnnotator()
+        cpptosiptransformer.UpdateConvertToSubClassCodeDirectives(syms,[scope],["Zyzz"])
+        
+        print("Sip----------------------------------")
+        print(scope.format())
+
+
     def testSanityCheck(self):
         self.sanityCheck("""
 class Foo : QWidget {};

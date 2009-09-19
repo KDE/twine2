@@ -40,7 +40,7 @@ class SymbolData(cppsymboldata.SymbolData):
             if isinstance(item,SymbolData.SipClass):
                 self._classIndex[item.name()] = item
             elif isinstance(item,SymbolData.Namespace):
-                self._indexScope(self,item)
+                self._indexScope(item)
 
     class _SipEntityExtra(object):
         @sealed

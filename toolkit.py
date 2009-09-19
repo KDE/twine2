@@ -80,6 +80,9 @@ class ModuleGenerator(object):
         print("Annotating Sip files.")
         self._annotateSipScopes(moduleSipScopes)
         
+        print("Computing 'Convert To Sub Class Code'.")
+        cpptosiptransformer.UpdateConvertToSubClassCodeDirectives(self._sipSymbolData,moduleSipScopes,[])
+        
         print(self._indexSip(moduleSipScopes))
         
         for scope in moduleSipScopes:

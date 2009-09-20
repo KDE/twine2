@@ -66,16 +66,18 @@ class ModuleGenerator(object):
         self._annotator.setMethodAnnotationRules(annotationRules)
         
     def run(self):
-        print("Extracting header file list from CMake.")
+        print("Extracting header file list from CMake:")
         cppHeaderFilenameList = self.extractCmakeListsHeaders()
+        for filename in cppHeaderFilenameList:
+            print("    Found %s" % (filename,))
         
-        print("Parsing Cpp headers.")
+        print("\nParsing Cpp headers:")
         headerScopeTuples = self._parseHeaders(cppHeaderFilenameList)
         
-        print("Parsing imported Sip files.")
+        print("\nParsing imported Sip files:")
         self._parseImportHeaders()
         
-        print("Convering header files into Sip files.")
+        print("\nConvering header files into Sip files.")
         moduleSipScopes = self._convertCppToSip(headerScopeTuples)
         
         print("Annotating Sip files.")
@@ -117,6 +119,7 @@ class ModuleGenerator(object):
         headerScopeTuples = []
         
         for filename in cppHeaderFilenameList:
+            print("    Parsing %s" % (filename,))
             with open(filename) as fhandle:
                 text = fhandle.read()
             basename = os.path.basename(filename)
@@ -131,6 +134,7 @@ class ModuleGenerator(object):
         
         for sipImport in self._sipImports:
             filename = self._findSipMod(sipImport)
+            print("    Parsing %s" % (filename,))
             scopes.append(self._importSipFile(filename))
         return scopes
         
@@ -170,6 +174,7 @@ class ModuleGenerator(object):
     def _convertCppToSip(self,headerScopeTuples):
         sipScopes = []
         for headerName,cppScope in headerScopeTuples:
+            print("    Converting %s" % (headerName,))
             sipscope = self._transformer.convert(cppScope,self._sipSymbolData)
             sipScopes.append(sipscope)
         return sipScopes

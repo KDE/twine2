@@ -73,6 +73,18 @@ class TestCppToSipTransformer(unittest.TestCase):
         print("Sip----------------------------------")
         print(scope.format())
         
+    def expandClassNames(self, siptext):
+        parser = sipparser.SipParser()
+        syms = sipsymboldata.SymbolData()
+        scope = parser.parse(syms,siptext)
+        
+        print("Sip----------------------------------")
+        print(scope.format())
+        cpptosiptransformer.ExpandClassNames(syms,scope)
+        
+        print("Sip output---------------------------")
+        print(scope.format())        
+        
     def testConstructor(self):
         self.convert("""
 #include <foo.h>
@@ -216,6 +228,16 @@ private:
 class Statistics;
 """)
 
+    def testNamespaces(self):
+        self.convert("""
+namespace FooSpace {
+    class Bar {
+    };
+    class Zyzz : public Bar {
+    };
+}
+""")
+
     def testCTSCC(self):
         parser = sipparser.SipParser()
         syms = sipsymboldata.SymbolData()
@@ -261,6 +283,25 @@ namespace FooSpace {
         
         print("Sip----------------------------------")
         print(scope.format())
+
+    def testClassNameExpand(self):
+        self.expandClassNames("""
+namespace FooSpace {
+    class Foo { };
+    class Bar : Foo { };
+};
+""")
+
+    def testClassNameExpand2(self):
+        self.expandClassNames("""
+namespace FooSpace {
+    class Foo { };
+    class Bar {
+        Foo doFooz(Foo inputFoo);
+        Foo doFoozRef(Foo &inputFoo);
+    };
+};
+""")
 
 
     def testSanityCheck(self):

@@ -101,7 +101,7 @@ class CppToSipTransformer(object):
     
         sipClass = self._sipsym.SipClass(parentScope, cppClass.name())
         sipClass.setBases( [base for base in cppClass.bases() if base not in self._ignoredBaseClasses] )
-        
+
         if self._cppScope.headerFilename() is not None:
             includeDirective = self._sipsym.SipDirective(sipClass,"%TypeHeaderCode")
             includeDirective.setBody(
@@ -154,6 +154,71 @@ class CppToSipTransformer(object):
         for item in cppEnum:
             sipEnum.append(item)
 
+
+###########################################################################
+def ExpandClassNames(sipsym,scope):
+    for item in scope:
+        if isinstance(item,sipsym.SipClass):
+            _ExpandClassNamesForClass(sipsym,item)
+            
+        elif isinstance(item,sipsym.Namespace):
+            ExpandClassNames(sipsym,item)
+            
+        elif isinstance(item,sipsym.Constructor):
+            _ExpandClassNamesForArguments(sipsym,scope,item)
+            
+        elif isinstance(item,sipsym.Function):
+            _ExpandClassNamesForFunction(sipsym,scope,item)
+
+def _ExpandClassNamesForClass(sipsym,sipClass):
+    # Use FQNs when talking about base classes, otherwise SIP fails.
+    fqnBaseList = []
+    for base in sipClass.bases():
+        try:
+            baseObject = sipsym.lookupClass(base,sipClass.parentScope().fqName())
+            print("fqn: "+baseObject.fqName())
+            fqnBaseList.append(baseObject.fqName())
+        except KeyError:
+            fqnBaseList.append(base)
+    sipClass.setBases(fqnBaseList)
+    
+    ExpandClassNames(sipsym,sipClass)
+
+def _ExpandClassNamesForFunction(sipsym,context,sipFunction):
+    sipFunction.setReturn(_ExpandArgument(sipsym,context,sipFunction.return_()))
+    
+    _ExpandClassNamesForArguments(sipsym,context,sipFunction)
+    
+def _ExpandClassNamesForArguments(sipsym,context,sipFunction):
+    sipFunction.setArguments( [_ExpandArgument(sipsym,context,argument) for argument in sipFunction.arguments()] )
+
+_PrimitiveTypes = ["char","signed char","unsigned char","wchar_t","int","unsigned",
+    "unsigned int","short","unsigned short","long","unsigned long","long long",
+    "unsigned long long","float","double","bool","void"]
+
+def _ExpandArgument(sipsym,context,argument):
+    className = argument.argumentType()
+    
+    suffix = ""
+    if className.endswith('*'):
+        className = className[:-1]
+        suffix = '*'
+    if className.endswith('&'):
+        className = className[:-1]
+        suffix = '&'
+        
+    if className in _PrimitiveTypes:
+        return argument
+        
+    classObject = sipsym.lookupClass(className,context.fqName())
+    if classObject.fqName()==className:
+        return argument # Nothing to do.
+
+    newArgument = sipsym.Argument(classObject.fqName(), argument.name(), argument.defaultValue(),
+                    argument.template(), argument.defaultTypes())
+    newArgument.setAnnotations(argument.annotations())
+    return newArgument
+    
 ###########################################################################
 class MethodAnnotationRule(object):
     @sealed
@@ -253,7 +318,7 @@ class _UpdateConvertToSubClassCodeDirectives(object):
         self._classToSubclassMapping = {}
         for class_ in self._subclassList:
             for baseName in class_.bases():
-                base = self._symbolData.lookupClass(baseName)
+                base = self._symbolData.lookupClass(baseName,class_.parentScope().fqName())
                 subClassList = self._classToSubclassMapping.setdefault(base,[])
                 subClassList.append(class_)
         
@@ -365,7 +430,7 @@ class _SanityCheckSip(object):
         # Check the base classes.
         for baseName in sipClass.bases():
             try:
-                self._symbolData.lookupClass(baseName)
+                self._symbolData.lookupClass(baseName,sipClass.parentScope().fqName())
             except KeyError:
                 print("Error: %s Unknown base class '%s'" % (sipClass.sourceLocation(),baseName))
     

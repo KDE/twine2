@@ -77,10 +77,14 @@ class ModuleGenerator(object):
         print("\nParsing imported Sip files:")
         self._parseImportHeaders()
         
-        print("\nConvering header files into Sip files.")
+        print("\nConverting header files into Sip files.")
         moduleSipScopes = self._convertCppToSip(headerScopeTuples)
         
-        print("Annotating Sip files.")
+        print("\nExpanding class names:")
+        for scope in moduleSipScopes:
+            cpptosiptransformer.ExpandClassNames(self._sipSymbolData,scope)
+        
+        print("\nAnnotating Sip files.")
         self._annotateSipScopes(moduleSipScopes)
         
         print("Computing 'Convert To Sub Class Code'.")

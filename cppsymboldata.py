@@ -63,9 +63,20 @@ class SymbolData(object):
         
         This class isn't meant to be used directly but is typically subclassed."""
         @sealed
-        def __init__(self):
+        def __init__(self,name=None):
             self._items = []
             #self._names = {}
+            self._name = name
+            
+        def name(self):
+            return self._name
+            
+        def fqName(self):
+            parentFqn = self.parentScope().fqName()
+            if parentFqn is not None:
+                return parentFqn + "::" + self.name()
+            else:
+                return self.name()
 
         def insertIntoScope(self, name, cppMember):
             if cppMember not in self._items:
@@ -106,7 +117,10 @@ class SymbolData(object):
             
         def _symbolData(self):
             return self._symbolDataPtr
-    
+            
+        def fqName(self):
+            return None
+            
         def setHeaderFilename(self,filename):
             self._headerFilename = filename
     
@@ -121,6 +135,9 @@ class SymbolData(object):
             self._lineno = lineno
             self._scope.insertIntoScope(None, self)
             
+        def parentScope(self):
+            return self._scope
+            
         def _symbolData(self):
             return self._scope._symbolData()
         
@@ -134,13 +151,9 @@ class SymbolData(object):
         """Represents a C++ style namespace."""
         @sealed
         def __init__(self, parentScope, name, filename, lineno):
-            SymbolData.Scope.__init__(self)
+            SymbolData.Scope.__init__(self,name)
             SymbolData.ScopedEntity.__init__(self, parentScope, filename, lineno)
-            self._name = name
-            
-        def name(self):
-            return self._name
-            
+
         def format(self,indent=0):
             pre = SymbolData._indentString(indent)
             return pre + "namespace " + self._name + "\n"+pre+"{\n" + SymbolData.Scope.format(self,indent) + pre + "};\n"
@@ -155,7 +168,7 @@ class SymbolData(object):
             
         def name(self):
             return self._name
-            
+
         def setAccess(self,typeName):
             if typeName in SymbolData.ACCESS_TYPE_MAPPING_TO_NAME.keys():
                 self._access = typeName
@@ -236,12 +249,12 @@ class SymbolData(object):
     class CppClass(Scope, _CppEntity):
         @sealed
         def __init__(self,parentScope, name, filename=None, lineno=-1):
-            SymbolData.Scope.__init__(self)
+            SymbolData.Scope.__init__(self,name)
             SymbolData._CppEntity.__init__(self, parentScope, name, filename, lineno)
             self._bases = []
             self._opaque = False
             self._macros = []
-            
+
         def addBase(self, base):
             self._bases.append(base)
             
@@ -299,6 +312,8 @@ class SymbolData(object):
             return ''.join(accu)
 
     class Argument(object):
+        # Immutable.
+        
         @sealed
         def __init__(self, argumentType, argumentName = None, argumentValue = None, template = None, defaultTypes = None):
             self._argumentType = argumentType
@@ -317,7 +332,13 @@ class SymbolData(object):
             
         def defaultValue(self):
             return self._defaultValue
-
+            
+        def template(self):
+            return self._template
+            
+        def defaultTypes(self):
+            return self._defaultTypes
+            
         def format(self):
             return self._argumentType + (" " + self._argumentName if self._argumentName is not None else "") + \
                 ("" if self._defaultValue is None else " = "+self._defaultValue)
@@ -445,7 +466,7 @@ class SymbolData(object):
     class Typedef(Scope,_CppEntity):
         @sealed
         def __init__(self,parentScope, name, filename, lineno):
-            SymbolData.Scope.__init__(self)
+            SymbolData.Scope.__init__(self,name)
             SymbolData._CppEntity.__init__(self, parentScope, name, filename, lineno)
             self._argumentType = None
             

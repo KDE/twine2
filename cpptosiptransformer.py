@@ -135,7 +135,7 @@ class CppToSipTransformer(object):
         return self._sipsym.Argument(argumentType, cppArgument.name(), defaultValue)
 
     def _convertVariable(self,cppVariable,parentScope):
-        if cppVariable.access()==cppsymboldata.SymbolData.ACCESS_PRIVATE:
+        if cppVariable.access()!=cppsymboldata.SymbolData.ACCESS_PUBLIC:
             return
             
         sipVariable = self._sipsym.Variable(parentScope, cppVariable.name())

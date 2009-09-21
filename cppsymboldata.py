@@ -190,6 +190,16 @@ class SymbolData(object):
             SymbolData._CppEntity.__init__(self, parentScope, name, filename, lineno)
             self._enumerators = []
             
+        def fqName(self):
+            if self.name() is None:
+                return None
+                
+            parentFqn = self.parentScope().fqName()
+            if parentFqn is not None:
+                return parentFqn + "::" + self.name()
+            else:
+                return self.name()
+            
         def appendEnumerator(self,enumerator):
             self.append(enumerator)
             

@@ -175,7 +175,7 @@ def _ExpandClassNamesForClass(sipsym,sipClass):
     fqnBaseList = []
     for base in sipClass.bases():
         try:
-            baseObject = sipsym.lookupClass(base,sipClass.parentScope().fqName())
+            baseObject = sipsym.lookupType(base,sipClass.parentScope().fqName())
             print("fqn: "+baseObject.fqName())
             fqnBaseList.append(baseObject.fqName())
         except KeyError:
@@ -210,7 +210,7 @@ def _ExpandArgument(sipsym,context,argument):
     if className in _PrimitiveTypes:
         return argument
         
-    classObject = sipsym.lookupClass(className,context.fqName())
+    classObject = sipsym.lookupType(className,context.fqName())
     if classObject.fqName()==className:
         return argument # Nothing to do.
 
@@ -318,7 +318,7 @@ class _UpdateConvertToSubClassCodeDirectives(object):
         self._classToSubclassMapping = {}
         for class_ in self._subclassList:
             for baseName in class_.bases():
-                base = self._symbolData.lookupClass(baseName,class_.parentScope().fqName())
+                base = self._symbolData.lookupType(baseName,class_.parentScope().fqName())
                 subClassList = self._classToSubclassMapping.setdefault(base,[])
                 subClassList.append(class_)
         
@@ -430,7 +430,7 @@ class _SanityCheckSip(object):
         # Check the base classes.
         for baseName in sipClass.bases():
             try:
-                self._symbolData.lookupClass(baseName,sipClass.parentScope().fqName())
+                self._symbolData.lookupType(baseName,sipClass.parentScope().fqName())
             except KeyError:
                 print("Error: %s Unknown base class '%s'" % (sipClass.sourceLocation(),baseName))
     

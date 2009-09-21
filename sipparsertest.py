@@ -481,18 +481,18 @@ namespace Foo {
 """)
 
     def testSuperClassQueries(self):
-        self.parser.parse(self.syms, """
+        scope = self.parser.parse(self.syms, """
 class Bar {};
 class Zyzz : Bar {};
 class Foo : Zyzz {
 
 };
 """)
-        bar = self.syms.lookupClass("Bar")
+        bar = self.syms.lookupType("Bar",scope.fqName())
         self.assertTrue(bar is not None)
         self.assertTrue(bar.allSuperClassNames() is not None)
         self.assertTrue(len(bar.allSuperClassNames())==0)
-        foo = self.syms.lookupClass("Foo")
+        foo = self.syms.lookupType("Foo",scope.fqName())
         self.assertTrue(foo is not None)
         fooBases = foo.allSuperClassNames()
         self.assertTrue(fooBases is not None)

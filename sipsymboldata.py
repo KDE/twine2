@@ -22,30 +22,36 @@ class SymbolData(cppsymboldata.SymbolData):
     @sealed
     def __init__(self):
         cppsymboldata.SymbolData.__init__(self)
-        self._classIndex = None
+        self._typeIndex = None
         
-    def lookupClass(self,name,contextFqName):
-        if self._classIndex is None:
-            self._buildClassIndex()
+    def lookupType(self,name,contextFqName):
+        if self._typeIndex is None:
+            self._buildTypeIndex()
             
         if contextFqName is not None:
             pathParts = contextFqName.split("::")
             for i in range(len(pathParts)):
                 canidate = '::'.join(pathParts[:len(pathParts)-i]) + '::' + name
-                if canidate in self._classIndex:
-                    return self._classIndex[canidate]
+                if canidate in self._typeIndex:
+                    return self._typeIndex[canidate]
        
-        return self._classIndex[name]
+        return self._typeIndex[name]
 
-    def _buildClassIndex(self):
-        self._classIndex = {}
+    def _buildTypeIndex(self):
+        self._typeIndex = {}
         for scope in self._scopes:
             self._indexScope(scope)
         
     def _indexScope(self,scope):
         for item in scope:
             if isinstance(item,SymbolData.SipClass):
-                self._classIndex[item.fqName()] = item
+                self._typeIndex[item.fqName()] = item
+                self._indexScope(item)
+            elif isinstance(item,SymbolData.Enum):
+                fqName = item.fqName()
+                if fqName is not None:
+                    print("Indexing enum: " + item.fqName())
+                    self._typeIndex[item.fqName()] = item
             elif isinstance(item,SymbolData.Namespace):
                 self._indexScope(item)
 
@@ -114,7 +120,7 @@ class SymbolData(cppsymboldata.SymbolData):
             for name in self._bases:
                 allBases.add(name)
                 
-                class_ = symbolData.lookupClass(name)
+                class_ = symbolData.lookupType(name,self.fqName())
                 if class_ is not None:
                     allBases.update(class_.allSuperClassNames())
                     

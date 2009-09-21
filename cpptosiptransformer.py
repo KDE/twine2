@@ -207,14 +207,19 @@ def _ExpandArgument(sipsym,context,argument):
         className = className[:-1]
         suffix = '&'
         
-    if className in _PrimitiveTypes:
+    prefix = ""
+    if className.startswith("const "):
+        className = className[6:]
+        prefix = "const "
+    
+    if className in _PrimitiveTypes or '<' in className:
         return argument
         
     classObject = sipsym.lookupType(className,context.fqName())
     if classObject.fqName()==className:
         return argument # Nothing to do.
 
-    newArgument = sipsym.Argument(classObject.fqName(), argument.name(), argument.defaultValue(),
+    newArgument = sipsym.Argument(prefix+classObject.fqName()+suffix, argument.name(), argument.defaultValue(),
                     argument.template(), argument.defaultTypes())
     newArgument.setAnnotations(argument.annotations())
     return newArgument

@@ -50,7 +50,6 @@ class SymbolData(cppsymboldata.SymbolData):
             elif isinstance(item,SymbolData.Enum):
                 fqName = item.fqName()
                 if fqName is not None:
-                    print("Indexing enum: " + item.fqName())
                     self._typeIndex[item.fqName()] = item
             elif isinstance(item,SymbolData.Namespace):
                 self._indexScope(item)

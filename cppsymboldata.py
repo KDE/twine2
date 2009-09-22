@@ -114,9 +114,12 @@ class SymbolData(object):
             SymbolData.Scope.__init__(self)
             self._symbolDataPtr = symbolData
             self._headerFilename = None
-            
+
         def _symbolData(self):
             return self._symbolDataPtr
+            
+        def topScope(self):
+            return self
             
         def fqName(self):
             return None
@@ -138,6 +141,9 @@ class SymbolData(object):
         def parentScope(self):
             return self._scope
             
+        def topScope(self):
+            return self._scope.topScope()
+        
         def _symbolData(self):
             return self._scope._symbolData()
         

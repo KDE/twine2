@@ -176,7 +176,6 @@ def _ExpandClassNamesForClass(sipsym,sipClass):
     for base in sipClass.bases():
         try:
             baseObject = sipsym.lookupType(base,sipClass.parentScope().fqName())
-            print("fqn: "+baseObject.fqName())
             fqnBaseList.append(baseObject.fqName())
         except KeyError:
             fqnBaseList.append(base)
@@ -344,11 +343,11 @@ class _UpdateConvertToSubClassCodeDirectives(object):
             accu.append(indent)
             accu.append(joiner)
             accu.append("if (dynamic_cast<")
-            accu.append(class_.name())
+            accu.append(class_.fqName())
             accu.append("*>(sipCpp)) {\n")
             accu.append(indent)
             accu.append("    sipClass = sipClass_")
-            accu.append(class_.name())
+            accu.append(class_.fqName().replace("::","_"))
             accu.append(";\n")
         
         joiner = ""
@@ -370,9 +369,11 @@ class _UpdateConvertToSubClassCodeDirectives(object):
         subclasses = self._findAllSubclasses(class_)
         
         # Find an existing %ConvertToSubClassCode block.
+        directiveClass = None
         for subclass in subclasses:
             directive = self._findDirective(subclass,"%ConvertToSubClassCode")
             if directive is not None:
+                directiveClass = subclass
                 break
         else:
             # Create a new %ConvertToSubClassCode block.
@@ -386,6 +387,18 @@ class _UpdateConvertToSubClassCodeDirectives(object):
                 directiveClass = subclasses[0]
             directive = self._symbolData.SipDirective(directiveClass,"%ConvertToSubClassCode")
         directive.setBody(self._generateCTSCC(class_))
+        
+        # Update the %TypeHeaderCode #include list.
+        headerCode = self._findDirective(directiveClass.topScope(),"%ModuleHeaderCode")
+        if headerCode is None:
+            headerCode = self._symbolData.SipDirective(directiveClass.topScope(),"%ModuleHeaderCode")
+        
+        fileScopes = list(set( (subclass.topScope().headerFilename() for subclass in subclasses) ))
+        fileScopes.sort()
+        
+        headerCode.setBody("%ModuleHeaderCode\n" +
+            "".join(["#include <"+x+">\n" for x in fileScopes]) +
+            "%End\n")
         
     def _findDirective(self,class_,directiveName):
         for item in class_:

@@ -22,7 +22,7 @@ import qtkdemacros
 
 tk = toolkit.ModuleGenerator(
     module="PyKDE4.kggzmod",
-    outputDirectory="kggzmod",
+    outputDirectory="/home/sbe/devel/pykde4/kggzmod/sip/kggzmod",
     
     # .h file extraction
     cmakelists="/home/sbe/devel/svn/kde/trunk/KDE/kdegames/libkdegames/kggzmod/CMakeLists.txt",
@@ -37,6 +37,7 @@ tk = toolkit.ModuleGenerator(
     sipImportDirs=["/usr/share/sip/PyQt4/"],
     sipImports=["QtCore/QtCoremod.sip"],
     copyrightNotice=qtkdemacros.copyrightNotice(),
+    exportMacros=["KGGZMOD_EXPORT"]
     
     #annotationRules=[toolkit.AnnotationRule()]
     )

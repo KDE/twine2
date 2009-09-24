@@ -103,6 +103,28 @@ class SymbolData(cppsymboldata.SymbolData):
                     ", ".join(item.format() for item in self._cppargs) + ")]"
             else:
                 return ""
+                
+    class TopLevelScope(cppsymboldata.SymbolData.TopLevelScope):
+        @sealed
+        def __init__(self,symbolData):
+            cppsymboldata.SymbolData.TopLevelScope.__init__(self,symbolData)
+            
+        def format(self,indent=0):
+            accu = []
+            force = False
+            for item in self:
+                if isinstance(item,cppsymboldata.SymbolData._CppEntity):
+                    if item.force()!=force:
+                        if not force:
+                            accu.append("//force\n")
+                        else:
+                            accu.append("//end\n")
+                        force = not force
+                accu.append(item.format(indent))
+            if force:
+                accu.append("//end\n")
+                
+            return ''.join(accu)
 
     class SipClass(cppsymboldata.SymbolData.CppClass, _SipEntityExtra):
         @sealed

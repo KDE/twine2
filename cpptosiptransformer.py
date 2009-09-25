@@ -458,10 +458,9 @@ class _SanityCheckSip(object):
                 self._checkFunction(item)
 
     def _checkFunction(self,function):
-        if function.isIgnore():
+        if function.ignore():
             return
 
         for arg in function.arguments():
             if arg.argumentType().endswith('&') and 'In' not in arg.annotations() and 'Out' not in arg.annotations():
                 print("Error: %s Parameter '%s' requires a /In/ or /Out/ annotation." % (function.sourceLocation(),arg.name()))
-                

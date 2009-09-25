@@ -57,14 +57,14 @@ class SymbolData(cppsymboldata.SymbolData):
     class _SipEntityExtra(object):
         @sealed
         def __init__(self):
-            self._annotations = None
+            self._annotations = []
             self._blocks = []
             self._ignore = False
             self._cppargs = None
             self._cppreturn = None
             self._force = False
             
-        def isIgnore(self):
+        def ignore(self):
             return self._ignore
             
         def setIgnore(self,ignore):
@@ -91,6 +91,12 @@ class SymbolData(cppsymboldata.SymbolData):
         def addBlock(self, block):
             self._blocks.append(block)
             
+        def blocks(self):
+            return self._blocks
+        
+        def setBlocks(self,blocks):
+            self._blocks = blocks[:]
+        
         def _formatIgnore(self,indent):
             if self._ignore:
                 return "//ig" + (" " if indent==0 else "")
@@ -200,6 +206,8 @@ class SymbolData(cppsymboldata.SymbolData):
             return "<SipClass '%s'>" % (self.name(),)
 
     class Argument(cppsymboldata.SymbolData.Argument):
+        # FIXME Make this immutable.
+    
         @sealed
         def __init__(self, argumentType, argumentName = None, argumentValue = None, template = None, defaultTypes = None):
             cppsymboldata.SymbolData.Argument.__init__(self, argumentType, argumentName, argumentValue, template, defaultTypes)

@@ -139,6 +139,8 @@ class Foo {
   void bar();
 };
         """)
+        fooCtor = newScope[1][0]
+        self.assertTrue(len(fooCtor.annotations())==1)
 
     def testNamespace(self):
         newScope = self.merge("""
@@ -150,6 +152,17 @@ namespace Foo {
   void bar();
 };
         """)
+
+    def testForceFunction(self):
+        newScope = self.merge("""
+void foo();
+//force
+void bar();
+//end
+        ""","""
+void foo();
+        """)
+
 
 if __name__ == '__main__':
     unittest.main()

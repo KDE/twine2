@@ -35,6 +35,8 @@ def MergeSipScope(sipsym,oldScope,newScope):
             mangledName = _MangleFunctionName(item)
             if mangledName in oldFunctionMap:
                 _MergeSipFunction(sipsym,oldFunctionMap[mangledName],item)
+                del oldFunctionMap[mangledName]
+                
         elif isinstance(item,sipsym.SipClass):
             if item.fqName() in oldClassMap:
                 _MergeSipClass(sipsym,oldClassMap[item.fqName()],item)
@@ -42,6 +44,11 @@ def MergeSipScope(sipsym,oldScope,newScope):
             if item.fqName() in oldNamespaceMap:
                 MergeSipScope(sipsym,oldNamespaceMap[item.fqName()],item)
         
+    # Handle any left over functions which are forced.
+    for oldFunctionName,function in oldFunctionMap.items():
+        if function.force():
+            newScope.append(function)
+
 def _MergeSipFunction(sipsym,oldFunction,newFunction):
     newFunction.setIgnore(oldFunction.ignore())
     newFunction.setForce(oldFunction.force())

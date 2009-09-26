@@ -119,7 +119,7 @@ class SymbolData(cppsymboldata.SymbolData):
             accu = []
             force = False
             for item in self:
-                if isinstance(item,cppsymboldata.SymbolData._CppEntity):
+                if isinstance(item,cppsymboldata.SymbolData._CppEntity) or isinstance(item,SymbolData.SipDirective):
                     if item.force()!=force:
                         if not force:
                             accu.append("//force\n")
@@ -186,6 +186,8 @@ class SymbolData(cppsymboldata.SymbolData):
                             accu.append(item.formatAccess())
                             accu.append(":\n")
                             access = item.access()
+                            
+                    if isinstance(item,cppsymboldata.SymbolData._CppEntity) or isinstance(item,SymbolData.SipDirective):
                         if item.force()!=force:
                             if not force:
                                 accu.append("//force\n")
@@ -315,6 +317,13 @@ class SymbolData(cppsymboldata.SymbolData):
         def __init__(self, parentScope, name, filename=None, lineno=-1):
             cppsymboldata.SymbolData.ScopedEntity.__init__(self, parentScope, filename, lineno)
             SymbolData.SipBlock.__init__(self, name)
+            self._force = False
+
+        def setForce(self,force):
+            self._force = force
+            
+        def force(self):
+            return self._force
             
     class Comment(cppsymboldata.SymbolData.ScopedEntity):
         @sealed
@@ -432,7 +441,7 @@ class SymbolData(cppsymboldata.SymbolData):
            
             force = False
             for item in self._items:
-                if isinstance(item,cppsymboldata.SymbolData._CppEntity):
+                if isinstance(item,cppsymboldata.SymbolData._CppEntity) or isinstance(item,SymbolData.SipDirective):
                     if item.force()!=force:
                         if not force:
                             accu.append("//force\n")

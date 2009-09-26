@@ -480,6 +480,18 @@ namespace Foo {
 };
 """)
 
+    def testCTSCC(self):
+        self.mirrorTest("""
+class Foo {
+//force
+%ConvertToSubClassCode
+// Custom %ConvertToSubClassCode
+%End
+//end
+};
+""")
+
+
     def testSuperClassQueries(self):
         scope = self.parser.parse(self.syms, """
 class Bar {};

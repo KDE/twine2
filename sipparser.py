@@ -228,6 +228,7 @@ class SipParser(object):
         obj = self.symbolData.SipDirective(self.scope, name, self.filename, self.lexer.lineno)
         #obj.argument = arg
         #self.symbolData.objectList.append (obj)
+        obj.setForce(self.force)
         return obj
       
     precedence = (('left','PLUS','MINUS'), ('left','ASTERISK','SLASH'), ('right','UMINUS'), )

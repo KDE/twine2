@@ -48,6 +48,15 @@ void bar();
         """)
         self.assertTrue(len(newScope)==3)
         
+    def testDeleteFunction(self):
+        newScope = self.merge("""
+void foo();
+void bar();
+        ""","""
+void foo();
+        """)
+        self.assertTrue(len(newScope)==2)
+        
     def testFunctionIgnore(self):
         newScope = self.merge("""
 //ig void foo();
@@ -88,7 +97,7 @@ void foo() /Factory/;
 void foo();
 //end
         ""","""
-void foo();
+void bar();
         """)
         fooFunc = newScope[1]
         self.assertTrue(fooFunc.force())

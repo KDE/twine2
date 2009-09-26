@@ -74,11 +74,10 @@ def MergeSipScope(sipsym,primaryScope,updateScope):
             if not isinstance(item,sipsym.Comment):
                 print("Warning: Unknown object " +str(item))
                 
-        
     # Handle any left over functions which are forced.
-    #for oldFunctionName,function in oldFunctionMap.items():
-    #    if function.force():
-    #        newScope.append(function)
+    for primaryFunctionName,function in primaryFunctionMap.items():
+        if not function.force():
+            del primaryScope[primaryScope.index(function)]
 
 def _MergeSipFunction(sipsym,primaryFunction,updateFunction):
     

@@ -105,6 +105,12 @@ class SymbolData(object):
         def __iter__(self):
             return self._items.__iter__()
             
+        def __delitem__(self,item):
+            self._items.__delitem__(item)
+            
+        def index(self,item):
+            return self._items.index(item)
+            
         def append(self,item):
             self._items.append(item)
             

@@ -22,22 +22,31 @@ import sipsymboldata
 import sipmerger
 
 class TestSipMerger(unittest.TestCase):
-    def merge(self, oldSipText, newSipText):
+    def merge(self, primarySipText, updateSipText):
         parser = sipparser.SipParser()
         syms = sipsymboldata.SymbolData()
-        oldScope = parser.parse(syms,oldSipText)
-        newScope = parser.parse(syms,newSipText)
+        primaryScope = parser.parse(syms,primarySipText)
+        updateScope = parser.parse(syms,updateSipText)
         
-        print("Old Sip -------------------------------------")
-        print(oldScope.format())
-        print("New Sip -------------------------------------")
-        print(newScope.format())
+        print("Primary Sip -------------------------------------")
+        print(primaryScope.format())
+        print("Update Sip -------------------------------------")
+        print(updateScope.format())
         
-        sipmerger.MergeSipScope(syms,oldScope,newScope)
+        sipmerger.MergeSipScope(syms,primaryScope,updateScope)
         
         print("Result --------------------------------------")
-        print(newScope.format())
-        return newScope
+        print(primaryScope.format())
+        return primaryScope
+        
+    def testNewFunction(self):
+        newScope = self.merge("""
+void foo();
+        ""","""
+void foo();
+void bar();
+        """)
+        self.assertTrue(len(newScope)==3)
         
     def testFunctionIgnore(self):
         newScope = self.merge("""
@@ -162,6 +171,7 @@ void bar();
         ""","""
 void foo();
         """)
+
 
 
 if __name__ == '__main__':

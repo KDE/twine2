@@ -181,6 +181,33 @@ void bar();
 void foo();
         """)
 
+    def testEnum(self):
+        newScope = self.merge("""
+enum Foo {
+   bar,
+   zyzz
+};
+        ""","""
+enum Foo {
+   bar,
+   zyzz,
+   fooz
+};
+        """)
+
+    def testEnum2(self):
+        newScope = self.merge("""
+enum Foo {
+   bar,
+   zyzz
+};
+        ""","""
+enum Barz {
+   bar,
+   zyzz,
+   fooz
+};
+        """)
 
 
 if __name__ == '__main__':

@@ -34,6 +34,7 @@ def MergeSipScope(sipsym,primaryScope,updateScope):
     primaryFunctionMap = {}
     primaryClassMap = {}
     primaryNamespaceMap = {}
+    primaryEnumMap = {}
     
     # Index the old scope
     for item in primaryScope:
@@ -43,6 +44,8 @@ def MergeSipScope(sipsym,primaryScope,updateScope):
             primaryClassMap[item.fqName()] = item
         elif isinstance(item,sipsym.Namespace):
             primaryNamespaceMap[item.fqName()] = item
+        elif isinstance(item,sipsym.Enum):    
+            primaryEnumMap[item.fqName()] = item
 
     # Update
     for item in updateScope[:]:
@@ -70,6 +73,14 @@ def MergeSipScope(sipsym,primaryScope,updateScope):
             else:
                 # New namespace
                 primaryScope.append(item)
+                
+        elif isinstance(item,sipsym.Enum):
+            if item.fqName() in primaryEnumMap:
+                _MergeEnum(sipsym,primaryEnumMap[item.fqName()],item)
+            else:
+                # New enum
+                primaryScope.append(item)
+        
         else:
             if not isinstance(item,sipsym.Comment):
                 print("Warning: Unknown object " +str(item))
@@ -78,6 +89,11 @@ def MergeSipScope(sipsym,primaryScope,updateScope):
     for primaryFunctionName,function in primaryFunctionMap.items():
         if not function.force():
             del primaryScope[primaryScope.index(function)]
+
+    for primaryEnumName,enum in primaryEnumMap.items():
+        if not enum.force():
+            del primaryScope[primaryScope.index(enum)]
+
 
 def _MergeSipFunction(sipsym,primaryFunction,updateFunction):
     
@@ -114,8 +130,15 @@ def _MergeSipClass(sipsym,primaryClass,updateClass):
     for anno in primaryClass.annotations():
         if anno not in annotations:
             annotations.append(anno)
-
     primaryClass.setAnnotations(annotations)
     
     MergeSipScope(sipsym,primaryClass,updateClass)
     
+def _MergeEnum(sipsym,primaryEnum,updateEnum):
+    annotations = list(updateEnum.annotations())
+    for anno in primaryEnum.annotations():
+        if anno not in annotations:
+            annotations.append(anno)
+    primaryEnum.setAnnotations(annotations)
+
+    primaryEnum[:] = updateEnum[:]

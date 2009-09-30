@@ -707,13 +707,16 @@ class CppParser(object):
                 
     def p_typedef_function_ptr (self, p):
         'typedef_function_ptr : typedef pointer_to_function'
+        
         ptrType, name, args = p [2].split ('|', 2)
-        typedefObj = self.typedefObject (ptrType, name)
-        if args:
-            typedefObj.functionPtr = args.split (',')
-        else:
-            typedefObj.functionPtr = ['()']
+        
+        fa = self.symbolData.FunctionArgument(name, ptrType, args)
+        typedefObj = self.symbolData.FunctionPointerTypedef(self.scope, fa, self.filename, self.lexer.lineno)
+        typedefObj.setAccess(self.access)
         self.inTypedef = True
+        
+        self._pushScope(typedefObj)
+        self.currentTypedef = typedefObj
         
     def p_array_variable (self, p):
         'array_variable : ID ARRAYOP'
@@ -873,7 +876,7 @@ class CppParser(object):
     def p_cast_operator_name1 (self, p):
         'cast_operator_name : operator type_specifier LPAREN RPAREN CVQUAL'
         fObj = self.functionObject ('operator ' + p [2], p[2])
-        fObj.attributes.cv = p [5]
+        fObj.addQualifier(p[5])
         self.arguments  = []        
         
     def p_cast_operator_stmt (self, p):
@@ -994,7 +997,7 @@ class CppParser(object):
     
     def p_virtual_stmt1 (self, p):
         'virtual_stmt : virtual_primary CVQUAL decl_end'
-        self.stateInfo.currentObject ().attributes.cv = p [2]
+        self.currentFunction.addQualifier(p[2])
 
     def p_pure_virtual_suffix (self, p):
         'pure_virtual_suffix : EQUALS PURESFX'
@@ -1019,8 +1022,9 @@ class CppParser(object):
         
     def p_template_decl (self, p):
         'template_decl : template LT template_param_list GT'
-        self.stateInfo.inTemplate = ','.join (self.templateParams)
-        self.templateParams = []
+        pass
+        #self.stateInfo.inTemplate = ','.join (self.templateParams)
+        #self.templateParams = []
                         
 #     def p_skip_macro (self, p):
 #         'skip_macro : MACROCALL MACROBODY'

@@ -284,6 +284,12 @@ class TestCppParser(unittest.TestCase):
             """)
         print(scope.format())
 
+    def testTypedef4(self):
+        scope = self.parser.parse(self.syms,
+            """typedef QObject *(*CreateInstanceFunction)(QWidget *, QObject *, const QVariantList &);
+            """)
+        print(scope.format())
+
     def testTemplate(self):
         scope = self.parser.parse(self.syms,
             """

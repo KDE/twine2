@@ -365,6 +365,17 @@ class SymbolData(object):
             return self._argumentType + (" " + self._argumentName if self._argumentName is not None else "") + \
                 ("" if self._defaultValue is None else " = "+self._defaultValue)
             
+    class FunctionArgument(Argument):
+        # Immutable
+        @sealed
+        def __init__(self, argumentName, returnType, functionArguments):
+            SymbolData.Argument.__init__(self,None, argumentName)
+            self._returnType = returnType
+            self._functionArguments = functionArguments
+            
+        def format(self):
+            return self._returnType + " (*" + self._argumentName + ")("+self._functionArguments+")"
+            
     class Variable(_CppEntity):
         """Represents a single variable declaration."""
         @sealed
@@ -504,6 +515,16 @@ class SymbolData(object):
                 if len(self._items)!=0:
                     contents = self._items[0].format(indent+1)
                 return pre + "typedef\n" + " " + contents
+                
+    class FunctionPointerTypedef(Typedef):
+        @sealed
+        def __init__(self,parentScope, functionArgument, filename, lineno):
+            SymbolData.Typedef.__init__(self,parentScope, functionArgument.name(), filename, lineno)
+            self._functionArgument = functionArgument
+            
+        def format(self,indent=0):
+            pre = SymbolData._indentString(indent)
+            return pre + "typedef "+ self._functionArgument.format() + ";\n"
                 
     class Macro(object):
         @sealed

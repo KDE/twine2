@@ -383,7 +383,8 @@ class SymbolData(object):
             SymbolData._CppEntity.__init__(self, parentScope, name, filename, lineno)
             self._storage = None
             self._argument = None
-
+            self._bitfield = None
+            
         def setArgument(self, argument):
             self._argument = argument
             
@@ -397,10 +398,17 @@ class SymbolData(object):
         def storage(self):
             return self._storage
             
+        def setBitfield(self,bitfield):
+            self._bitfield = bitfield
+            
+        def bitfield(self):
+            return self._bitfield
+            
         def format(self,indent=0):
             pre = SymbolData._indentString(indent)
             storage = self._storage+" " if self._storage is not None else ""
-            return pre + storage + self._argument.format() + ";\n"
+            bitfield = " : " + self._bitfield if self._bitfield is not None else ""
+            return pre + storage + self._argument.format() + bitfield + ";\n"
 
     class Function(_CppEntity):
         """Represents a C++ function or method if the parent scope is a class."""

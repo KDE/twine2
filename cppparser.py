@@ -820,7 +820,7 @@ class CppParser(object):
     def p_variable_decl6 (self, p):
         'variable_decl : type_specifier ID COLON ICONST SEMI'
         vObj = self.variableObject (p [2], p [1])
-        vObj.bitmap = p [4]
+        vObj.setBitfield(p[4])
 
     def p_variable_decl7 (self, p):
         'variable_decl : pointer_to_function SEMI'

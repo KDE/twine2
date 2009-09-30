@@ -350,6 +350,13 @@ public:
             """)
         print(scope.format())
 
+    def testBitfield(self):
+        scope = self.parser.parse(self.syms,
+            """
+            bool mHasMin : 1;
+            """,debugLevel=2)
+        print(scope.format())
+
     def testLiveAmmo(self):
         with open("/home/sbe/devel/svn/kde/branches/KDE/4.3/kdeedu/marble/src/lib/MarbleMap.h") as fhandle:
             text = fhandle.read()

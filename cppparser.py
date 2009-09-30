@@ -432,8 +432,8 @@ class CppParser(object):
         
     def p_enum_decl1 (self, p):
         'enum_decl : enum_statement id_list SEMI'
-        self.object_id_list (p [2], 'enum')
         self.currentEnum = None
+        #self.lexer.begin('variable')
         
     def p_enum_statement (self, p):
         """enum_statement : enum_name enumerator_list RBRACE
@@ -473,7 +473,7 @@ class CppParser(object):
             enumerator = self.symbolData.Enumerator(p[2], p[4])
         else:
             enumerator = self.symbolData.Enumerator(p[2], None)
-        enumerator.setDoc(p[1])
+        #enumerator.setDoc(p[1])
         self.currentEnum.appendEnumerator(enumerator)
         
     def p_enumerator2 (self, p):
@@ -764,8 +764,22 @@ class CppParser(object):
         p [0] = "|".join (p [1:])
         
     def p_decl_starter1 (self, p):
+        'decl_starter : type_specifier bare_macro qualified_id'
+        p [0] = p[1] + "|" + p[3]
+
+    def p_decl_starter2 (self, p):
         'decl_starter : STORAGE type_specifier qualified_id'
         p [0] = "|".join (p [2:])
+        self.storage = p [1]
+        
+    def p_decl_starter3 (self, p):
+        'decl_starter : STORAGE bare_macro type_specifier qualified_id'
+        p [0] = "|".join (p [3:])
+        self.storage = p [1]
+            
+    def p_decl_starter4 (self, p):
+        'decl_starter : STORAGE type_specifier bare_macro qualified_id'
+        p [0] = p[2] + "|" + p[4]
         self.storage = p [1]
             
     def p_variable_decl0 (self, p):

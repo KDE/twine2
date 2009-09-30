@@ -1,6 +1,24 @@
 # -*- coding: utf-8 -*-
+#     Copyright 2009 Simon Edwards <simon@simonzone.com>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the
+# Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-__QtBareMacros = ["Q_OBJECT", "Q_GADGET", "Q_OBJECT_CHECK", "K_DCOP"] 
+import re
+
+__QtBareMacros = ["Q_OBJECT", "Q_GADGET", "Q_OBJECT_CHECK", "K_DCOP"]
 
 def QtBareMacros(extraMacros=[]):
     macros = __QtBareMacros[:]
@@ -9,7 +27,7 @@ def QtBareMacros(extraMacros=[]):
     
 __QtMacros = [
         "Q_ENUMS", "Q_PROPERTY", "Q_OVERRIDE", "Q_SETS", "Q_CLASSINFO",\
-        "Q_DECLARE_OPERATORS_FOR_FLAGS", "Q_PRIVATE_SLOT", "Q_FLAGS",\
+        "Q_DECLARE_OPERATORS_FOR_FLAGS", "Q_PRIVATE_SLOT", "Q_FLAGS", \
         "Q_DECLARE_INTERFACE", "Q_DECLARE_METATYPE","KDE_DUMMY_COMPARISON_OPERATOR",\
         "Q_GADGET", "K_DECLARE_PRIVATE", "PHONON_ABSTRACTBASE", "PHONON_HEIR",\
         "PHONON_OBJECT", "Q_DECLARE_PRIVATE", "QT_BEGIN_HEADER", "QT_END_HEADER",\
@@ -24,7 +42,10 @@ def QtMacros(extraMacros=[]):
 
 __QtPreprocessSubstitutionMacros = [
         ('Q_SLOTS','slots'),
-        ('Q_SIGNALS','signals')
+        ('Q_SIGNALS','signals'),
+        (re.compile(r'Q_DECLARE_FLAGS\((.*?),(.*?)\)'),r'typedef QFlags<\2> \1;'),
+        ("KDE_CONSTRUCTOR_DEPRECATED",""),
+        ("KDE_DEPRECATED","")
         ]
 def QtPreprocessSubstitutionMacros(extraMacros=[]):
     macros = __QtPreprocessSubstitutionMacros[:]

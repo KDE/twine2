@@ -273,7 +273,6 @@ class CppParser(object):
                   | class_decl
                   | enum_decl
                   | typedef_decl
-                  | q_declare_flags
                   | function_decl
                   | variable_decl
                   | template_decl
@@ -340,7 +339,6 @@ class CppParser(object):
         """class_member : class_decl
                         | enum_decl
                         | typedef_decl
-                        | q_declare_flags
                         | access_specifier
                         | function_decl
                         | variable_decl
@@ -644,14 +642,6 @@ class CppParser(object):
         self.typedefObject('%s*' % p [2], p [3])
         self.inTypedef = True
 
-    def p_q_declare_flags_name (self, p):
-        'q_declare_flags_name : Q_DECLARE_FLAGS LPAREN ID COMMA ID'
-        self.typedefObject("QFlags<%s>" % p [5], p [3]);
-        
-    def p_q_declare_flags (self, p):
-        'q_declare_flags : q_declare_flags_name RPAREN'
-        self.stateInfo.popObject ()
-        
     def p_typedef_elaborated (self, p):
         """typedef_elaborated : typedef class qualified_id ID
                               | typedef struct qualified_id ID

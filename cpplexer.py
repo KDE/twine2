@@ -40,7 +40,7 @@ class CppLexerClass(object):
     accessSpecifiers = ("private", "protected", "public", "slots", "signals")
 
     edges = ("class", "struct", "union",  "template", "enum", "namespace",\
-            "typedef", "Q_DECLARE_FLAGS", "operator", 'typename')
+            "typedef", "operator", 'typename')
 
     storageQualifiers = ("auto", "register", "static", "extern", "mutable")
 

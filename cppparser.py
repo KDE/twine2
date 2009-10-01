@@ -278,13 +278,10 @@ class CppParser(object):
                   | template_decl
                   | bare_macro
                   | skip_macro"""
-        pass
-        #self.lexer.begin (self.stateInfo.lexState)
-        #self.stateInfo.lexState  = 'variable'
-        #self.stateInfo.inTypedef = False
-        #self.arguments    = []
-        #self.template     = None
-        #self.exprElements = []
+        self.lexer.lexstate  = 'variable'
+        self.arguments   = []
+        self.template    = None
+        self.exprElement = None
                   
     def p_member_list (self, p):
         """member_list : member

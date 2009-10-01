@@ -244,6 +244,23 @@ class TestCppParser(unittest.TestCase):
             """)
         print(scope.format())
 
+    def testNamespaceEnum(self):
+        scope = self.parser.parse(self.syms,
+            """
+namespace Foo {
+
+    const KComponentData &mainComponent();
+
+    enum global {
+        earth,
+        orb,
+        globe
+    };
+}
+            """,debugLevel=0)
+        print(scope.format())
+
+
     def testEnumAnonymous(self):
         scope = self.parser.parse(self.syms,
             """

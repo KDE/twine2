@@ -47,7 +47,7 @@ class SymbolData(cppsymboldata.SymbolData):
             if isinstance(item,SymbolData.SipClass):
                 self._typeIndex[item.fqName()] = item
                 self._indexScope(item)
-            elif isinstance(item,SymbolData.Enum):
+            elif isinstance(item,SymbolData.Enum) or isinstance(item,SymbolData.Typedef):
                 fqName = item.fqName()
                 if fqName is not None:
                     self._typeIndex[item.fqName()] = item

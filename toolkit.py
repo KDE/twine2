@@ -115,7 +115,7 @@ class ModuleGenerator(object):
         for cmakeFilename in self._cmakelists:
             dirName = os.path.dirname(cmakeFilename)
             for header in cmake.ExtractInstallFiles(cmakeFilename):
-                if header not in self._ignoreHeaders:
+                if os.path.basename(header) not in self._ignoreHeaders:
                     filenames.append(os.path.join(dirName,header))
         return set(filenames)
         

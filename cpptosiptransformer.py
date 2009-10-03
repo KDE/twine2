@@ -214,9 +214,13 @@ def _ExpandArgument(sipsym,context,argument):
     if className in _PrimitiveTypes or '<' in className:
         return argument
         
-    classObject = sipsym.lookupType(className,context.fqName())
-    if classObject.fqName()==className:
-        return argument # Nothing to do.
+    try:
+        classObject = sipsym.lookupType(className,context.fqName())
+        if classObject.fqName()==className:
+            return argument # Nothing to do.
+    except KeyError:
+        print("Warning: %s Unrecognized type '%s' was found when expanding argument type names." % (context.sourceLocation(),className))
+        return argument
 
     newArgument = sipsym.Argument(prefix+classObject.fqName()+suffix, argument.name(), argument.defaultValue(),
                     argument.template(), argument.defaultTypes())
@@ -322,9 +326,12 @@ class _UpdateConvertToSubClassCodeDirectives(object):
         self._classToSubclassMapping = {}
         for class_ in self._subclassList:
             for baseName in class_.bases():
-                base = self._symbolData.lookupType(baseName,class_.parentScope().fqName())
-                subClassList = self._classToSubclassMapping.setdefault(base,[])
-                subClassList.append(class_)
+                try:
+                    base = self._symbolData.lookupType(baseName,class_.parentScope().fqName())
+                    subClassList = self._classToSubclassMapping.setdefault(base,[])
+                    subClassList.append(class_)
+                except KeyError:
+                    print("Warning: %s Unrecognized type '%s' was found when updating CTSCC." % (class_.sourceLocation(),baseName))
         
         # Figure out which superclass heirachies need ConvertToSubClassCode.
         # The top of a heirachy tree has no subclasses (i.e. doesn't appear in _subclassList) but

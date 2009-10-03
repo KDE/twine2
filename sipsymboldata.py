@@ -213,7 +213,7 @@ class SymbolData(cppsymboldata.SymbolData):
         @sealed
         def __init__(self, argumentType, argumentName = None, argumentValue = None, template = None, defaultTypes = None):
             cppsymboldata.SymbolData.Argument.__init__(self, argumentType, argumentName, argumentValue, template, defaultTypes)
-            self._annotations = None
+            self._annotations = []
 
         def setAnnotations(self,annotations):
             self._annotations = annotations

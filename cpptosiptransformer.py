@@ -84,11 +84,11 @@ class CppToSipTransformer(object):
             return
             
         if isCtor:
-            sipFunction = self._sipsym.Constructor(destScope,cppFunction.name())
+            sipFunction = self._sipsym.Constructor(destScope,cppFunction.name(),filename=cppFunction._filename,lineno=cppFunction._lineno)
         elif isDtor:
-            sipFunction = self._sipsym.Destructor(destScope,cppFunction.name())
+            sipFunction = self._sipsym.Destructor(destScope,cppFunction.name(),filename=cppFunction._filename,lineno=cppFunction._lineno)
         else:
-            sipFunction = self._sipsym.Function(destScope,cppFunction.name())
+            sipFunction = self._sipsym.Function(destScope,cppFunction.name(),filename=cppFunction._filename,lineno=cppFunction._lineno)
             sipFunction.setReturn(self._convertArgument(cppFunction.return_()))
         sipFunction.setAccess(cppFunction.access())
         sipFunction.setArguments( [self._convertArgument(x) for x in cppFunction.arguments()] )
@@ -99,7 +99,7 @@ class CppToSipTransformer(object):
         if not self._isClassExported(cppClass) or cppClass.opaque():
             return None
     
-        sipClass = self._sipsym.SipClass(parentScope, cppClass.name())
+        sipClass = self._sipsym.SipClass(parentScope, cppClass.name(),filename=cppClass._filename,lineno=cppClass._lineno)
         sipClass.setBases( [base for base in cppClass.bases() if base not in self._ignoredBaseClasses] )
 
         if self._cppScope.headerFilename() is not None:

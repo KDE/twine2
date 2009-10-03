@@ -22,7 +22,9 @@ import cppsymboldata
 import sipparser
 import sipsymboldata
 import cpptosiptransformer
+import sipmerger
 from sealed import sealed
+import sys
 import os
 import os.path
 
@@ -87,12 +89,21 @@ class ModuleGenerator(object):
         print("\nAnnotating Sip files.")
         self._annotateSipScopes(moduleSipScopes)
         
+        _indexFilename = self._indexFilename()
+        if os.path.exists(_indexFilename):
+            print("\nParsing previous Sip files.")
+            moduleSipScopes = self._updateScopes(moduleSipScopes)
+        else:
+            print("(%s not found. Skipping merge with previous sip files.)" % (_indexFilename,))
+            
+        print("\n")
+        
         print("Computing 'Convert To Sub Class Code'.")
         cpptosiptransformer.UpdateConvertToSubClassCodeDirectives(self._sipSymbolData,moduleSipScopes,[])
 
-        print("Sanity check.")
-        cpptosiptransformer.SanityCheckSip(self._sipSymbolData,moduleSipScopes)
-
+        #print("Sanity check.")
+        #cpptosiptransformer.SanityCheckSip(self._sipSymbolData,moduleSipScopes)
+        
         print("Writing Sip files.")
         if self._outputDirectory is not None:
 
@@ -127,7 +138,7 @@ class ModuleGenerator(object):
             with open(filename) as fhandle:
                 text = fhandle.read()
             basename = os.path.basename(filename)
-            scope = self._cppParser.parse(self._symbolData, text, filename=filename)
+            scope = self._cppParser.parse(self._symbolData, text, filename=filename, debugLevel=0)
             scope.setHeaderFilename(basename)
             headerScopeTuples.append( (basename,scope) )
             #print(scope.format())
@@ -156,6 +167,8 @@ class ModuleGenerator(object):
             text = fhandle.read()
             
         scope = self._sipParser.parse(self._sipSymbolData,text,filename=sipFilename)
+        scope.setHeaderFilename(sipFilename)
+        scopeList = [scope]
         
         #print("********************************************")
         #print(scope.format())
@@ -169,11 +182,11 @@ class ModuleGenerator(object):
                     #print("body:"+sipIncludeFilename)
                     sipIncludeFullFilename = os.path.join(modDir,sipIncludeFilename)
                     if os.path.exists(sipIncludeFullFilename):
-                        self._importSipFile(sipIncludeFullFilename)
+                        scopeList.extend(self._importSipFile(sipIncludeFullFilename))
                     else:
                         print("Error: Unable to find sip import '%s'. (sipImportDirs=%s" % (sipModName,repr(self._sipImportDirs)))
                     
-        return scope
+        return scopeList
     
     def _convertCppToSip(self,headerScopeTuples):
         sipScopes = []
@@ -188,7 +201,10 @@ class ModuleGenerator(object):
             self._annotator.applyRules(scope)
         
     def _convertHeaderNameToSip(self,headerName):
-        return headerName[:-2]+".sip"
+        filename = os.path.basename(headerName)
+        if filename.endswith(".h"):
+            return filename[:-2]+".sip"
+        return filename
         
     def _writeScopes(self,moduleSipScopes):
         for scope in moduleSipScopes:
@@ -200,9 +216,41 @@ class ModuleGenerator(object):
         moduleName = self._module
         if '.' in self._module:
             moduleName = self._module[self._module.rfind('.')+1:]
-        fullFilename = os.path.join(self._outputDirectory,moduleName) + "mod.sip"
-        with open(fullFilename,'w') as fhandle:
+        with open(self._indexFilename(),'w') as fhandle:
             fhandle.write(self._indexSip(scopes))
+            
+    def _indexFilename(self):
+        module = self._module
+        if '.' in module:
+            module = module.rpartition('.')[2]
+        return os.path.join(self._outputDirectory,module) + "mod.sip"
+        
+    def _updateScopes(self,moduleSipScopes):
+        previousSipScopes = self._importSipFile(self._indexFilename())
+        
+        updateSipScopes = moduleSipScopes
+        
+        # Match moduleSipScopes
+        updateSipMap = {}
+        for scope in moduleSipScopes:
+            #print("header sip name: " + self._convertHeaderNameToSip(scope.headerFilename()))
+            updateSipMap[self._convertHeaderNameToSip(scope.headerFilename())] = scope
+            
+        for scope in previousSipScopes:
+            filename = self._convertHeaderNameToSip(scope.headerFilename())
+            previousScope = updateSipMap.get(filename,None)
+            if previousScope is not None:
+                print("    Merging %s" % (filename,))
+                sipmerger.MergeSipScope(self._sipSymbolData,scope,updateSipMap[filename])
+                del updateSipMap[filename]
+            else:
+                print("    (Missing header file %s. Skipping merge.)" % (filename,) )
+            
+        for key in updateSipMap.iterkeys():
+            print("    Adding new header "+key)
+            previousSipScopes.append(updateSipMap[key])
+            
+        return previousSipScopes
         
     def _indexSip(self,scopes):
         accu = []

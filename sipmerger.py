@@ -82,7 +82,7 @@ def MergeSipScope(sipsym,primaryScope,updateScope):
                 primaryScope.append(item)
         
         else:
-            if not isinstance(item,sipsym.Comment):
+            if not isinstance(item,sipsym.SipDirective) and not isinstance(item,sipsym.Comment):
                 print("Warning: Unknown object " +str(item))
                 
     # Handle any left over functions which are forced.

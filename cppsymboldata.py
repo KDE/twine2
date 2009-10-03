@@ -136,6 +136,12 @@ class SymbolData(object):
         def headerFilename(self):
             return self._headerFilename
     
+        def sourceLocation(self):
+            if self._headerFilename is not None:
+                return "%s:-1" % (self._headerFilename,)
+            else:
+                return "???:-1" % (self._headerFilename,)
+    
     class ScopedEntity(object):
         @sealed
         def __init__(self, parentScope, filename, lineno):

@@ -374,6 +374,21 @@ public:
             """,debugLevel=2)
         print(scope.format())
 
+    def testAccess(self):
+        scope = self.parser.parse(self.syms,
+            """void PlainPreFunc ();
+class Foo {
+    public:
+        class Bar {
+            private:
+                void privateBar ();
+        };
+        void publicFoo ();
+};
+void PlainPostFunc ();
+""")
+        print(scope.format())
+
     def testLiveAmmo(self):
         with open("/home/sbe/devel/svn/kde/branches/KDE/4.3/kdeedu/marble/src/lib/MarbleMap.h") as fhandle:
             text = fhandle.read()

@@ -47,6 +47,7 @@ class CppParser(object):
         self._scopeStack = []
         self.scope = None
         self.access = "private"
+        self._accessStack = []
         self.currentFunction = None
         self.currentEnum = None
         self.currentClass = None
@@ -161,6 +162,13 @@ class CppParser(object):
 
     def _popScope(self):
         self.scope = self._scopeStack.pop()
+
+    def _pushAccess(self, newAccess):
+        self._accessStack.append(self.access)
+        self.access = newAccess
+        
+    def _popAccess(self):
+        self.access = self._accessStack.pop()
 
     def object_id_list (self, id_list, obj, objType = None):
         idList = id_list.split (',')
@@ -317,13 +325,16 @@ class CppParser(object):
         
     def p_class_decl0 (self, p):
         """class_decl : class_header class_member_list RBRACE decl_end
-                      | opaque_class
                       | class_header RBRACE decl_end"""
         #name, obj = self.stateInfo.popClass ()
+        self._popAccess()
         self._popScope()
         #if not obj.opaque:
         #    self.symbolData.objectList.append (EndClassMarker (name, self.lexer.lineno, self.stateInfo))
-    
+    def p_class_declopaque(self,p):
+        """class_decl : opaque_class"""
+        self._popScope()
+
     def p_class_decl1 (self, p):
         'class_decl : class_header class_member_list RBRACE id_list decl_end'
         if p [1] in ['class', 'struct', 'union']:
@@ -331,6 +342,8 @@ class CppParser(object):
         else:
             self.object_id_list (p [4], 'class')
         name, obj = self.stateInfo.popClass ()
+        self._popAccess()
+        self._popScope()
         
     def p_class_member (self, p):
         """class_member : class_decl
@@ -378,12 +391,14 @@ class CppParser(object):
         """class_header : class_name LBRACE
                         | class_name COLON base_list LBRACE
                         | class_from_typedef"""
-        p [0] = p [1]
+        p[0] = p[1]
+        self._pushAccess('private')
         
     def p_class_header1 (self, p):
         """class_header : union LBRACE
                         | struct LBRACE"""
         self.classObject('anonymous', p[1])
+        self._pushAccess('private')
     
     def p_class_name (self, p):
         """class_name : class ID

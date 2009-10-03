@@ -77,6 +77,7 @@ def MergeSipScope(sipsym,primaryScope,updateScope):
         elif isinstance(item,sipsym.Enum):
             if item.fqName() in primaryEnumMap:
                 _MergeEnum(sipsym,primaryEnumMap[item.fqName()],item)
+                del primaryEnumMap[item.fqName()]
             else:
                 # New enum
                 primaryScope.append(item)

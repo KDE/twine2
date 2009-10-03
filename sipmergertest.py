@@ -209,6 +209,12 @@ enum Barz {
 };
         """)
 
+    def testOptionalArguments(self):
+        newScope = self.merge("""
+//ig static void invokeTerminal (const QString& command, const QByteArray& startup_id = "");
+        ""","""
+static void invokeTerminal (const QString& command, const QString& workdir = QString(), const QByteArray& startup_id = "");        
+        """)
 
 if __name__ == '__main__':
     unittest.main()

@@ -36,7 +36,7 @@ def MergeSipScope(sipsym,primaryScope,updateScope):
     primaryNamespaceMap = {}
     primaryEnumMap = {}
     
-    # Index the old scope
+    # Index the primary scope
     for item in primaryScope:
         if isinstance(item,sipsym.Function) or isinstance(item,sipsym.Constructor) or isinstance(item,sipsym.Destructor):
             primaryFunctionMap[_MangleFunctionName(item)] = item
@@ -94,17 +94,27 @@ def MergeSipScope(sipsym,primaryScope,updateScope):
         if not enum.force():
             del primaryScope[primaryScope.index(enum)]
 
-
 def _MergeSipFunction(sipsym,primaryFunction,updateFunction):
-    
     if updateFunction.annotations() is not None:
         annotations = set(updateFunction.annotations())
         if primaryFunction.annotations() is not None:
             annotations.update(primaryFunction.annotations())
         primaryFunction.setAnnotations(annotations)
 
-    primaryFunction.setArguments( [_MergeArgument(sipsym,primaryFunction.arguments()[i],updateFunction.arguments()[i]) \
-        for i in range(len(updateFunction.arguments()))] )
+    # Update the arguments by name.
+    
+    primaryArguments = {}
+    for arg in primaryFunction.arguments():
+        primaryArguments[arg.name()] = arg
+        
+    newArguments = []
+    for updateArg in updateFunction.arguments():
+        if updateArg.name() in primaryArguments:
+            newArguments.append(_MergeArgument(sipsym,primaryArguments[updateArg.name()],updateArg))
+        else:
+            newArguments.append(_MergeArgument(sipsym,updateArg,updateArg))
+            
+    primaryFunction.setArguments(newArguments)
 
 def _MangleFunctionName(function):
     return function.name() + '(' + \

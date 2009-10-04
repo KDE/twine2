@@ -46,7 +46,7 @@ class CppParser(object):
         self.filename = None
         self._scopeStack = []
         self.scope = None
-        self.access = "private"
+        self.access = "public"
         self._accessStack = []
         self.currentFunction = None
         self.currentEnum = None

@@ -16,6 +16,7 @@
 # Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+import os.path
 from sealed import sealed
 import sipsymboldata
 import cppsymboldata
@@ -311,7 +312,8 @@ class _UpdateConvertToSubClassCodeDirectives(object):
         self._scopeList = scopeList
         self._ignoreClassList = ignoreClassList
         self._subclassList = None
-
+        self.INDENT = "    "
+        
     def run(self):
         if len(self._scopeList)==0:
             return
@@ -330,11 +332,9 @@ class _UpdateConvertToSubClassCodeDirectives(object):
             topSuperClass = self._updateSubclassBaseMapping(classToSubclassMapping,class_)
             if topSuperClass is None:
                 topSuperClass = class_
-            print("%s -> %s" % (class_.fqName(),topSuperClass.fqName()))
             topSuperClasses.add(topSuperClass)
-            
+        
         for class_ in topSuperClasses:
-            print("inserting " +class_.fqName())
             self._insertCTSCC(classToSubclassMapping,class_)
             
     def _updateSubclassBaseMapping(self,mapping,class_):
@@ -354,34 +354,46 @@ class _UpdateConvertToSubClassCodeDirectives(object):
         return lastBase
 
     def _generateCTSCC(self,classToSubclassMapping,class_):
-        return "%%ConvertToSubClassCode\n    // CTSCC for subclasses of '%s'\n    sipClass = NULL;\n%s%%End\n" % (class_.name(),self._generateCTSCCPart(classToSubclassMapping,class_))
+        return "%%ConvertToSubClassCode\n    // CTSCC for subclasses of '%s'\n    sipClass = NULL;\n\n%s%%End\n" % (class_.name(),self._generateCTSCCPart(classToSubclassMapping,class_,self.INDENT))
             
     def _generateCTSCCPart(self,classToSubclassMapping,class_,indent="",joiner=""):
         accu = []
-        if class_ in self._subclassList:
-            accu.append(indent)
-            accu.append(joiner)
-            accu.append("if (dynamic_cast<")
-            accu.append(class_.fqName())
-            accu.append("*>(sipCpp)) {\n")
-            accu.append(indent)
-            accu.append("    sipClass = sipClass_")
-            accu.append(class_.fqName().replace("::","_"))
-            accu.append(";\n")
         
-        joiner = ""
         subclasses = list(classToSubclassMapping.get(class_,set()))
         def namekey(class_): return class_.fqName()
         subclasses.sort(key=namekey)
         
-        for subclass in subclasses:
-            accu.append(self._generateCTSCCPart(classToSubclassMapping,subclass,indent+"    ",joiner))
-            joiner = "else "
-            
         if class_ in self._subclassList:
             accu.append(indent)
+            accu.append(joiner)
+            joiner = ""
+            accu.append("if (dynamic_cast<")
+            accu.append(class_.fqName())
+            accu.append("*>(sipCpp))\n")
+            if len(subclasses)!=0:
+                accu.append(indent);
+                accu.append(self.INDENT)
+                accu.append("{\n")
+                
+            if class_ in self._subclassList:
+                accu.append(indent)
+                accu.append(self.INDENT)
+                accu.append("sipClass = sipClass_")
+                accu.append(class_.fqName().replace("::","_"))
+                accu.append(";\n")
+            extraIndent = self.INDENT                
+        else:
+            extraIndent = ""
+        
+        for subclass in subclasses:
+            accu.append(self._generateCTSCCPart(classToSubclassMapping,subclass,indent+extraIndent,joiner))
+            joiner = "else "
+        
+        if class_ in self._subclassList and len(subclasses)!=0:
+            accu.append(indent)
+            accu.append(self.INDENT)
             accu.append("}\n")
-            
+
         return "".join(accu)
         
     def _insertCTSCC(self,classToSubclassMapping,class_):
@@ -413,9 +425,10 @@ class _UpdateConvertToSubClassCodeDirectives(object):
             headerCode = self._symbolData.SipDirective(directiveClass.topScope(),"%ModuleHeaderCode")
         
         fileScopes = list(set( (subclass.topScope().headerFilename() for subclass in subclasses) ))
-        fileScopes.sort()
+        def key(x): return os.path.basename(x)
+        fileScopes.sort(key=key)
         
-        headerCode.setBody("%ModuleHeaderCode\n" +
+        headerCode.setBody("%ModuleHeaderCode\n//ctscc\n" +
             "".join(["#include <"+str(x)+">\n" for x in fileScopes]) +
             "%End\n")
         

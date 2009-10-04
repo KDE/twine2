@@ -55,8 +55,12 @@ class SymbolData(object):
     @classmethod
     def _indentString(cls, indent):
         return ' ' * (4*indent)
-
+        
+    def _changed(self):
+        pass
+        
     # Query interface goes here.
+    
 
     class Scope(object):
         """Represents a scope which can hold other entities.
@@ -83,6 +87,7 @@ class SymbolData(object):
                 self._items.append(cppMember)
             #if name is not None:
             #    self._names[name] = cppMember
+            self._killCache(cppMember)
 
         def __str__(self):
             return '\n'.join( (str(item) for item in self._items) )
@@ -100,20 +105,31 @@ class SymbolData(object):
             return self._items[key]
             
         def __setitem__(self, key, value):
+            oldValue = self_items.get(key,None)
+            
             self._items[key] = value
+            
+            self._killCache(oldValue)
+            self._killCache(value)
             
         def __iter__(self):
             return self._items.__iter__()
             
         def __delitem__(self,item):
             self._items.__delitem__(item)
+            self._killCache(item)
             
         def index(self,item):
             return self._items.index(item)
             
         def append(self,item):
             self._items.append(item)
-            
+            self._killCache(item)
+        
+        def _killCache(self,targetItem):
+            syms = self._symbolData()
+            syms._changed()
+        
     class TopLevelScope(Scope):
         @sealed
         def __init__(self,symbolData):

@@ -53,6 +53,19 @@ class SymbolData(cppsymboldata.SymbolData):
                     self._typeIndex[item.fqName()] = item
             elif isinstance(item,SymbolData.Namespace):
                 self._indexScope(item)
+                
+    def _changed(self):
+        self._typeIndex = None
+
+    def dumpKnownTypes(self):
+        if self._typeIndex is None:
+            self._buildTypeIndex()
+        
+        print("Known types (%i)---------------------------------" % (len(self._typeIndex.keys()),) )
+        print("Top levels: %i" % (len(self._scopes),) )
+        typesKeys = list(self._typeIndex.keys())
+        typesKeys.sort()
+        print(", ".join(typesKeys))
 
     class _SipEntityExtra(object):
         @sealed
@@ -432,10 +445,11 @@ class SymbolData(cppsymboldata.SymbolData):
             pre = SymbolData._indentString(indent)
             return self._formatIgnore(indent) + pre + "typedef "+ self._functionArgument.format() + ";\n"
             
-    class Namespace(cppsymboldata.SymbolData.Namespace):
+    class Namespace(cppsymboldata.SymbolData.Namespace, _SipEntityExtra):
         @sealed
         def __init__(self, parentScope, name, filename=None, lineno=-1):
             cppsymboldata.SymbolData.Namespace.__init__(self, parentScope, name, filename, lineno)
+            SymbolData._SipEntityExtra.__init__(self)
             
         def format(self,indent=0):
             pre = SymbolData._indentString(indent)

@@ -197,7 +197,6 @@ public:
 };
 """)
 
-
     def testAnnotate(self):
         self.annotate("""
 class Foo {
@@ -245,21 +244,21 @@ namespace FooSpace {
 class QWidget {};
 class QObject {};
 class QBar : QWidget {};
-""")
+""",filename="qtcore.h")
         scope = parser.parse(syms,"""
-class Foo {
+class KFoo {
 };
-class FooSub : Foo {
+class KFooSub : KFoo {
 };
-class BarWidget : QBar {
+class KBarWidget : QBar {
 };
 
-class Zyzz : BarWidget {
+class KBarWidgetSpecial : KBarWidget {
 
 };
-class SteelBar : QBar {};
-class Bob : QObject {};
-""")
+class KSteelBar : QBar {};
+class KBob : QObject {};
+""",filename="stuff.h")
         annotator = cpptosiptransformer.SipAnnotator()
         cpptosiptransformer.UpdateConvertToSubClassCodeDirectives(syms,[scope],["Zyzz"])
         

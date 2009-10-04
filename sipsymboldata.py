@@ -397,6 +397,14 @@ class SymbolData(cppsymboldata.SymbolData):
             accu.append("};\n")
             return ''.join(accu)
         
+    class Enumerator(cppsymboldata.SymbolData.Enumerator):
+        @sealed
+        def __init__(self,name,value):
+            cppsymboldata.SymbolData.Enumerator.__init__(self,name,value)
+
+        def format(self):
+            return self._name
+                
     class EnumeratorComment(object):
         @sealed
         def __init__(self,body):

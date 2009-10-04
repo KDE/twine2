@@ -152,4 +152,4 @@ def _MergeEnum(sipsym,primaryEnum,updateEnum):
             annotations.append(anno)
     primaryEnum.setAnnotations(annotations)
 
-    primaryEnum[:] = updateEnum[:]
+    primaryEnum[:] = [sipsym.Enumerator(e.name(),e.value()) for e in updateEnum]

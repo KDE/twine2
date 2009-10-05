@@ -167,7 +167,29 @@ class ModuleGenerator(object):
             text = fhandle.read()
             
         scope = self._sipParser.parse(self._sipSymbolData,text,filename=sipFilename)
-        scope.setHeaderFilename(sipFilename)
+        
+        # Figure out the Cpp header file name.
+        def findAll(scope,matchType):
+            result = []
+            for item in scope:
+                if isinstance(item,matchType):
+                    result.append(item)
+                if isinstance(item,self._sipSymbolData.SipClass) or isinstance(item,self._sipSymbolData.Namespace):
+                    result.extend(findAll(item,matchType))
+            return result
+        
+        def extractHeader(directives,directiveName):
+            for directive in directives:
+                if directive.name()==directiveName and directive.body() is not None:
+                    for line in directive.body().split('\n'):
+                        if line.startswith("#include <"):
+                            return line[10:-1]
+
+        directives = findAll(scope,self._sipSymbolData.SipDirective)
+        scope.setHeaderFilename(extractHeader(directives,"%TypeHeaderCode") \
+            or extractHeader(directives,"%ModuleHeaderCode") \
+            or sipFilename)
+            
         scopeList = [scope]
         
         #print("********************************************")

@@ -24,10 +24,17 @@ class SymbolData(cppsymboldata.SymbolData):
         cppsymboldata.SymbolData.__init__(self)
         self._typeIndex = None
         
-    def lookupType(self,name,contextFqName):
+    def lookupType(self,name,context):
+        resolvedType = self._SafeLookupType(name,context)
+        if resolvedType is None:
+            raise KeyError()
+        return resolvedType
+    
+    def _SafeLookupType(self,name,context):
         if self._typeIndex is None:
             self._buildTypeIndex()
             
+        contextFqName = context.fqName()
         if contextFqName is not None:
             pathParts = contextFqName.split("::")
             for i in range(len(pathParts)):
@@ -35,8 +42,18 @@ class SymbolData(cppsymboldata.SymbolData):
                 if canidate in self._typeIndex:
                     return self._typeIndex[canidate]
        
-        return self._typeIndex[name]
-
+        resolvedType = self._typeIndex.get(name,None)
+        if resolvedType is not None:
+            return resolvedType
+            
+        if isinstance(context,self.SipClass):
+            for base in context.bases():
+                resolvedBase = self._SafeLookupType(base,context.parentScope())
+                if resolvedBase is not None:
+                    return self.lookupType(name,resolvedBase)
+                    
+        return None
+            
     def _buildTypeIndex(self):
         self._typeIndex = {}
         for scope in self._scopes:
@@ -160,7 +177,7 @@ class SymbolData(cppsymboldata.SymbolData):
             for name in self._bases:
                 allBases.add(name)
                 
-                class_ = symbolData.lookupType(name,self.fqName())
+                class_ = symbolData.lookupType(name,self)
                 if class_ is not None:
                     allBases.update(class_.allSuperClassNames())
                     

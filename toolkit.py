@@ -238,8 +238,10 @@ class ModuleGenerator(object):
         moduleName = self._module
         if '.' in self._module:
             moduleName = self._module[self._module.rfind('.')+1:]
+        
+        indexFilename = self._indexFilename()
         with open(self._indexFilename(),'w') as fhandle:
-            fhandle.write(self._indexSip(scopes))
+            fhandle.write(self._indexSip( [s for s in scopes if s.headerFilename()!=indexFilename] ))
             
     def _indexFilename(self):
         module = self._module
@@ -275,6 +277,9 @@ class ModuleGenerator(object):
         return previousSipScopes
         
     def _indexSip(self,scopes):
+        def key(x): return x.headerFilename()
+        scopes.sort(key=key)
+        
         accu = []
         
         if self._copyrightNotice is not None:

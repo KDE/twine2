@@ -72,6 +72,9 @@ class CppToSipTransformer(object):
             elif isinstance(item,cppsymboldata.SymbolData.Enum):
                 self._convertEnum(item,destScope)
 
+            elif isinstance(item,cppsymboldata.SymbolData.Typedef):
+                self._convertTypedef(item,destScope)
+                
     def _convertFunction(self,cppFunction,destScope):
         isCtor = isinstance(cppFunction,cppsymboldata.SymbolData.Constructor)
         isDtor = isinstance(cppFunction,cppsymboldata.SymbolData.Destructor)
@@ -152,10 +155,18 @@ class CppToSipTransformer(object):
     
     def _convertEnum(self,cppEnum,parentScope):
         sipEnum = self._sipsym.Enum(parentScope, cppEnum.name())
+        sipEnum.setAccess(cppEnum.access())
         for item in cppEnum:
             sipEnum.append(item)
 
-
+    def _convertTypedef(self,cppTypedef,parentScope):
+        sipTypedef = self._sipsym.Typedef(parentScope, cppTypedef.name(),
+            filename=cppTypedef._filename,lineno=cppTypedef._lineno)
+        sipTypedef.setAccess(cppTypedef.access())
+        print("_convertTypedef "+str(id(sipTypedef))+", |"+str(cppTypedef.argumentType())+"|")
+        sipTypedef.setArgumentType(cppTypedef.argumentType())
+        return sipTypedef
+        
 ###########################################################################
 def ExpandClassNames(sipsym,scope):
     for item in scope:
@@ -176,7 +187,7 @@ def _ExpandClassNamesForClass(sipsym,sipClass):
     fqnBaseList = []
     for base in sipClass.bases():
         try:
-            baseObject = sipsym.lookupType(base,sipClass.parentScope().fqName())
+            baseObject = sipsym.lookupType(base,sipClass.parentScope())
             fqnBaseList.append(baseObject.fqName())
         except KeyError:
             fqnBaseList.append(base)
@@ -216,7 +227,7 @@ def _ExpandArgument(sipsym,context,argument):
         return argument
         
     try:
-        classObject = sipsym.lookupType(className,context.fqName())
+        classObject = sipsym.lookupType(className,context)
         if classObject.fqName()==className:
             return argument # Nothing to do.
     except KeyError:
@@ -341,7 +352,7 @@ class _UpdateConvertToSubClassCodeDirectives(object):
         lastBase = None
         for baseName in class_.bases():
             try:
-                base = self._symbolData.lookupType(baseName,class_.parentScope().fqName())
+                base = self._symbolData.lookupType(baseName,class_.parentScope())
                 if lastBase is None:
                     lastBase = base
                 subClassList = mapping.setdefault(base,set())
@@ -480,7 +491,7 @@ class _SanityCheckSip(object):
         # Check the base classes.
         for baseName in sipClass.bases():
             try:
-                self._symbolData.lookupType(baseName,sipClass.parentScope().fqName())
+                self._symbolData.lookupType(baseName,sipClass.parentScope())
             except KeyError:
                 print("Error: %s Unknown base class '%s'" % (sipClass.sourceLocation(),baseName))
     

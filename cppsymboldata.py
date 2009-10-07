@@ -77,6 +77,11 @@ class SymbolData(object):
             
         def fqName(self):
             parentFqn = self.parentScope().fqName()
+            
+            # FIXME name() should never be None. This only happens because the typedef parsing is broken with enums.
+            if self.name() is None:
+                return ""
+            
             if parentFqn is not None:
                 return parentFqn + "::" + self.name()
             else:
@@ -535,6 +540,9 @@ class SymbolData(object):
             
         def setArgumentType(self,argumentType):
             self._argumentType = argumentType
+            
+        def argumentType(self):
+            return self._argumentType
             
         def format(self,indent=0):
             pre = SymbolData._indentString(indent)

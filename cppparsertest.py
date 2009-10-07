@@ -244,6 +244,17 @@ class TestCppParser(unittest.TestCase):
             """)
         print(scope.format())
 
+    def testEnumInClass(self):
+        scope = self.parser.parse(self.syms,
+            """
+enum TimeFormatOption {
+    TimeDefault        = 0x0,   ///< Default formatting using seconds and the format
+                                ///< as specified by the locale.
+    TimeDuration       = 0x6   ///< Read/format time string as duration. This will strip
+};
+              """,debugLevel=2)
+        print(scope.format())
+
     def testNamespaceEnum(self):
         scope = self.parser.parse(self.syms,
             """
@@ -307,11 +318,30 @@ namespace Foo {
             """)
         print(scope.format())
 
+    def testTypedef5(self):
+        scope = self.parser.parse(self.syms,
+            """typedef QFlags< SearchOption > SearchOptions;
+            """)
+        print(scope.format())
+        
+    def testTypedef6(self):
+        scope = self.parser.parse(self.syms,
+            """typedef enum { Name, FromUrl } FileNameUsedForCopying;
+            """)
+        print(scope.format())
+
     def testTemplate(self):
         scope = self.parser.parse(self.syms,
             """
             QList<int> intlist;
             """)
+        print(scope.format())
+
+    def testInline(self):
+        scope = self.parser.parse(self.syms,
+            """
+            inline operator bool() const { return ( d != 0 ); }
+            """,debugLevel=2)
         print(scope.format())
 
     def testMacro(self):

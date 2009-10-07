@@ -197,6 +197,12 @@ public:
 };
 """)
 
+    def testTypedef(self):
+        self.convert("""
+typedef QFlags< SearchOption > SearchOptions;
+""")
+
+
     def testAnnotate(self):
         self.annotate("""
 class Foo {

@@ -445,7 +445,7 @@ class SymbolData(cppsymboldata.SymbolData):
 
     class Typedef(cppsymboldata.SymbolData.Typedef, _SipEntityExtra):
         @sealed
-        def __init__(self,parentScope, name, filename, lineno):
+        def __init__(self,parentScope, name, filename=None, lineno=-1):
             cppsymboldata.SymbolData.Typedef.__init__(self,parentScope, name, filename, lineno)
             SymbolData._SipEntityExtra.__init__(self)
             

@@ -89,7 +89,7 @@ class SipParser(object):
         self._resetState()
 
         self.symbolData = symbolData
-        self.scope = self.symbolData.newScope()
+        topScope = self.scope = self.symbolData.newScope()
         
         self.filename = filename
         sipLexer.input (text)
@@ -97,7 +97,8 @@ class SipParser(object):
         sipLexer.lexpos = 0
     
         result = self._parse(debug = debugLevel, lexer = self.lexer)
-        return self.scope
+        # FIXME topScope should equal self.scope now. But there is a bug in the template parsing somewhere.
+        return topScope
         
     def _pushScope(self, newScope):
         self._scopeStack.append(self.scope)

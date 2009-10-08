@@ -241,7 +241,9 @@ def preprocess (text, global_values, global_macros):
         text = text + '\n'
     ppLexer.input (text)
     token = ppLexer.token ()
-    return "".join (fixDoc (newtext))
+    #print(newtext)
+    #return "".join (fixDoc (newtext))
+    return "".join(newtext)
 
 def fixDoc (textList):
     doReplace = False
@@ -280,9 +282,6 @@ def fixDoc (textList):
             doReplace = False
             
     return textList
-            
-        
-    
     
 if __name__ == '__main__':
     text = """#define foo bar"""

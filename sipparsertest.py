@@ -517,20 +517,22 @@ class Foo : Zyzz {
         print(scope.format())
 
     def testFullCompare(self):
-        sipdir = "/home/sbe/devel/svn/kde/branches/KDE/4.3/kdebindings/python/pykde4/sip/kdecore/"
+        sipdir = "/home/sbe/devel/svn/kde/branches/KDE/4.3/kdebindings/python/pykde4/sip/kdeui/"
         #sipdir = "/usr/share/sip/PyQt4/QtGui/"        
         for filename in os.listdir(sipdir):
-             print(filename)
-             if filename.endswith(".sip"):
-                 filepath = os.path.join(sipdir,filename) 
-                 with open(filepath) as fhandle:
-                     text = fhandle.read()
-                     self.syms = sipsymboldata.SymbolData()
-                     self.parser.parse(self.syms, text)
-                     
-                     with open(filename+".v2",'w') as outhandle:
-                         outhandle.write(self.syms.topScope().format())
-                     subprocess.call(['diff','-durb',filepath,filename+".v2"])
+            print(filename)
+            if filename.endswith(".sip"):
+                filepath = os.path.join(sipdir,filename) 
+                with open(filepath) as fhandle:
+                    text = fhandle.read()
+                self.syms = sipsymboldata.SymbolData()
+                scope = self.parser.parse(self.syms, text)
+
+                output = scope.format()
+                if CleanWhitespace(text)!=CleanWhitespace(output):
+                    with open(filename+".v2",'w') as outhandle:
+                        outhandle.write(scope.format())
+                    subprocess.call(['diff','-durb',filepath,filename+".v2"])
 
 #        self.parser = sipparser.SipParser()
 

@@ -23,6 +23,7 @@ from sealed import sealed
 import ply.yacc as yacc
 import cpplexer
 import pplexer
+import inspect
 
 class CppParser(object):
     """Parser for C++ header files."""
@@ -159,9 +160,18 @@ class CppParser(object):
     def _pushScope(self, newScope):
         self._scopeStack.append(self.scope)
         self.scope = newScope
+        #print("\n_pushScope")
+        #self._dumpScopeStack()
 
     def _popScope(self):
+        #print("\n_popScope")
         self.scope = self._scopeStack.pop()
+        #self._dumpScopeStack()
+
+    def _dumpScopeStack(self):
+        print("Scope stack: [" + (", ".join(repr(s) for s in self._scopeStack)) + "]")
+        for s in inspect.stack()[:4]:
+            print(repr(s))
 
     def _pushAccess(self, newAccess):
         self._accessStack.append(self.access)

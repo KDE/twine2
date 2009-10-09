@@ -252,7 +252,7 @@ enum TimeFormatOption {
                                 ///< as specified by the locale.
     TimeDuration       = 0x6   ///< Read/format time string as duration. This will strip
 };
-              """,debugLevel=2)
+              """,debugLevel=0)
         print(scope.format())
 
     def testNamespaceEnum(self):
@@ -325,6 +325,12 @@ namespace Foo {
         print(scope.format())
         
     def testTypedef6(self):
+        scope = self.parser.parse(self.syms,
+            """typedef enum { Name, FromUrl } FileNameUsedForCopying;
+            """)
+        print(scope.format())
+
+    def testTypedef7(self):
         scope = self.parser.parse(self.syms,
             """typedef enum { Name, FromUrl } FileNameUsedForCopying;
             """)

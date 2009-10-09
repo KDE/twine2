@@ -50,7 +50,6 @@ class CppParser(object):
         self.access = "public"
         self._accessStack = []
         self.currentFunction = None
-        self.currentEnum = None
         self.currentClass = None
         self.currentTypedef = None
         self.exprElement = None
@@ -206,9 +205,8 @@ class CppParser(object):
             class_.setAccess('public')
     
     def enumObject (self, name):
-        enum = self.symbolData.Enum(self.scope, name, self.filename, self.lexer.lineno)
+        enum = self.symbolData.Enum(None, name, self.filename, self.lexer.lineno)
         enum.setAccess(self.access)
-        self.currentEnum = enum
         return enum
     
     def typedefObject(self, typeName, newName):
@@ -219,7 +217,7 @@ class CppParser(object):
 #       else:
 #            tdObj.template = self.template
 #        self.template = None
-        self._pushScope(tdObj)
+#        self._pushScope(tdObj)
         self.currentTypedef = tdObj
             
         return tdObj
@@ -291,6 +289,7 @@ class CppParser(object):
                   | class_decl
                   | enum_decl
                   | typedef_decl
+                  | typedef_enum_decl
                   | function_decl
                   | variable_decl
                   | template_decl
@@ -359,6 +358,7 @@ class CppParser(object):
         """class_member : class_decl
                         | enum_decl
                         | typedef_decl
+                        | typedef_enum_decl
                         | access_specifier
                         | function_decl
                         | variable_decl
@@ -449,87 +449,110 @@ class CppParser(object):
         pass
 
     def p_enum_decl0 (self, p):
-        'enum_decl : enum_statement SEMI'
-        self.currentEnum = None
+        """enum_decl : enum_statement SEMI"""
+        self.scope.append(p[1])
         
     def p_enum_decl1 (self, p):
-        'enum_decl : enum_statement id_list SEMI'
-        self.currentEnum = None
+        """enum_decl : enum_statement id_list SEMI"""
+        self.scope.append(p[1])
         #self.lexer.begin('variable')
         
-    def p_enum_statement (self, p):
-        """enum_statement : enum_name enumerator_list RBRACE
-                                       | enum_name RBRACE"""
+    def p_enum_statement0 (self, p):
+        """enum_statement : enum_name enumerator_list RBRACE"""
+        for enum in p[2]:
+            p[1].appendEnumerator(enum)
+        #self._popScope()
+        self.lexer.begin ('variable')
+        p[0] = p[1]
+        
+    def p_enum_statement1 (self, p):
+        """enum_statement : enum_name RBRACE"""
+        p[0] = p[1]
         self.lexer.begin ('variable')
         
     def p_enum_name0 (self, p):
         """enum_name : enum ID LBRACE
                      | enum LBRACE"""                     
-            
         if p[2] != "{":
             name = p[2]
         else:
             name = None
-        self.enumObject(name)
-        
-    def p_enum_name1 (self, p):
-        'enum_name : enum_from_typedef'
-        self._popScope()
-        self.currentTypedef = None
+        p[0] = self.enumObject(name)
+
+    def p_typedef_enum (self, p):
+        """typedef_enum_decl : typedef enum_statement SEMI
+                             | typedef enum_statement id_list SEMI"""
+        accu = []
+        accu.append("enum { ")
+        accu.append((", ").join((item.format() for item in p[2])))
+        accu.append(" }")
+        formattedEnum = ''.join(accu)
+        name = p[2].name()
+        if len(p)==5:
+            name = p[3]
+        self.typedefObject(formattedEnum, name)
         
     def p_enumerator0 (self, p):
-        """enumerator : ID
-                      | ID EQUALS expression"""
-                
-        if len(p) == 4:
-            enumerator = self.symbolData.Enumerator(p[1], p[3])
-        else:
-            enumerator = self.symbolData.Enumerator(p[1], None)
-        self.currentEnum.appendEnumerator(enumerator)
+        """enumerator : ID"""
+        enumerator = self.symbolData.Enumerator(p[1], None)
+        p[0] = enumerator
     
     def p_enumerator1 (self, p):
-        """enumerator : DOC ID
-                      | DOC ID EQUALS expression"""
-                
-        if len (p) == 5:
-            enumerator = self.symbolData.Enumerator(p[2], p[4])
-        else:
-            enumerator = self.symbolData.Enumerator(p[2], None)
-        #enumerator.setDoc(p[1])
-        self.currentEnum.appendEnumerator(enumerator)
-        
+        """enumerator : ID EQUALS expression"""
+        enumerator = self.symbolData.Enumerator(p[1], p[3])
+        p[0] = enumerator
+    
     def p_enumerator2 (self, p):
-        """enumerator : ID UPDOC
-                      | ID EQUALS expression UPDOC"""
-        
-        if len (p) == 5:
-            enumerator = self.symbolData.Enumerator(p[1], p[3], self.stateInfo)
-            enumerator.setDoc(p[4])
-        else:
-            enumerator = self.symbolData.Enumerator(p[1], None, self.stateInfo)
-            enumerator.setDoc(p[2])
-        self.currentEnum.appendEnumerator(enumerator)
+        """enumerator : DOC ID"""
+        enumerator = self.symbolData.Enumerator(p[2], None)
+        #enumerator.setDoc(p[1])
+        p[0] = enumerator
+
+    def p_enumerator3 (self, p):
+        """enumerator : DOC ID EQUALS expression"""
+        enumerator = self.symbolData.Enumerator(p[2], p[4])
+        #enumerator.setDoc(p[1])
+        p[0] = enumerator
+
+    def p_enumerator4 (self, p):
+        """enumerator : ID EQUALS expression enum_doc"""
+        enumerator = self.symbolData.Enumerator(p[1], p[3])
+        #enumerator.setDoc(p[4])
+        p[0] = enumerator
+            
+    def p_enumerator5 (self, p):
+        """enumerator : ID enum_doc"""
+        enumerator = self.symbolData.Enumerator(p[1], None)
+        #enumerator.setDoc(p[2])
+        p[0] = enumerator
 
     def p_enumerator_list0 (self, p):
-        """enumerator_list : enumerator
-                           | enumerator_list enum_delim enumerator
-                           | enumerator_list UPDOC"""
-        if len (p) == 3:
-            self.currentObject ().enumerators [-1].doc = p [2]
+        """enumerator_list : enumerator"""
+        p[0] = [p[1]]
+            
+    def p_enumerator_list1 (self, p):
+        """enumerator_list : enumerator_list enum_delim enumerator"""
+        p[1].append(p[3])
+        p[0] = p[1]
+        
+    def p_enumerator_list2 (self, p):
+        """enumerator_list : enumerator_list enum_doc"""
+        #p[1][-1].doc = p[2]
+        p[0] = p[1]
         
     def p_enum_delim0 (self, p):
-        """enum_delim : COMMA
-                      | COMMA UPDOC"""
-        if len (p) == 3:
-            self.stateInfo.currentObject ().enumerators [-1].doc = p [2]
+        """enum_delim : COMMA"""
+        p[0] = (None,None)  # (DOC,UPDOC)
         
     def p_enum_delim1 (self, p):
-        'enum_delim : COMMA UPDOC DOC'
-        self.stateInfo.currentObject ().enumerators [-1].doc = p [2]
-
-    def p_enum_delim2 (self, p):
-        """enum_delim : COMMA DOC
-                      | DOC COMMA"""
+        """enum_delim : COMMA enum_doc"""
+        p[0] = (None,None)  # (DOC,UPDOC)
+        
+    def p_enum_doc(self, p):
+        """enum_doc : enum_doc DOC
+                 | enum_doc UPDOC
+                 | DOC
+                 | UPDOC"""
         pass
 
     def p_id_list_element0 (self, p):
@@ -656,12 +679,14 @@ class CppParser(object):
        
     def p_typedef_simple0 (self, p):
         'typedef_simple : typedef type_specifier ID'
-        self.typedefObject(p[2], p[3])
+        tdObj = self.typedefObject(p[2], p[3])
+        self._pushScope(tdObj)
         self.inTypedef = True
         
     def p_typedef_simple1 (self, p):
         'typedef_simple : typedef type_specifier ID ARRAYOP'
-        self.typedefObject('%s*' % p [2], p [3])
+        tdObj = self.typedefObject('%s*' % p [2], p [3])
+        self._pushScope(tdObj)
         self.inTypedef = True
 
     def p_typedef_elaborated (self, p):
@@ -669,7 +694,8 @@ class CppParser(object):
                               | typedef struct qualified_id ID
                               | typedef union qualified_id ID
                               | typedef enum qualified_id ID"""
-        self.typedefObject(p[3], p[4])
+        tdObj = self.typedefObject(p[3], p[4])
+        self._pushScope(tdObj)
         self.inTypedef = True
         
     def p_class_from_typedef0 (self, p):
@@ -687,22 +713,6 @@ class CppParser(object):
         self.classObject ('anonymous', p [2])
         self.inTypedef = True
 
-    def p_enum_from_typedef (self, p):
-        """enum_from_typedef : typedef enum ID LBRACE
-                             | typedef enum LBRACE"""
-        if p [3] != "{":
-            name = p [3]
-        else:
-            name = None
-            
-        tdObj = self.symbolData.Typedef(self.scope, name, self.filename, self.lexer.lineno)
-        self.template = None
-        self._pushScope(tdObj)
-        self.currentTypedef = tdObj
-
-        self.inTypedef = True
-        self.enumObject(name)
-        
     def p_pointer_to_function_pfx (self, p):
         """pointer_to_function_pfx : ASTERISK FUNCPTR
                                    | type_specifier FUNCPTR"""

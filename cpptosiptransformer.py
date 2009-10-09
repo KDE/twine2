@@ -163,7 +163,6 @@ class CppToSipTransformer(object):
         sipTypedef = self._sipsym.Typedef(parentScope, cppTypedef.name(),
             filename=cppTypedef._filename,lineno=cppTypedef._lineno)
         sipTypedef.setAccess(cppTypedef.access())
-        print("_convertTypedef "+str(id(sipTypedef))+", |"+str(cppTypedef.argumentType())+"|")
         sipTypedef.setArgumentType(cppTypedef.argumentType())
         return sipTypedef
         

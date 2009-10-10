@@ -238,15 +238,19 @@ def _ExpandArgument(sipsym,context,argument):
     defaultValue = argument.defaultValue()
     if defaultValue is not None:
         if defaultValue.endswith("()"):
-            pass
+            try:
+                valueObject = sipsym.lookupType(defaultValue[:-2],context)
+                defaultValue = valueObject.fqName() + "()"
+            except KeyError:
+                pass
         else:
             enum = sipsym.lookupEnum(defaultValue,context)
             if enum is not None:
                 defaultValue =  enum.fqName() + "::" + defaultValue
             else:
                 try:
-                    valueClassObject = sipsym.lookupType(defaultValue,context)
-                    print("******** FOUNd valueClassObject")
+                    valueObject = sipsym.lookupType(defaultValue,context)
+                    defaultValue = valueObject.fqName()
                 except KeyError:
                     pass
                 

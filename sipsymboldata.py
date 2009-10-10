@@ -70,8 +70,8 @@ class SymbolData(cppsymboldata.SymbolData):
                     self._typeIndex[item.fqName()] = item
             elif isinstance(item,SymbolData.Namespace):
                 self._indexScope(item)
-            #elif isinstance(item,SymbolData.Variable):
-            #    self._typeIndex[item.fqName()] = item
+            elif isinstance(item,SymbolData.Variable):
+                self._typeIndex[item.fqName()] = item
             
     def _changed(self):
         self._typeIndex = None

@@ -500,11 +500,11 @@ class Foo : Zyzz {
 
 };
 """)
-        bar = self.syms.lookupType("Bar",scope.fqName())
+        bar = self.syms.lookupType("Bar",scope)
         self.assertTrue(bar is not None)
         self.assertTrue(bar.allSuperClassNames() is not None)
         self.assertTrue(len(bar.allSuperClassNames())==0)
-        foo = self.syms.lookupType("Foo",scope.fqName())
+        foo = self.syms.lookupType("Foo",scope)
         self.assertTrue(foo is not None)
         fooBases = foo.allSuperClassNames()
         self.assertTrue(fooBases is not None)

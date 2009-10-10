@@ -61,15 +61,18 @@ class SymbolData(object):
         
     # Query interface goes here.
     
-
-    class Scope(object):
-        """Represents a scope which can hold other entities.
+    class Entity(object):
+        """Represents an entity and a scope which can hold other entities.
         
         This class isn't meant to be used directly but is typically subclassed."""
         @sealed
-        def __init__(self,name=None):
+        def __init__(self, parentScope, name, filename, lineno):
+            self._scope = parentScope
+            self._filename = filename
+            self._lineno = lineno
+            if self._scope is not None:
+                self._scope.insertIntoScope(None, self)
             self._items = []
-            #self._names = {}
             self._name = name
             
         def name(self):
@@ -134,11 +137,26 @@ class SymbolData(object):
         def _killCache(self,targetItem):
             syms = self._symbolData()
             syms._changed()
+            
+        def parentScope(self):
+            return self._scope
+            
+        def topScope(self):
+            return self._scope.topScope()
         
-    class TopLevelScope(Scope):
+        def _symbolData(self):
+            return self._scope._symbolData()
+        
+        def sourceLocation(self):
+            if self._filename is not None:
+                return "%s:%i" % (self._filename,self._lineno)
+            else:
+                return "???:%i" % (self._lineno,)
+        
+    class TopLevelScope(Entity):
         @sealed
         def __init__(self,symbolData):
-            SymbolData.Scope.__init__(self)
+            SymbolData.Entity.__init__(self, None, None, None, -1)
             self._symbolDataPtr = symbolData
             self._headerFilename = None
 
@@ -165,53 +183,24 @@ class SymbolData(object):
     
         def parentScope(self):
             return None
-    
-    class ScopedEntity(object):
-        @sealed
-        def __init__(self, parentScope, filename, lineno):
-            self._scope = parentScope
-            self._filename = filename
-            self._lineno = lineno
-            if self._scope is not None:
-                self._scope.insertIntoScope(None, self)
-            
-        def parentScope(self):
-            return self._scope
-            
-        def topScope(self):
-            return self._scope.topScope()
         
-        def _symbolData(self):
-            return self._scope._symbolData()
-        
-        def sourceLocation(self):
-            if self._filename is not None:
-                return "%s:%i" % (self._filename,self._lineno)
-            else:
-                return "???:%i" % (self._lineno,)
-        
-    class Namespace(ScopedEntity,Scope):
+    class Namespace(Entity):
         """Represents a C++ style namespace."""
         @sealed
         def __init__(self, parentScope, name, filename, lineno):
-            SymbolData.Scope.__init__(self,name)
-            SymbolData.ScopedEntity.__init__(self, parentScope, filename, lineno)
+            SymbolData.Entity.__init__(self, parentScope, name, filename, lineno)
 
         def format(self,indent=0):
             pre = SymbolData._indentString(indent)
-            return pre + "namespace " + self._name + "\n"+pre+"{\n" + SymbolData.Scope.format(self,indent) + pre + "};\n"
+            return pre + "namespace " + self._name + "\n"+pre+"{\n" + SymbolData.Entity.format(self,indent) + pre + "};\n"
 
-    class _CppEntity(ScopedEntity):
+    class _CppEntity(Entity):
         @sealed
         def __init__(self, parentScope, name, filename, lineno):
-            SymbolData.ScopedEntity.__init__(self, parentScope, filename, lineno)
-            self._name = name
+            SymbolData.Entity.__init__(self, parentScope, name, filename, lineno)
             self._access = SymbolData.ACCESS_PUBLIC
             if self._scope is not None:
                 self._scope.insertIntoScope(name, self)
-            
-        def name(self):
-            return self._name
 
         def setAccess(self,typeName):
             if typeName in SymbolData.ACCESS_TYPE_MAPPING_TO_NAME.keys():
@@ -300,10 +289,9 @@ class SymbolData(object):
             else:
                 return self._name + "=" + self._value
 
-    class CppClass(Scope, _CppEntity):
+    class CppClass(_CppEntity):
         @sealed
         def __init__(self,parentScope, name, filename=None, lineno=-1):
-            SymbolData.Scope.__init__(self,name)
             SymbolData._CppEntity.__init__(self, parentScope, name, filename, lineno)
             self._bases = []
             self._opaque = False
@@ -536,10 +524,9 @@ class SymbolData(object):
             storage = self._storage+" " if self._storage is not None else ""
             return pre + storage + "~" + self._name + " ();\n"
             
-    class Typedef(Scope,_CppEntity):
+    class Typedef(_CppEntity):
         @sealed
         def __init__(self,parentScope, name, filename, lineno):
-            SymbolData.Scope.__init__(self,name)
             SymbolData._CppEntity.__init__(self, parentScope, name, filename, lineno)
             self._argumentType = None
             

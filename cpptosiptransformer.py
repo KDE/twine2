@@ -480,7 +480,7 @@ class _UpdateConvertToSubClassCodeDirectives(object):
         for item in scope:
             if isinstance(item,self._symbolData.SipClass):
                 classList.append(item)
-            if isinstance(item,self._symbolData.Scope):
+            if isinstance(item,self._symbolData.Entity):
                 classList.extend(self._findClasses(item))
         return classList
     

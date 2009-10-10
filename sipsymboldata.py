@@ -50,7 +50,7 @@ class SymbolData(cppsymboldata.SymbolData):
             for base in context.bases():
                 resolvedBase = self._SafeLookupType(base,context.parentScope())
                 if resolvedBase is not None:
-                    return self.lookupType(name,resolvedBase)
+                    return self._SafeLookupType(name,resolvedBase)
                     
         return None
             
@@ -70,7 +70,9 @@ class SymbolData(cppsymboldata.SymbolData):
                     self._typeIndex[item.fqName()] = item
             elif isinstance(item,SymbolData.Namespace):
                 self._indexScope(item)
-                
+            #elif isinstance(item,SymbolData.Variable):
+            #    self._typeIndex[item.fqName()] = item
+            
     def _changed(self):
         self._typeIndex = None
 
@@ -84,6 +86,25 @@ class SymbolData(cppsymboldata.SymbolData):
         typesKeys.sort()
         print(", ".join(typesKeys))
 
+    def lookupEnum(self,value,context):
+        scope = context
+        while scope is not None:
+            for item in scope:
+                if isinstance(item,SymbolData.Enum):
+                    for enum in item:
+                        if enum.name()==value:
+                            return item
+            scope = scope.parentScope()
+            
+        if isinstance(context,self.SipClass):
+            for base in context.bases():
+                resolvedBase = self._SafeLookupType(base,context.parentScope())
+                if resolvedBase is not None:
+                    enum = self.lookupEnum(value,resolvedBase)
+                    if enum is not None:
+                        return enum
+        return None
+        
     class _SipEntityExtra(object):
         @sealed
         def __init__(self):

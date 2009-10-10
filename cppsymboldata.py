@@ -163,6 +163,9 @@ class SymbolData(object):
             else:
                 return "???:-1" % (self._headerFilename,)
     
+        def parentScope(self):
+            return None
+    
     class ScopedEntity(object):
         @sealed
         def __init__(self, parentScope, filename, lineno):

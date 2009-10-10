@@ -222,18 +222,36 @@ def _ExpandArgument(sipsym,context,argument):
         className = className[6:]
         prefix = "const "
     
-    if className in _PrimitiveTypes or '<' in className:
-        return argument
-        
-    try:
-        classObject = sipsym.lookupType(className,context)
-        if classObject.fqName()==className:
-            return argument # Nothing to do.
-    except KeyError:
-        print("Warning: %s Unrecognized type '%s' was found when expanding argument type names." % (context.sourceLocation(),className))
-        return argument
+    #if '<' in className:
+    #    return argument
+    if className not in _PrimitiveTypes:
+        #    return argument
+        try:
+            classObject = sipsym.lookupType(className,context)
+            if classObject.fqName()==className:
+                return argument # Nothing to do.
+            className = classObject.fqName()
+        except KeyError:
+            print("Warning: %s Unrecognized type '%s' was found when expanding argument type names." % (context.sourceLocation(),className))
+            return argument
 
-    newArgument = sipsym.Argument(prefix+classObject.fqName()+suffix, argument.name(), argument.defaultValue(),
+    defaultValue = argument.defaultValue()
+    if defaultValue is not None:
+        if defaultValue.endswith("()"):
+            pass
+        else:
+            enum = sipsym.lookupEnum(defaultValue,context)
+            if enum is not None:
+                defaultValue =  enum.fqName() + "::" + defaultValue
+            else:
+                try:
+                    valueClassObject = sipsym.lookupType(defaultValue,context)
+                    print("******** FOUNd valueClassObject")
+                except KeyError:
+                    pass
+                
+            
+    newArgument = sipsym.Argument(prefix + className + suffix, argument.name(), defaultValue,
                     argument.template(), argument.defaultTypes())
     newArgument.setAnnotations(argument.annotations())
     return newArgument

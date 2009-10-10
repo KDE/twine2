@@ -160,6 +160,20 @@ class Foo {
         fooCtor = newScope[1][0]
         self.assertTrue(len(fooCtor.annotations())==1)
 
+    def testClassDestructor(self):
+        newScope = self.merge("""
+class Foo {
+  Foo();
+  ~Foo();
+};
+        ""","""
+class Foo {
+  Foo();
+  ~Foo();
+};
+        """)
+        self.assertTrue(len(newScope[1])==2)
+
     def testNamespace(self):
         newScope = self.merge("""
 namespace Foo {

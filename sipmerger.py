@@ -39,7 +39,7 @@ def MergeSipScope(sipsym,primaryScope,updateScope):
     # Index the primary scope
     for item in primaryScope:
         if isinstance(item,sipsym.Function) or isinstance(item,sipsym.Constructor) or isinstance(item,sipsym.Destructor):
-            primaryFunctionMap[_MangleFunctionName(item)] = item
+            primaryFunctionMap[_MangleFunctionName(sipsym,item)] = item
         elif isinstance(item,sipsym.SipClass):
             primaryClassMap[item.fqName()] = item
         elif isinstance(item,sipsym.Namespace):
@@ -52,7 +52,7 @@ def MergeSipScope(sipsym,primaryScope,updateScope):
         # Loop over a copy of the item because we might change the list on the fly.
         
         if isinstance(item,sipsym.Function) or isinstance(item,sipsym.Constructor) or isinstance(item,sipsym.Destructor):
-            mangledName = _MangleFunctionName(item)
+            mangledName = _MangleFunctionName(sipsym,item)
             if mangledName in primaryFunctionMap:
                 _MergeSipFunction(sipsym,primaryFunctionMap[mangledName],item)
                 del primaryFunctionMap[mangledName]
@@ -117,8 +117,12 @@ def _MergeSipFunction(sipsym,primaryFunction,updateFunction):
             
     primaryFunction.setArguments(newArguments)
 
-def _MangleFunctionName(function):
-    return function.name() + '(' + \
+def _MangleFunctionName(sipsym,function):
+    name = function.name()
+    if isinstance(function,sipsym.Destructor):
+        name = "~" + name
+        
+    return name + '(' + \
         ','.join([arg.argumentType() for arg in function.arguments() if arg.defaultValue() is None]) + ')'
 
 def _MergeArgument(sipsym,primaryArgument,updateArgument):

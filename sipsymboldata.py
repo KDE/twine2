@@ -156,7 +156,7 @@ class SymbolData(cppsymboldata.SymbolData):
                 
         def _formatCppArgs(self):
             if self._cppargs is not None:
-                return (" [(" if self._cppreturn is None else "  [" + self._cppreturn + " (") + \
+                return (" [(" if self._cppreturn is None else " [" + self._cppreturn + " (") + \
                     ", ".join(item.format() for item in self._cppargs) + ")]"
             else:
                 return ""

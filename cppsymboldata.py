@@ -484,10 +484,10 @@ class SymbolData(object):
             accu.append(" (")
             accu.append(', '.join( (arg.format() for arg in self._arguments) ))
             accu.append(")")
-            if 'pure' in self._qualifier:
-                accu.append("=0")
             if 'const' in self._qualifier:
                 accu.append(" const")
+            if 'pure' in self._qualifier:
+                accu.append("=0")
             accu.append(";\n")
             return ''.join(accu)
 

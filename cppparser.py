@@ -257,7 +257,9 @@ class CppParser(object):
             functionObj.setReturn(returnArg)
         functionObj.setAccess(self.access)
 
-        #self.template = None
+        functionObj.setTemplate(self.template)
+        self.template = None
+        
         self.exprElements = []
 
         functionObj.setStorage(self.storage)
@@ -289,14 +291,20 @@ class CppParser(object):
                   | typedef_enum_decl
                   | function_decl
                   | variable_decl
-                  | template_decl
                   | bare_macro
                   | skip_macro"""
-        self.lexer.lexstate  = 'variable'
-        self.arguments   = []
-        self.template    = None
+        self.lexer.lexstate = 'variable'
+        self.arguments = []
+        self.template = None
         self.exprElement = None
-                  
+
+    def p_member2 (self, p):
+        """member : template_decl"""
+        self.lexer.lexstate  = 'variable'
+        self.template = p[1]
+        self.arguments = []
+        self.exprElement = None
+
     def p_member_list (self, p):
         """member_list : member
                        | member_list member"""
@@ -359,16 +367,18 @@ class CppParser(object):
                         | access_specifier
                         | function_decl
                         | variable_decl
-                        | template_decl
                         | bare_macro
                         | skip_macro"""
-        #if self.stateInfo.lexState != 'operator':
-        #   self.lexer.begin (self.stateInfo.lexState)
         self.lexer.lexstate  = 'variable'
-        #self.stateInfo.inTypedef = False
-
         self.arguments   = []
         self.template    = None
+        self.exprElement = None
+        
+    def p_class_member2 (self, p):
+        """class_member : template_decl"""
+        self.lexer.lexstate  = 'variable'
+        self.arguments   = []
+        self.template    = p[1]
         self.exprElement = None
             
     def p_access_specifier (self, p):
@@ -1049,23 +1059,20 @@ class CppParser(object):
     def p_template_param (self, p):
         """template_param : type_specifier
                          | type_specifier ID"""
-        self.templateParams.append (" ".join (p [1:]))
+        p[0] = " ".join(p[1:])
         
     def p_template_param_list (self, p):
-        """template_param_list : template_param
-                              | template_param_list COMMA template_param"""
-        pass
+        """template_param_list : template_param"""
+        p[0] = [p[1]]
+        
+    def p_template_param_list2 (self, p):
+        """template_param_list : template_param_list COMMA template_param"""
+        p[1].append(p[3])
+        p[0] = p[1]
         
     def p_template_decl (self, p):
         'template_decl : template LT template_param_list GT'
-        pass
-        #self.stateInfo.inTemplate = ','.join (self.templateParams)
-        #self.templateParams = []
-                        
-#     def p_skip_macro (self, p):
-#         'skip_macro : MACROCALL MACROBODY'
-#         pass        
-
+        p[0] = p[3]
 
 # expression handling for argument default values - just parses and
 # then reassembles the default value expression (no evaluation)

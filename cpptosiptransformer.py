@@ -81,6 +81,10 @@ class CppToSipTransformer(object):
     def _convertFunction(self,cppFunction,destScope):
         isCtor = isinstance(cppFunction,cppsymboldata.SymbolData.Constructor)
         isDtor = isinstance(cppFunction,cppsymboldata.SymbolData.Destructor)
+
+        if len(cppFunction.template())!=0:
+            # Ignore templated functions.
+            return
         
         # Private funcions/methods are not copied.
         if cppFunction.access()==cppsymboldata.SymbolData.ACCESS_PRIVATE and not isCtor and not isDtor:

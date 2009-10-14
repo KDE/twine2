@@ -439,6 +439,7 @@ class SymbolData(object):
             self._storage = None
             self._arguments = []
             self._qualifier = set()
+            self._template = []
 
         def setStorage(self,storage):
             self._storage = storage
@@ -461,9 +462,25 @@ class SymbolData(object):
         def addQualifier(self,qualifier):
             self._qualifier.add(qualifier)
 
+        def setTemplate(self, template):
+            if template is None:
+                self._template = []
+            else:
+                self._template = template
+                
+        def template(self):
+            return self._template
+            
         def format(self,indent=0):
             accu = []
-            accu.append(SymbolData._indentString(indent))
+            indentstr = SymbolData._indentString(indent)
+            if self._template:
+                accu.append(indentstr)
+                accu.append("template <")
+                accu.append(", ".join(self._template))
+                accu.append(">\n")
+            
+            accu.append(indentstr)
             chars = 0
             if 'virtual' in self._qualifier:
                 accu.append("virtual ")

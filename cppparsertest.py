@@ -213,6 +213,22 @@ class TestCppParser(unittest.TestCase):
             """)
         print(scope.format())
 
+    def testFunctions7(self):
+        scope = self.parser.parse(self.syms,
+            """
+            template <T>
+            void foo (T t);
+            """)
+        print(scope.format())
+        
+    def testFunctions8(self):
+        scope = self.parser.parse(self.syms,
+            """
+template<typename T>
+    inline T readCheck(const char *key, const T &defaultValue) const;
+            """)
+        print(scope.format())
+
     def testOperator1(self):
         scope = self.parser.parse(self.syms,
             """

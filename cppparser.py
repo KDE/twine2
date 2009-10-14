@@ -51,7 +51,6 @@ class CppParser(object):
         self._accessStack = []
         self.currentFunction = None
         self.currentClass = None
-        self.currentTypedef = None
         self.exprElement = None
         self.inTypedef = False
 
@@ -218,8 +217,6 @@ class CppParser(object):
 #            tdObj.template = self.template
 #        self.template = None
 #        self._pushScope(tdObj)
-        self.currentTypedef = tdObj
-            
         return tdObj
         
     def bareMacro(self,name):
@@ -482,15 +479,10 @@ class CppParser(object):
     def p_typedef_enum (self, p):
         """typedef_enum_decl : typedef enum_statement SEMI
                              | typedef enum_statement id_list SEMI"""
-        accu = []
-        accu.append("enum { ")
-        accu.append((", ").join((item.format() for item in p[2])))
-        accu.append(" }")
-        formattedEnum = ''.join(accu)
         name = p[2].name()
         if len(p)==5:
             name = p[3]
-        self.typedefObject(formattedEnum, name)
+        self.symbolData.EnumTypedef(self.scope, name, p[2], self.filename, self.lexer.lineno)
         
     def p_enumerator0 (self, p):
         """enumerator : ID"""
@@ -675,7 +667,6 @@ class CppParser(object):
                         | typedef_elaborated SEMI
                         | typedef_function_ptr SEMI"""
         self._popScope()
-        self.currentTypedef = None
        
     def p_typedef_simple0 (self, p):
         'typedef_simple : typedef type_specifier ID'
@@ -748,7 +739,6 @@ class CppParser(object):
         self.inTypedef = True
         
         self._pushScope(typedefObj)
-        self.currentTypedef = typedefObj
         
     def p_array_variable (self, p):
         'array_variable : ID ARRAYOP'

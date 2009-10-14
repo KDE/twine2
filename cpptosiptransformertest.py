@@ -159,6 +159,15 @@ enum global {
 };
 """)
         
+    def testEnumTypedef(self):
+        self.convert("""
+typedef enum {
+    earth,
+    orb,
+    globe
+} global;
+""")
+
     def testPrivate(self):
         self.convert("""
 class Foo {

@@ -72,6 +72,9 @@ class CppToSipTransformer(object):
             elif isinstance(item,cppsymboldata.SymbolData.Enum):
                 self._convertEnum(item,destScope)
 
+            elif isinstance(item,cppsymboldata.SymbolData.EnumTypedef):
+                self._convertEnumTypedef(item,destScope)
+                
             elif isinstance(item,cppsymboldata.SymbolData.Typedef):
                 self._convertTypedef(item,destScope)
                 
@@ -166,6 +169,13 @@ class CppToSipTransformer(object):
         sipTypedef.setArgumentType(cppTypedef.argumentType())
         return sipTypedef
         
+    def _convertEnumTypedef(self,cppEnumTypedef,parentScope):
+        sipEnum = self._sipsym.Enum(parentScope, cppEnumTypedef.name())
+        sipEnum.setAccess(cppEnumTypedef.enum().access())
+        for item in cppEnumTypedef.enum():
+            sipEnum.append(item)
+        return sipEnum
+
 ###########################################################################
 def ExpandClassNames(sipsym,scope):
     for item in scope:

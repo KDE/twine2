@@ -556,6 +556,33 @@ class SymbolData(object):
             pre = SymbolData._indentString(indent)
             return pre + "typedef "+ self._functionArgument.format() + ";\n"
                 
+    class EnumTypedef(Typedef):
+        @sealed
+        def __init__(self,parentScope, name, enumDecl, filename, lineno):
+            SymbolData.Typedef.__init__(self,parentScope, name, filename, lineno)
+            self._enumDecl = enumDecl
+            
+        def enum(self):
+            return self._enumDecl
+            
+        def format(self,indent=0):
+            pre = SymbolData._indentString(indent)
+            accu = []
+            accu.append(pre)
+            accu.append("typedef enum\n")
+            accu.append(pre)
+            accu.append("{\n")
+            
+            pre2 = SymbolData._indentString(indent+1)
+            accu.append(pre2)
+            accu.append((",\n"+pre2).join((item.format() for item in self._enumDecl)))
+            accu.append("\n")
+            accu.append(pre)
+            accu.append("} ")
+            accu.append(self.name())
+            accu.append(";\n")
+            return ''.join(accu)
+                
     class Macro(object):
         @sealed
         def __init__(self, name):

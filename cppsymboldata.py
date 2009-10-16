@@ -462,6 +462,9 @@ class SymbolData(object):
         def addQualifier(self,qualifier):
             self._qualifier.add(qualifier)
 
+        def qualifier(self):
+            return self._qualifier
+
         def setTemplate(self, template):
             if template is None:
                 self._template = []

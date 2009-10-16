@@ -105,6 +105,9 @@ class CppToSipTransformer(object):
         sipFunction.setArguments( [self._convertArgument(x) for x in cppFunction.arguments()] )
         if cppFunction.storage()=='static':
             sipFunction.setStorage('static')
+            
+        for qual in cppFunction.qualifier():
+            sipFunction.addQualifier(qual)
                    
     def _convertClass(self,cppClass,parentScope):
         if not self._isClassExported(cppClass) or cppClass.opaque():

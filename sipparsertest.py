@@ -35,8 +35,8 @@ class TestSipParser(unittest.TestCase):
         self.parser = sipparser.SipParser()
         self.syms = sipsymboldata.SymbolData()
         
-    def mirrorTest(self,code):
-        scope = self.parser.parse(self.syms, code, debugLevel=0);
+    def mirrorTest(self,code,debugLevel=0):
+        scope = self.parser.parse(self.syms, code, debugLevel=debugLevel);
         new_code = scope.format()
         if CleanWhitespace(new_code)!=CleanWhitespace(code):
             self.fail("Output code doesn't match input code.\n---- Original:\n" + code + "\n---- Result:" + new_code)
@@ -202,6 +202,14 @@ class TestSipParser(unittest.TestCase):
         self.mirrorTest(
             """
             int DoFoo (int* x /Out/);
+            """)
+
+    def testFunctions9(self):
+        self.mirrorTest(
+            """
+KConfigGroup            group (const QByteArray& group);
+const KConfigGroup      group (const QByteArray& group);
+const KConfigGroup      group (const QByteArray& group) const;
             """)
 
     def testAccess(self):

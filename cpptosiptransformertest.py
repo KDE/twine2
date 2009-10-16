@@ -138,6 +138,15 @@ static int staticBar;
 int FunctionBar();
 """)
 
+    def testConstFunctions(self):
+        self.convert("""
+KConfigGroup            group (const QByteArray& group);
+const KConfigGroup      group (const QByteArray& group);
+const KConfigGroup      group (const QByteArray& group) const;
+""")
+
+
+
     def testStaticFunction(self):
         self.convert("""
 static int StaticFunctionBar();
@@ -211,7 +220,7 @@ public:
 typedef QFlags< SearchOption > SearchOptions;
 """)
 
-
+    ###########################################################################
     def testAnnotate(self):
         self.annotate("""
 class Foo {

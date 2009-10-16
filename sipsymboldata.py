@@ -297,13 +297,22 @@ class SymbolData(cppsymboldata.SymbolData):
             SymbolData._SipEntityExtra.__init__(self)
 
         def format(self,indent=0):
+            accu = []
+            
             annotations = ""
             if self._annotations is not None and len(self._annotations)!=0:
                 annotations = ' /' + ', '.join(self._annotations) + '/'
             
-            return self._formatIgnore(indent) + cppsymboldata.SymbolData.Function.format(self,indent)[:-2] + \
-                annotations + self._formatCppArgs() + ";\n" + \
-                ''.join( (block.format(indent) for block in self._blocks))
+            accu.append(self._formatIgnore(indent))
+            accu.append(cppsymboldata.SymbolData.Function.format(self,indent)[:-2])
+            accu.append(annotations)
+            accu.append(self._formatCppArgs())
+            accu.append(";\n")
+            for block in self._blocks:
+                accu.append(block.format(indent))
+            
+            return ''.join(accu)
+
 
     class Constructor(cppsymboldata.SymbolData.Constructor, _SipEntityExtra):
         @sealed

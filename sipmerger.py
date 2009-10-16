@@ -121,9 +121,14 @@ def _MangleFunctionName(sipsym,function):
     name = function.name()
     if isinstance(function,sipsym.Destructor):
         name = "~" + name
-        
-    return name + '(' + \
+
+    name = name + '(' + \
         ','.join([arg.argumentType() for arg in function.arguments() if arg.defaultValue() is None]) + ')'
+
+    if 'const' in function._qualifier:
+        name = name + " const"
+        
+    return name
 
 def _MergeArgument(sipsym,primaryArgument,updateArgument):
     resultArg = sipsym.Argument(primaryArgument.argumentType(),

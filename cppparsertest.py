@@ -229,6 +229,16 @@ template<typename T>
             """)
         print(scope.format())
 
+    def testFunctions9(self):
+        scope = self.parser.parse(self.syms,
+            """
+KConfigGroup            group (const QByteArray& group);
+const KConfigGroup      group (const QByteArray& group);
+const KConfigGroup      group (const QByteArray& group) const;
+            """)
+        print(scope.format())
+
+
     def testOperator1(self):
         scope = self.parser.parse(self.syms,
             """

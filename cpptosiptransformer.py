@@ -159,6 +159,8 @@ class CppToSipTransformer(object):
     def _convertNamespace(self,cppNamespace,parentScope):
         sipNamespace = self._sipsym.Namespace(parentScope, cppNamespace.name())
         self._convertScope(cppNamespace,sipNamespace)
+        if len(sipNamespace)==0:
+            del parentScope[parentScope.index(sipNamespace)]
     
     def _convertEnum(self,cppEnum,parentScope):
         sipEnum = self._sipsym.Enum(parentScope, cppEnum.name())

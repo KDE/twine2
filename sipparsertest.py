@@ -272,6 +272,14 @@ public:
             };
             """)
 
+    def testOperator3(self):
+        self.mirrorTest(
+            """
+            class Foo {
+                QVariant operator QVariant ();
+            };
+            """,debugLevel=2)
+
     def testNamespace(self):
         self.mirrorTest(
             """

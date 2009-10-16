@@ -761,17 +761,24 @@ class SipParser(object):
         fObj.setStorage(p[1])
 
     def p_operator_pfx (self, p):
-        'operator_pfx : type_specifier operator'
+        """operator_pfx : type_specifier operator"""
         p [0] = p [1]
         
     def p_cast_operator_name0 (self, p):
-        'cast_operator_name : operator type_specifier LPAREN RPAREN'
-        self.functionObject ('operator ' + p [2], p[2])
-        
+        """cast_operator_name : operator_pfx type_specifier LPAREN RPAREN"""
+        fObj = self.functionObject('operator ' + p[2], p[1])
+        p[0] = fObj
+
     def p_cast_operator_name1 (self, p):
-        'cast_operator_name : operator type_specifier LPAREN RPAREN CVQUAL'
+        """cast_operator_name : operator_pfx type_specifier LPAREN RPAREN CVQUAL"""
         fObj = self.functionObject('operator ' + p [2], p[2])
         fObj.addQualifier(p[5])
+        p[0] = fObj
+        
+    def p_cast_operator_name2 (self, p):
+        """cast_operator_name : operator type_specifier LPAREN RPAREN"""
+        fObj = self.functionObject ('operator ' + p [2], p[2])
+        p[0] = fObj        
         
     def p_operator_name (self, p):
         """operator_name : operator_pfx PLUS LPAREN

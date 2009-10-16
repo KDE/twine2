@@ -231,6 +231,11 @@ class SymbolData(cppsymboldata.SymbolData):
                 access = SymbolData.ACCESS_PRIVATE
                 force = False
                 for item in self._items:
+                    if isinstance(item,cppsymboldata.SymbolData._CppEntity) or isinstance(item,SymbolData.SipDirective):
+                        if item.force()!=force and force:
+                            accu.append("//end\n")
+                            force = not force
+                            
                     if isinstance(item,cppsymboldata.SymbolData._CppEntity):
                         if item.access() is not access:
                             accu.append(pre)
@@ -239,12 +244,10 @@ class SymbolData(cppsymboldata.SymbolData):
                             access = item.access()
                             
                     if isinstance(item,cppsymboldata.SymbolData._CppEntity) or isinstance(item,SymbolData.SipDirective):
-                        if item.force()!=force:
-                            if not force:
-                                accu.append("//force\n")
-                            else:
-                                accu.append("//end\n")
+                        if item.force()!=force and not force:
+                            accu.append("//force\n")
                             force = not force
+                            
                     accu.append(item.format(indent+1))
                 if force:
                     accu.append("//end\n")

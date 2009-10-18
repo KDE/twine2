@@ -24,8 +24,12 @@ kdecore = toolkit.ModuleGenerator(
     outputDirectory="/home/sbe/devel/svn/kde/trunk/KDE/kdebindings/python/pykde4/sip/kdecore",
     
     # .h file extraction
-    cmakelists="/home/sbe/devel/svn/kde/trunk/KDE/kdelibs/kdecore/CMakeLists.txt",
+    #cmakelists="/home/sbe/devel/svn/kde/trunk/KDE/kdelibs/kdecore/CMakeLists.txt",
+    cmakelists="/home/sbe/devel/svn/kde/branches/KDE/4.3/kdelibs/kdecore/CMakeLists.txt",
+    
     ignoreHeaders="""conversion_check.h kallocator.h kdebug.h kcodecs.h kgenericfactory.h ksortablelist.h ktrader.h ktypelist.h  kmulticastsocket.h kmulticastsocketdevice.h kdecore_export.h kde_file.h ksocks.h kde_file.h ksharedptr.h klauncher_iface.h k3bufferedsocket.h  k3clientsocketbase.h  k3datagramsocket.h k3httpproxysocketdevice.h k3iobuffer.h  k3processcontroller.h  k3process.h  k3procio.h  k3resolver.h k3reverseresolver.h k3serversocket.h  k3socketaddress.h  k3socketbase.h  k3socketdevice.h  k3socks.h k3sockssocketdevice.h  k3streamsocket.h qtest_kde.h kdefakes.h kdeversion.h kauth.h""".split(" "),
+    
+    noUpdateSip=["typedefs.sip"],
     
     # Cpp parsing    
     preprocessSubstitutionMacros=qtkdemacros.QtPreprocessSubstitutionMacros(),

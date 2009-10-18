@@ -104,16 +104,26 @@ def _MergeSipFunction(sipsym,primaryFunction,updateFunction):
 
     # Update the arguments by name.
     
+    def name(item):
+        if item.name() is not None and name!="": 
+            return item.name()
+        else:
+            return "$a" + str(i)
+    
     primaryArguments = {}
+    i = 0
     for arg in primaryFunction.arguments():
-        primaryArguments[arg.name()] = arg
+        primaryArguments[name(arg)] = arg
+        i += 1
         
     newArguments = []
+    i = 0
     for updateArg in updateFunction.arguments():
-        if updateArg.name() in primaryArguments:
-            newArguments.append(_MergeArgument(sipsym,primaryArguments[updateArg.name()],updateArg))
+        if name(updateArg) in primaryArguments:
+            newArguments.append(_MergeArgument(sipsym,primaryArguments[name(updateArg)],updateArg))
         else:
             newArguments.append(_MergeArgument(sipsym,updateArg,updateArg))
+        i += 1
             
     primaryFunction.setArguments(newArguments)
 

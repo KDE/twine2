@@ -405,7 +405,7 @@ class _UpdateConvertToSubClassCodeDirectives(object):
         return lastBase
 
     def _generateCTSCC(self,classToSubclassMapping,class_):
-        return "%%ConvertToSubClassCode\n    // CTSCC for subclasses of '%s'\n    sipClass = NULL;\n\n%s%%End\n" % (class_.name(),self._generateCTSCCPart(classToSubclassMapping,class_,self.INDENT))
+        return "%%ConvertToSubClassCode\n    // CTSCC for subclasses of '%s'\n    sipClass = NULL;\n\n%s%%End" % (class_.name(),self._generateCTSCCPart(classToSubclassMapping,class_,self.INDENT))
             
     def _generateCTSCCPart(self,classToSubclassMapping,class_,indent="",joiner=""):
         accu = []
@@ -482,7 +482,7 @@ class _UpdateConvertToSubClassCodeDirectives(object):
         
         headerCode.setBody("%ModuleHeaderCode\n//ctscc\n" +
             "".join(["#include <"+str(x)+">\n" for x in fileScopes]) +
-            "%End\n")
+            "%End")
         
     def _findDirective(self,class_,directiveName):
         for item in class_:

@@ -30,13 +30,14 @@ import os.path
 
 class ModuleGenerator(object):
     @sealed
-    def __init__(self,module,cmakelists=[],ignoreHeaders=[],outputDirectory=None,
+    def __init__(self,module,cmakelists=[],ignoreHeaders=[],noUpdateSip=[],outputDirectory=None,
             preprocessSubstitutionMacros=[],macros=[],bareMacros=[],exportMacros=None,ignoreBases=None,
             sipImportDirs=[],sipImports=[],copyrightNotice=None,annotationRules=[]):
             
         self._module = module
         self._cmakelists = [cmakelists] if isinstance(cmakelists,str) else cmakelists
         self._ignoreHeaders = set([ignoreHeaders] if isinstance(ignoreHeaders,str) else ignoreHeaders)
+        self._noUpdateSip = noUpdateSip
         self._outputDirectory = outputDirectory
         
         self._preprocessSubstitutionMacros = preprocessSubstitutionMacros
@@ -162,7 +163,7 @@ class ModuleGenerator(object):
             print("Error: Unable to find sip import '%s'. (sipImportDirs=%s" % (sipModName,repr(self._sipImportDirs)))
         return None
     
-    def _importSipFile(self,sipFilename):
+    def _importSipFile(self,sipFilename,noUpdateSip=[]):
         with open(sipFilename) as fhandle:
             text = fhandle.read()
             
@@ -201,12 +202,12 @@ class ModuleGenerator(object):
             if isinstance(item,self._sipSymbolData.SipDirective):
                 if item.body().startswith("%Include"):
                     sipIncludeFilename = item.body()[len("%Include")+1:]
-                    #print("body:"+sipIncludeFilename)
-                    sipIncludeFullFilename = os.path.join(modDir,sipIncludeFilename)
-                    if os.path.exists(sipIncludeFullFilename):
-                        scopeList.extend(self._importSipFile(sipIncludeFullFilename))
-                    else:
-                        print("Error: Unable to find sip import '%s'. (sipImportDirs=%s" % (sipModName,repr(self._sipImportDirs)))
+                    if sipIncludeFilename not in noUpdateSip:
+                        sipIncludeFullFilename = os.path.join(modDir,sipIncludeFilename)
+                        if os.path.exists(sipIncludeFullFilename):
+                            scopeList.extend(self._importSipFile(sipIncludeFullFilename))
+                        else:
+                            print("Error: Unable to find sip import '%s'. (sipImportDirs=%s" % (sipModName,repr(self._sipImportDirs)))
                     
         return scopeList
     
@@ -250,7 +251,7 @@ class ModuleGenerator(object):
         return os.path.join(self._outputDirectory,module) + "mod.sip"
         
     def _updateScopes(self,moduleSipScopes):
-        previousSipScopes = self._importSipFile(self._indexFilename())
+        previousSipScopes = self._importSipFile(self._indexFilename(),self._noUpdateSip)
         
         updateSipScopes = moduleSipScopes
         
@@ -299,6 +300,11 @@ class ModuleGenerator(object):
             accu.append(sipImport)
             accu.append("\n")
         accu.append("\n")
+        
+        for sipFile in self._noUpdateSip:
+            accu.append("%Include ")
+            accu.append(sipFile)
+            accu.append("\n")
         
         for scope in scopes:
             accu.append("%Include ")

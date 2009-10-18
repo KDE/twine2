@@ -449,6 +449,7 @@ class _UpdateConvertToSubClassCodeDirectives(object):
         
     def _insertCTSCC(self,classToSubclassMapping,class_):
         subclasses = self._findAllSubclasses(classToSubclassMapping,class_)
+        subclasses.append(class_)
         
         # Find an existing %ConvertToSubClassCode block.
         directiveClass = None

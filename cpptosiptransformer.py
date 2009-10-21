@@ -299,11 +299,13 @@ class MethodAnnotationRule(object):
     def apply(self,symbolData,sipFunction):
         matchCtor = self._methodTypeMatch in ('ctor','all')
         matchDtor = self._methodTypeMatch in ('dtor','all')
-        matchAny = self._methodTypeMatch=='all'
+        matchFunc = self._methodTypeMatch in ('function','all')
 
-        if (matchCtor and isinstance(sipFunction,symbolData.Constructor)) or \
-                (matchDtor and isinstance(sipFunction,symbolData.Destructor)) or \
-                matchAny:
+        isCtor = isinstance(sipFunction,symbolData.Constructor)
+        isDtor = isinstance(sipFunction,symbolData.Destructor)
+        isFunc = isinstance(sipFunction,symbolData.Function)
+        if (matchCtor and isCtor) or (matchDtor and isDtor) or \
+                (matchFunc and isFunc and not isCtor and not isDtor):
             for argument in sipFunction.arguments():
                 if self._parameterTypeMatch is None or argument.argumentType() in self._parameterTypeMatch:
                     if argument.name() in self._parameterNameMatch:

@@ -31,8 +31,8 @@ import os.path
 class ModuleGenerator(object):
     @sealed
     def __init__(self,module,cmakelists=[],ignoreHeaders=[],noUpdateSip=[],outputDirectory=None,
-            preprocessSubstitutionMacros=[],macros=[],bareMacros=[],exportMacros=None,ignoreBases=None,
-            sipImportDirs=[],sipImports=[],copyrightNotice=None,annotationRules=[]):
+            preprocessorValues=[],preprocessSubstitutionMacros=[],macros=[],bareMacros=[],exportMacros=None,
+            ignoreBases=None,sipImportDirs=[],sipImports=[],copyrightNotice=None,annotationRules=[]):
             
         self._module = module
         self._cmakelists = [cmakelists] if isinstance(cmakelists,str) else cmakelists
@@ -40,12 +40,14 @@ class ModuleGenerator(object):
         self._noUpdateSip = noUpdateSip
         self._outputDirectory = outputDirectory
         
+        self._preprocessorValues = preprocessorValues
         self._preprocessSubstitutionMacros = preprocessSubstitutionMacros
         self._macros = macros
         self._bareMacros = bareMacros
         
         self._symbolData = cppsymboldata.SymbolData()
         self._cppParser = cppparser.CppParser()
+        self._cppParser.preprocessorValues = self._preprocessorValues
         self._cppParser.bareMacros = self._bareMacros
         self._cppParser.macros = self._macros
         self._cppParser.preprocessorSubstitutionMacros = self._preprocessSubstitutionMacros

@@ -150,6 +150,8 @@ class ModuleGenerator(object):
         
         for sipImport in self._sipImports:
             filename = self._findSipMod(sipImport)
+            if filename is None:
+                raise SystemExit
             print("    Parsing %s" % (filename,))
             scopes.append(self._importSipFile(filename))
         return scopes

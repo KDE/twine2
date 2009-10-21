@@ -180,8 +180,7 @@ def t_define (t):
     t.lexer.lineno += 1
     
 def t_anyline (t):
-    r'.*?\n'
-    
+    r'.*?\n[^#]*'
     """
     Process anything that's not a preprocesor directive.
 
@@ -194,12 +193,12 @@ def t_anyline (t):
     if not bitBucket:
         line = t.value
         for m in macros:
-            line = m [0].sub (m [1], line)
+            line = m[0].sub(m[1], line)
         newtext.append (line)
+        t.lexer.lineno += line.count('\'n')
     else:
         newtext.append ('\n')
-        
-    t.lexer.lineno += 1   
+        t.lexer.lineno += 1   
 
 # this needs to be HERE - not above token definitions
 ppLexer = lex.lex ()

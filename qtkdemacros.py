@@ -43,10 +43,11 @@ def QtMacros(extraMacros=[]):
 __QtPreprocessSubstitutionMacros = [
         ('Q_SLOTS','slots'),
         ('Q_SIGNALS','signals'),
-        (re.compile(r'Q_DECLARE_FLAGS\((.*?),(.*?)\)'),r'typedef QFlags<\2> \1;'),
+        (re.compile(r'Q_DECLARE_FLAGS\((.*?),(.*?)\)',re.DOTALL),r'typedef QFlags<\2> \1;'),
         ("KDE_CONSTRUCTOR_DEPRECATED",""),
         ("KDE_DEPRECATED",""),
-        ("QT_MOC_COMPAT","")
+        ("QT_MOC_COMPAT",""),
+        ("Q_SCRIPTABLE","")
         ]
 def QtPreprocessSubstitutionMacros(extraMacros=[]):
     macros = __QtPreprocessSubstitutionMacros[:]

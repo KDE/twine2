@@ -102,7 +102,7 @@ class CppToSipTransformer(object):
             sipFunction = self._sipsym.Function(destScope,cppFunction.name(),filename=cppFunction._filename,lineno=cppFunction._lineno)
             sipFunction.setReturn(self._convertArgument(cppFunction.return_()))
         sipFunction.setAccess(cppFunction.access())
-        sipFunction.setArguments( [self._convertArgument(x) for x in cppFunction.arguments()] )
+        sipFunction.setArguments( [self._convertArgument(x) for x in cppFunction.arguments() if x.argumentType()!="void"] )
         if cppFunction.storage()=='static':
             sipFunction.setStorage('static')
             

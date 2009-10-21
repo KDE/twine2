@@ -132,7 +132,7 @@ def t_undef (t):
     global macros, values, newtext
     item = t.lexer.lexmatch.group ('item').strip ()
     if item in values:
-        macros = [macro for macro in macros if macro [2] != item]
+        macros = [macro for macro in macros if len(macro)==2 or macro[2] != item]
         del values [item]
     t.lexer.lineno += 1
     newtext.append ('\n')

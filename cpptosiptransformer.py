@@ -296,7 +296,7 @@ class MethodAnnotationRule(object):
         self._parameterNameMatch = set([parameterNameMatch]) if isinstance(parameterNameMatch,str) else set(parameterNameMatch)
         self._annotations = [annotations] if isinstance(annotations,str) else annotations
        
-    def apply(self,symbolData,sipFunction):
+    def apply(self,symbolData,sipFunction,sipClass):
         matchCtor = self._methodTypeMatch in ('ctor','all')
         matchDtor = self._methodTypeMatch in ('dtor','all')
         matchFunc = self._methodTypeMatch in ('function','all')
@@ -319,6 +319,39 @@ class MethodAnnotationRule(object):
         return "ClassMatch: " + repr(self._classMatch) + " MethodTypeMatch: " + methodTypeMatch + \
             " MethodNameMatch: " + repr(methodNameMatch) + " Annotations: " + repr(self._annotations)
 
+class PySlotRule(object):
+    @sealed
+    def __init__(self,className=None,namespaceName=None,arg1Name=None,arg2Name=None):
+        self._className = className
+        self._namespaceName = namespaceName
+        self._arg1Name = arg1Name
+        self._arg2Name = arg2Name
+
+    def apply(self,symbolData,sipFunction,sipClassOrNamespace):
+        if self._className is not None and not isinstance(sipClassOrNamespace,symbolData.SipClass):
+            return
+        if self._namespaceName is not None and not isinstance(sipClassOrNamespace,symbolData.Namespace):
+            return
+            
+        if isinstance(sipFunction,symbolData.Function):
+            args = sipFunction.arguments()
+            if len(args) >= 2:
+                for i in range(len(args)-1):
+                    arg1 = args[i]
+                    arg2 = args[i+1]
+                    if arg1.name()==self._arg1Name and arg2.name()==self._arg2Name:
+                        args = list(args)
+                        newArg1 = symbolData.Argument("SIP_RXOBJ_CON", None, None, None, None)
+                        args[i] = newArg1
+                        
+                        newArg2 = symbolData.Argument("SIP_SLOT_CON ()", None, None, None, None)
+                        args[i+1] = newArg2
+                        sipFunction.setArguments(args)
+                        break
+
+    def __str__(self):
+        return "PySlotRule ClassName: " + self._className + " Arg1: " + self._arg1 + " Arg2: " + self._arg2
+
 class SipAnnotator(object):
     @sealed
     def __init__(self):
@@ -330,23 +363,23 @@ class SipAnnotator(object):
         
     def applyRules(self,sipTree):
         for item in sipTree:
-            if isinstance(item,self._sipsym.SipClass):
-                self._applyRulesToClass(item)
-                
-    def _applyRulesToClass(self,sipClass):
+            if isinstance(item,self._sipsym.SipClass) or isinstance(item,self._sipsym.Namespace):
+                self._applyRulesToClassOrNamespace(item)
+
+    def _applyRulesToClassOrNamespace(self,sipClass):
         for item in sipClass:
             if isinstance(item,self._sipsym.Function):
-                self._applyRulesToFunction(self._methodAnnotationRules,item)
+                self._applyRulesToFunction(self._methodAnnotationRules,item,sipClass)
             elif isinstance(item,self._sipsym.Constructor):
-                self._applyRulesToFunction(self._methodAnnotationRules,item)
+                self._applyRulesToFunction(self._methodAnnotationRules,item,sipClass)
             elif isinstance(item,self._sipsym.Destructor):
-                self._applyRulesToFunction(self._methodAnnotationRules,item)
+                self._applyRulesToFunction(self._methodAnnotationRules,item,sipClass)
                 
         self.applyRules(sipClass)
         
-    def _applyRulesToFunction(self,rules,sipFunction):
+    def _applyRulesToFunction(self,rules,sipFunction,sipClass=None):
         for rule in rules:
-            rule.apply(self._sipsym, sipFunction)
+            rule.apply(self._sipsym, sipFunction, sipClass)
 
 ###########################################################################
 

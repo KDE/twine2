@@ -319,3 +319,6 @@ class ModuleGenerator(object):
 
 def AnnotationRule(methodTypeMatch,parameterTypeMatch,parameterNameMatch,annotations):
     return cpptosiptransformer.MethodAnnotationRule(methodTypeMatch,parameterTypeMatch,parameterNameMatch,annotations)
+
+def PySlotRule(className=None,namespaceName=None,arg1Name=None,arg2Name=None):
+    return cpptosiptransformer.PySlotRule(className,namespaceName,arg1Name,arg2Name)

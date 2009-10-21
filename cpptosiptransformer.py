@@ -166,6 +166,9 @@ class CppToSipTransformer(object):
             del parentScope[parentScope.index(sipNamespace)]
     
     def _convertEnum(self,cppEnum,parentScope):
+        if cppEnum.access()==cppsymboldata.SymbolData.ACCESS_PRIVATE:
+            return
+    
         sipEnum = self._sipsym.Enum(parentScope, cppEnum.name())
         sipEnum.setAccess(cppEnum.access())
         for item in cppEnum:

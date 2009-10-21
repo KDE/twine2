@@ -41,6 +41,12 @@ class TestSipParser(unittest.TestCase):
         if CleanWhitespace(new_code)!=CleanWhitespace(code):
             self.fail("Output code doesn't match input code.\n---- Original:\n" + code + "\n---- Result:" + new_code)
 
+    def strictMirrorTest(self,code,debugLevel=0):
+        scope = self.parser.parse(self.syms, code, debugLevel=debugLevel);
+        new_code = scope.format()
+        if new_code!=code:
+            self.fail("Output code doesn't match input code.\n---- Original:\n" + code + "\n---- Result:" + new_code)
+            
     def testClass0(self):
         self.mirrorTest(
             """
@@ -507,6 +513,22 @@ class Foo {
 };
 """)
 
+    def testStrict0(self):
+        self.strictMirrorTest(
+            """// Foo
+
+// bar
+
+%ModuleHeaderCode
+//ctscc
+dsfd
+%End
+
+
+class KUrl : QUrl
+{
+};
+""")
 
     def testSuperClassQueries(self):
         scope = self.parser.parse(self.syms, """

@@ -210,8 +210,7 @@ class SymbolData(cppsymboldata.SymbolData):
             
             if self._ignore:
                 accu.append(self._formatIgnore(indent))
-            else:
-                accu.append(pre)
+            accu.append(pre)
             accu.append("class ")
             
             accu.append(self._name)

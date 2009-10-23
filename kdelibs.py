@@ -18,14 +18,17 @@
 
 import toolkit
 import qtkdemacros
+import os.path
+
+outputBaseDirectory = "/home/sbe/devel/svn/kde/trunk/KDE/kdebindings/python/pykde4"
+cmakelistBaseDirectory = "/home/sbe/devel/svn/kde/branches/KDE/4.3/kdelibs"
 
 kdecore = toolkit.ModuleGenerator(
     module="PyKDE4.kdecore",
-    outputDirectory="/home/sbe/devel/svn/kde/trunk/KDE/kdebindings/python/pykde4/sip/kdecore",
+    outputDirectory=os.path.join(outputBaseDirectory, "sip/kdecore"),
     
     # .h file extraction
-    #cmakelists="/home/sbe/devel/svn/kde/trunk/KDE/kdelibs/kdecore/CMakeLists.txt",
-    cmakelists="/home/sbe/devel/svn/kde/branches/KDE/4.3/kdelibs/kdecore/CMakeLists.txt",
+    cmakelists=os.path.join(cmakelistBaseDirectory,"kdecore/CMakeLists.txt"),
     
     ignoreHeaders="""conversion_check.h kallocator.h kdebug.h kcodecs.h kgenericfactory.h ksortablelist.h ktrader.h ktypelist.h  kmulticastsocket.h kmulticastsocketdevice.h kdecore_export.h kde_file.h ksocks.h kde_file.h ksharedptr.h klauncher_iface.h k3bufferedsocket.h  k3clientsocketbase.h  k3datagramsocket.h k3httpproxysocketdevice.h k3iobuffer.h  k3processcontroller.h  k3process.h  k3procio.h  k3resolver.h k3reverseresolver.h k3serversocket.h  k3socketaddress.h  k3socketbase.h  k3socketdevice.h  k3socks.h k3sockssocketdevice.h  k3streamsocket.h qtest_kde.h kdefakes.h kdeversion.h kauth.h""".split(" "),
     
@@ -57,5 +60,57 @@ kdecore = toolkit.ModuleGenerator(
             annotations="TransferThis")            
             ]
     )
+    
+###########################################################################
+kdeui = toolkit.ModuleGenerator(
+    module="PyKDE4.kdeui",
+    outputDirectory=os.path.join(outputBaseDirectory,"sip/kdeui"),
+    
+    # .h file extraction
+    cmakelists=[
+        os.path.join(cmakelistBaseDirectory,"kdeui/CMakeLists.txt")
+        #os.path.join(cmakelistBaseDirectory,"kdeui/dialogs/CMakeLists.txt"),
+        #os.path.join(cmakelistBaseDirectory,"kdeui/util/CMakeLists.txt"),
+        #os.path.join(cmakelistBaseDirectory,"kdeui/widgets/CMakeLists.txt")
+        ],
+    
+    ignoreHeaders="""kxerrorhandler.h  k3iconview.h  k3iconviewsearchline.h  k3listview.h  k3listviewlineedit.h k3listviewsearchline.h  netwm_p.h k3mimesourcefactory.h kdeui_export.h fixx11h.h kglobalshortcutinfo_p.h kkeyserver_mac.h kkeyserver_win.h""".split(" "),
+    
+    #noUpdateSip=["typedefs.sip"],
+    
+    # Cpp parsing    
+    preprocessSubstitutionMacros=qtkdemacros.QtPreprocessSubstitutionMacros(),
+    preprocessorValues={"Q_WS_X11": 1},
+    
+    macros=qtkdemacros.QtMacros(),
+    bareMacros=qtkdemacros.QtBareMacros(["KDEUI_EXPORT","KDE_EXPORT","KDE_DEPRECATED","KDEUI_EXPORT_DEPRECATED"]),
+    
+    # Sip generation
+    sipImportDirs=["/usr/share/sip/PyQt4/",os.path.join(outputBaseDirectory,"sip")],
+    sipImports=["QtCore/QtCoremod.sip","QtGui/QtGuimod.sip","QtXml/QtXmlmod.sip","QtSvg/QtSvgmod.sip","kdecore/kdecoremod.sip"],
+    copyrightNotice=qtkdemacros.copyrightNotice(),
+    exportMacros=["KDEUI_EXPORT","KDE_EXPORT","KDEUI_EXPORT_DEPRECATED"],
+    ignoreBases=["Q3GridView"],
+    
+    annotationRules=[
+        toolkit.AnnotationRule(
+            methodTypeMatch="ctor",
+            parameterTypeMatch=["QWidget*","QObject*"],
+            parameterNameMatch="parent",
+            annotations="TransferThis"),
+            
+        toolkit.AnnotationRule(
+            methodTypeMatch="function",
+            parameterTypeMatch=["QWidget*","QObject*"],
+            parameterNameMatch="parent",
+            annotations="Transfer"),
+            
+        toolkit.PySlotRule(className="KDialogButtonBox",arg1Name="receiver",arg2Name="slot"),
+        toolkit.PySlotRule(namespaceName="KStandardAction",arg1Name="recvr",arg2Name="slot")
+        ]
+    )
 
-kdecore.run()
+###########################################################################
+
+#kdecore.run()
+kdeui.run()

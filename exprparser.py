@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #     Copyright 2007-8 Jim Bublitz <jbublitz@nwinternet.com>
 #
 # This program is free software; you can redistribute it and/or modify
@@ -180,7 +181,7 @@ class ExpressionParser(object):
         self.lexer.input (s)
         self.mode = mode
         self.result = None
-        self._parse (debug = 1, lexer = self.lexer)
+        self._parse (debug = 0, lexer = self.lexer)
         return self.result
 
     def p_expression_result (self, p):

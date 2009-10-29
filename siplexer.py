@@ -51,7 +51,7 @@ stmtTokens = ('Exception', 'MappedType')
 sipDirectives = ('CModule', 'CompositeModule', 'ConsolidatedModule', 'End', 'Feature', 'If',\
                  'Import', 'Include', 'License', 'Module', 'OptionalInclude', 'Platforms',\
                  'SIPOptions', 'Timeline', 'Plugin', 'DefaultEncoding', 'DefaultMetatype',\
-                 'DefaultSupertype')
+                 'DefaultSupertype','API')
 
 accessSpecifiers = ("private", "protected", "public", "slots", "signals")
 

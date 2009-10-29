@@ -271,7 +271,8 @@ class SipParser(object):
                   | timeline
                   | object_ignore
                   | object_force
-                  | object_end"""
+                  | object_end
+                  | api"""
         pass       
         #self.lexer.begin (self.stateInfo.lexState)
         #self.stateInfo.lexState  = 'variable'
@@ -492,7 +493,7 @@ class SipParser(object):
         self.currentEnum.appendEnumerator(enumerator)
         for item in p[3]:
             self.currentEnum.appendEnumerator(item)
-
+        
     def p_enumeratorcomment(self, p):
         """enumeratorcomment : LINECOMMENT
                              | CCOMMENT
@@ -1203,6 +1204,9 @@ class SipParser(object):
         
     def p_sip_if (self, p):
         """sip_if : PERCENT If LPAREN if_expression RPAREN"""
+        pass
+    def p_api (self, p):
+        """api : PERCENT API ID ICONST"""
         pass
         
     def p_sip_end (self, p):

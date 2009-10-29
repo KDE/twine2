@@ -342,4 +342,8 @@ class CppLexerClass(object):
 tokens = CppLexerClass.tokens
 
 def CppLexer():
-    return lex.lex(object=CppLexerClass())
+    lexerClass = CppLexerClass()
+    lexer = lex.lex(object=lexerClass)
+    lexer.lexmodule = lexerClass
+    return lexer
+

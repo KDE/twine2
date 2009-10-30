@@ -444,10 +444,13 @@ class SipParser(object):
         self.currentEnum = None
         self.lexer.begin('variable')
         
-    def p_enum_statement (self, p):
-        """enum_statement : enum_name enumerator_list RBRACE
-                          | enum_name enumerator_list COMMA RBRACE
-                          | enum_name RBRACE"""
+    def p_enum_statement0 (self, p):
+        """enum_statement : enum_name enumerator_list RBRACE"""
+        for enumerator in p[2]:
+            self.currentEnum.appendEnumerator(enumerator)
+        
+    def p_enum_statement1 (self, p):
+        """enum_statement : enum_name RBRACE"""
         pass
         
     def p_enum_name0 (self, p):
@@ -458,41 +461,42 @@ class SipParser(object):
         else:
             name = None
         self.enumObject(name)
-                    
+    
+    # The enumerator_list grammar is quite permissive and doesn't enforce
+    # much in the way of ordering and commas.
+    
+    def p_enumerator_list0 (self, p):
+        """enumerator_list : enumerator
+                           | enumeratorcomment
+                           | versioned_enumerator_list
+        """
+        p[0] = p[1]
+
+    def p_enumerator_list1 (self, p):
+        """enumerator_list : COMMA"""
+        p[0] = []
+
+    def p_enumerator_list2 (self, p):
+        """enumerator_list : enumerator_list enumerator
+                           | enumerator_list enumeratorcomment
+                           | enumerator_list versioned_enumerator_list
+                           """
+        p[1].extend(p[2])
+        p[0] = p[1]
+
+    def p_enumerator_list3 (self, p):
+        """enumerator_list : enumerator_list COMMA"""
+        p[0] = p[1]
+
     def p_enumerator1 (self, p):
-        """enumerator : ID
-                      | enumeratorcomment ID"""
-        if len(p)==3:
-            for item in p[1]:
-                self.currentEnum.appendEnumerator(item)
-        enumerator = self.symbolData.Enumerator(p[1 if len(p)==2 else 2], None)
-        self.currentEnum.appendEnumerator(enumerator)
+        """enumerator : ID"""
+        enumerator = self.symbolData.Enumerator(p[1], None)
+        p[0] = [enumerator]
     
     def p_enumerator2 (self, p):
-        """enumerator : ID ENUMINIT
-                      | enumeratorcomment ID ENUMINIT"""
-        if len(p)==4:
-            for item in p[1]:
-                self.currentEnum.appendEnumerator(item)
-            enumerator = self.symbolData.Enumerator(p[2], p[3])
-        else:
-            enumerator = self.symbolData.Enumerator(p[1], p[2])
-        self.currentEnum.appendEnumerator(enumerator)
-
-    def p_enumerator3 (self, p):
-        """enumerator : ID enumeratorcomment
-                      """
-        enumerator = self.symbolData.Enumerator(p[1], None)
-        self.currentEnum.appendEnumerator(enumerator)
-        for item in p[2]:
-            self.currentEnum.appendEnumerator(item)
-
-    def p_enumerator4 (self, p):
-        """enumerator : ID ENUMINIT enumeratorcomment"""
+        """enumerator : ID ENUMINIT"""
         enumerator = self.symbolData.Enumerator(p[1], p[2])
-        self.currentEnum.appendEnumerator(enumerator)
-        for item in p[3]:
-            self.currentEnum.appendEnumerator(item)
+        p[0] = [enumerator]
         
     def p_enumeratorcomment(self, p):
         """enumeratorcomment : LINECOMMENT
@@ -500,40 +504,10 @@ class SipParser(object):
                              | BLANKLINE"""
         p[0] = [self.symbolData.EnumeratorComment(p[1])]
         
-    def p_enumeratorcomment2(self, p):
-        """enumeratorcomment : enumeratorcomment LINECOMMENT
-                             | enumeratorcomment CCOMMENT
-                             | enumeratorcomment BLANKLINE"""
-        p[1].append(self.symbolData.EnumeratorComment(p[2]))
-        p[0] = p[1]
-    
-    def p_versioned_enumerator_start (self, p):
-        'versioned_enumerator_start : sip_if enumerator'
-        pass
-        
     def p_versioned_enumerator_list (self, p):
-        """versioned_enumerator_list : versioned_enumerator_start   
-                                                 | versioned_enumerator_start COMMA
-                                                 | versioned_enumerator_list enumerator
-                                                 | versioned_enumerator_list enumerator COMMA"""
-        pass
-        
-    def p_versioned_enumerator_block (self, p):
-        'versioned_enumerator_block : versioned_enumerator_list sip_end'
-        pass
-            
-    
-    def p_enumerator_list (self, p):
-        """enumerator_list : enumerator
-                                   | versioned_enumerator_block
-                                   | versioned_enumerator_block enumerator
-                                   | enumerator_list COMMA enumerator
-                                   | enumerator_list COMMA versioned_enumerator_block
-                                   | enumerator_list COMMA versioned_enumerator_block enumerator
-                                   | enumerator_list versioned_enumerator_block
-                                   | enumerator_list versioned_enumerator_block enumerator"""
-        pass
-        
+        """versioned_enumerator_list : sip_if enumerator_list sip_end"""
+        p[0] = p[2]
+
     def p_id_list_element (self, p):
         'id_list_element : ID'
         p [0] = p [1]

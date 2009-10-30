@@ -344,6 +344,19 @@ public:
             };
             """)
 
+    def testEnumSipIf(self):
+        self.mirrorTest(
+            """
+            enum {
+                earth,
+                // This is a comment
+%If (FOO -)
+                orb,
+%End
+                globe
+            };
+            """,debugLevel=2)
+
     def testTypedef1(self):
         self.mirrorTest(
             """

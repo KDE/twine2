@@ -904,8 +904,9 @@ class SipParser(object):
                          | function_primary exception annotation cpp_args stmt_end"""
         self.currentFunction.setAnnotations(self.annotation)
         self.annotation = []
-        self.currentFunction.setCppReturn(p[-2][0])
-        self.currentFunction.setCppArgs(p[-2][1])
+        tp = [x for x in p]
+        self.currentFunction.setCppReturn(tp[-2][0])
+        self.currentFunction.setCppArgs(tp[-2][1])
         
     def p_function_stmt2(self, p):
         """function_stmt : function_primary CVQUAL stmt_end
@@ -924,8 +925,9 @@ class SipParser(object):
         self.currentFunction.addQualifier(p[2])
         self.currentFunction.setAnnotations(self.annotation)
         self.annotation = []
-        self.currentFunction.setCppReturn(p[-2][0])
-        self.currentFunction.setCppArgs(p[-2][1])
+        tp = [x for x in p]
+        self.currentFunction.setCppReturn(tp[-2][0])
+        self.currentFunction.setCppArgs(tp[-2][1])
         
     def p_function_stmt4(self, p):
         'function_stmt : function_primary EQUALS ICONST stmt_end'
@@ -952,7 +954,8 @@ class SipParser(object):
                      | ctor_primary annotation cpp_ctor_args stmt_end"""
         self.currentFunction.setAnnotations(self.annotation)
         self.annotation = []
-        self.currentFunction.setCppArgs(p[-2])
+        tp = [x for x in p]
+        self.currentFunction.setCppArgs(tp[-2])
         
     def p_dtor_primary0 (self, p):
         'dtor_primary : dtor_name LPAREN RPAREN'
@@ -1007,8 +1010,9 @@ class SipParser(object):
         self.currentFunction.setAnnotations(self.annotation)
         self.annotation = []
         self.currentFunction.addQualifier('virtual')
-        self.currentFunction.setCppReturn(p[-2][0])
-        self.currentFunction.setCppArgs(p[-2][1])
+        tp = [x for x in p]
+        self.currentFunction.setCppReturn(tp[-2][0])
+        self.currentFunction.setCppArgs(tp[-2][1])
         
     def p_virtual_stmt4 (self, p):
         """virtual_stmt : virtual_primary CVQUAL annotation SEMI
@@ -1027,8 +1031,9 @@ class SipParser(object):
         self.annotation = []
         self.currentFunction.addQualifier('virtual')
         self.currentFunction.addQualifier(p[2])
-        self.currentFunction.setCppReturn(p[-2][0])
-        self.currentFunction.setCppArgs(p[-2][1])
+        tp = [x for x in p]
+        self.currentFunction.setCppReturn(tp[-2][0])
+        self.currentFunction.setCppArgs(tp[-2][1])
         
     def p_pure_virtual_suffix1(self, p):
         """pure_virtual_suffix : EQUALS ICONST
@@ -1041,8 +1046,9 @@ class SipParser(object):
                                | EQUALS ICONST cpp_args"""
         self.currentFunction.setAnnotations(self.annotation)
         self.annotation = []
-        self.currentFunction.setCppReturn(p[-1][0])
-        self.currentFunction.setCppArgs(p[-1][1])
+        tp = [x for x in p]
+        self.currentFunction.setCppReturn(tp[-1][0])
+        self.currentFunction.setCppArgs(tp[-1][1])
         
     def p_pure_virtual (self, p):
         """pure_virtual : virtual_primary pure_virtual_suffix SEMI

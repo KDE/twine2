@@ -314,23 +314,36 @@ class SipParser(object):
         """stmt_end : SEMI"""
         pass
 
-    def p_annotation_element (self, p):
+    def p_annotation_element1 (self, p):
         """annotation_element : ID
                               | ID EQUALS ID
                               | ID EQUALS ICONST
                               | ID EQUALS SCONST
                               | ID EQUALS HEXCONST"""
-        self.annotation.append(''.join(p[1:]))
+        p[0] = ''.join(p[1:])
         
-    def p_annotation_list (self, p):
-        """annotation_list : annotation_element
-                           | annotation_list COMMA annotation_element"""
-        pass
+    def p_annotation_element2 (self, p):
+        """annotation_element : ID EQUALS ID COLON MINUS ICONST"""
+        p[0] = ''.join(p[1:5]) + ' ' + p[5] + ' ' + p[6]
+        
+    def p_annotation_element3 (self, p):
+        """annotation_element : ID EQUALS ID COLON ICONST MINUS"""
+        p[0] = ''.join(p[1:5]) + p[5] + ' ' + p[6] + ' '
+        
+    def p_annotation_list0 (self, p):
+        """annotation_list : annotation_element"""
+        p[0] = [p[1]]
+        
+    def p_annotation_list1 (self, p):
+        """annotation_list : annotation_list COMMA annotation_element"""
+        p[1].append(p[3])
+        p[0] = p[1]
         
     def p_annotation (self, p):
         'annotation : SLASH annotation_list SLASH'
-        pass
-
+        self.annotation = p[2]
+        p[0] = p[2]
+            
     def p_class_decl0 (self, p):
         """class_decl : class_header class_member_list RBRACE stmt_end
                       | opaque_class
@@ -1102,8 +1115,12 @@ class SipParser(object):
         
     def p_sip_stmt_header (self, p):
         """sip_stmt_header : PERCENT SIPSTMT type_specifier
+                           | PERCENT SIPSTMT type_specifier annotation
                            | PERCENT SIPSTMT qualified_id LPAREN qualified_id RPAREN"""
-        p[0] = '%%%s %s' % (p[2], ''.join(p[3:]))
+        if len(p)==5:
+            p[0] = '%%%s %s /%s/' % (p[2], p[3], ''.join(p[4]))
+        else:
+            p[0] = '%%%s %s' % (p[2], ''.join(p[3:]))
         #if len(p) == 7:
         #    sipTypeObj.base = p [5]
         if not self.inTemplate:

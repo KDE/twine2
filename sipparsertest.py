@@ -478,6 +478,16 @@ class Foo {
 };
 """)
 
+    def testMappedType3(self):
+     
+        self.mirrorTest(
+"""
+%MappedType QChar /API=QString:2 - /
+{
+// Foo
+};
+""",debugLevel=2)
+
     def testCppSigs1(self):
         self.mirrorTest("""
 class Foo {
@@ -489,6 +499,16 @@ class Foo {
         self.mirrorTest("""
 class Foo {
         int itemDouble (const QString& _group, const QString& _key, double reference, double defaultValue = 0)  [int (const QString& _group, const QString& _key, double& reference, double defaultValue = 0)];         
+};
+""")
+    def testCppSigs3(self):
+        self.mirrorTest("""
+class Foo
+{
+    virtual SIP_PYOBJECT    read (qint64 maxlen) /ReleaseGIL/ [qint64 (char* data, qint64 maxlen)];
+%MethodCode
+// foo.
+%End
 };
 """)
 

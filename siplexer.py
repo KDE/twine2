@@ -256,26 +256,27 @@ def t_ANY_NEWLINE(t):
         pos -= 1
         
 def t_sipStmt_SIPSTMT_BODY (t):
-    r'(?s){.*?(};|\n*\s*};)'
+    r'(?s){.*?\n};'
     t.lexer.lineno += t.value.count("\n")
     t.lexer.begin ('variable')
     return t
-
-def t_sipStmt_ANNO (t):
-    r'\/NoRelease\/'
-    pass
 
 def t_sipStmt_ID (t):
     r'[A-Za-z_][\w_]*'
     if t.value in cvQualifiers:
         t.type = "CVQUAL"
     return t
-    
+
+t_sipStmt_SLASH    = r'\/'
 t_sipStmt_LT       = r'<'
 t_sipStmt_GT       = r'>'
 t_sipStmt_COLON2   = r'::'
 t_sipStmt_ASTERISK = r'\*'
 t_sipStmt_COMMA    = r','
+t_sipStmt_EQUALS   = r'='
+t_sipStmt_COLON    = r':'
+t_sipStmt_MINUS    = r'-'
+t_sipStmt_ICONST   = t_ICONST
 
 def t_filename_FILENAME (t):
     r'[._A-Za-z][._/A-Za-z0-9\-]*[._A-Za-z0-9]'

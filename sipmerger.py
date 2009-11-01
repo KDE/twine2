@@ -36,6 +36,8 @@ def MergeSipScope(sipsym,primaryScope,updateScope):
     primaryNamespaceMap = {}
     primaryEnumMap = {}
     
+    handledFunctions = set()
+    
     # Index the primary scope
     for item in primaryScope:
         if isinstance(item,sipsym.Function) or isinstance(item,sipsym.Constructor) or isinstance(item,sipsym.Destructor):
@@ -56,9 +58,11 @@ def MergeSipScope(sipsym,primaryScope,updateScope):
             if mangledName in primaryFunctionMap:
                 _MergeSipFunction(sipsym,primaryFunctionMap[mangledName],item)
                 del primaryFunctionMap[mangledName]
+                handledFunctions.add(mangledName)
             else:
                 # New function.
-                primaryScope.append(item)
+                if mangledName not in handledFunctions:
+                    primaryScope.append(item)
                 
         elif isinstance(item,sipsym.SipClass):
             if item.fqName() in primaryClassMap:

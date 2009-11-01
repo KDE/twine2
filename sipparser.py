@@ -153,7 +153,8 @@ class SipParser(object):
         class_.setForce(self.force)
         self.currentClass = class_
         self._pushScope(class_)
-
+        return class_
+        
     def enumObject (self, name):
         enum = self.symbolData.Enum(self.scope, name, self.filename, self.lexer.lineno)
         enum.setAccess(self.access)
@@ -427,8 +428,14 @@ class SipParser(object):
         else:
             template = self.symbolData.Template(self.scope, self.filename, self.lexer.lineno)
             template.setParameters(self.inTemplate)
-            self.scope = template   # This is a bit of ugly to make the class appear inside the template scope.
-            self.classObject(p[2], p[1])
+            
+            self._pushScope(template)
+            classObj = self.classObject(p[2], p[1])
+            self._popScope()
+            self._popScope()
+            self._pushScope(classObj)
+            
+            self.inTemplate = None
         
     def p_opaque_class (self, p):
         """opaque_class : class qualified_id SEMI
@@ -1128,8 +1135,9 @@ class SipParser(object):
         else:
             template = self.symbolData.Template(self.scope, self.filename, self.lexer.lineno)
             template.setParameters(self.inTemplate)
-            self.scope = template   # This is a bit of ugly to make the class appear inside the template scope.
-            self.symbolData.SipType(self.scope, self.filename, self.lexer.lineno)
+            
+            self.scope = template
+            sipType = self.symbolData.SipType(self.scope, self.filename, self.lexer.lineno)
             self.inTemplate = None
                 
     def p_cmodule (self, p):

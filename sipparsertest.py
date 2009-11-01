@@ -546,6 +546,59 @@ class Foo {
 };
 """)
 
+    def testTemplateBlocks(self):
+        text ="""
+//
+
+%ModuleHeaderCode
+#include <kaccelgen.h>
+%End
+
+namespace KAccelGen
+{
+
+template <Iter>
+class Deref
+{
+%TypeHeaderCode
+#include <kaccelgen.h>
+%End
+
+
+public:
+    static QString          deref (Iter i);
+};
+// Deref
+
+
+template <Iter>
+class Deref_Key
+{
+%TypeHeaderCode
+#include <kaccelgen.h>
+%End
+
+
+public:
+    static QString          deref (Iter i);
+};
+// Deref_Key
+
+bool                    isLegalAccelerator (const QString& str, int index);
+void                    generate (const QStringList& source, QStringList& target);
+};
+// KAccelGen
+
+%ModuleHeaderCode
+#include <kaccelgen.h>
+%End
+"""
+        scope = self.parser.parse(self.syms, text, debugLevel=0);
+        for item in scope[5]:
+            print(repr(item))
+            print("-----------------------------" + item.format())
+
+
     def testStrict0(self):
         self.strictMirrorTest(
             """// Foo

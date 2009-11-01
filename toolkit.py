@@ -32,7 +32,7 @@ class ModuleGenerator(object):
     @sealed
     def __init__(self,module,cmakelists=[],ignoreHeaders=[],noUpdateSip=[],outputDirectory=None,
             preprocessorValues=[],preprocessSubstitutionMacros=[],macros=[],bareMacros=[],exportMacros=None,
-            ignoreBases=None,sipImportDirs=[],sipImports=[],copyrightNotice=None,annotationRules=[]):
+            ignoreBases=None,noCTSCC=[],sipImportDirs=[],sipImports=[],copyrightNotice=None,annotationRules=[]):
             
         self._module = module
         self._cmakelists = [cmakelists] if isinstance(cmakelists,str) else cmakelists
@@ -58,6 +58,7 @@ class ModuleGenerator(object):
         self._transformer.setExportMacros(exportMacros)
         self._transformer.setIgnoreBaseClasses(ignoreBases)
         self._transformer.setCopyrightNotice(copyrightNotice)
+        self._noCTSCC = noCTSCC
         
         self._copyrightNotice = copyrightNotice
         
@@ -102,7 +103,7 @@ class ModuleGenerator(object):
         print("\n")
         
         print("Computing 'Convert To Sub Class Code'.")
-        cpptosiptransformer.UpdateConvertToSubClassCodeDirectives(self._sipSymbolData,moduleSipScopes,[])
+        cpptosiptransformer.UpdateConvertToSubClassCodeDirectives(self._sipSymbolData,moduleSipScopes,self._noCTSCC)
 
         #print("Sanity check.")
         #cpptosiptransformer.SanityCheckSip(self._sipSymbolData,moduleSipScopes)
@@ -171,7 +172,7 @@ class ModuleGenerator(object):
         with open(sipFilename) as fhandle:
             text = fhandle.read()
             
-        scope = self._sipParser.parse(self._sipSymbolData,text,filename=sipFilename)
+        scope = self._sipParser.parse(self._sipSymbolData,text,filename=sipFilename,debugLevel=0)
         
         # Figure out the Cpp header file name.
         def findAll(scope,matchType):

@@ -91,6 +91,7 @@ kdeui = toolkit.ModuleGenerator(
     copyrightNotice=qtkdemacros.copyrightNotice(),
     exportMacros=["KDEUI_EXPORT","KDE_EXPORT","KDEUI_EXPORT_DEPRECATED"],
     ignoreBases=["Q3GridView"],
+    noCTSCC=["KWindowSystem","NETRootInfo","NETWinInfo"],
     
     annotationRules=[
         toolkit.AnnotationRule(

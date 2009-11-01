@@ -112,6 +112,46 @@ kdeui = toolkit.ModuleGenerator(
     )
 
 ###########################################################################
+kutils = toolkit.ModuleGenerator(
+    module="PyKDE4.kutils",
+    outputDirectory=os.path.join(outputBaseDirectory,"sip/kutils"),
+    
+    # .h file extraction
+    cmakelists=[os.path.join(cmakelistBaseDirectory,"kutils/CMakeLists.txt")],
+    ignoreHeaders="""kcmodulecontainer.h  kutils_export.h""".split(" "),
+    
+    #noUpdateSip=["typedefs.sip"],
+    
+    # Cpp parsing    
+    preprocessSubstitutionMacros=qtkdemacros.QtPreprocessSubstitutionMacros(),
+    preprocessorValues={"Q_WS_X11": 1},
+    
+    macros=qtkdemacros.QtMacros(),
+    bareMacros=qtkdemacros.QtBareMacros(["KUTILS_EXPORT","KDE_EXPORT","KDE_DEPRECATED"]),
+    
+    # Sip generation
+    sipImportDirs=["/usr/share/sip/PyQt4/",os.path.join(outputBaseDirectory,"sip")],
+    sipImports=["QtCore/QtCoremod.sip","QtGui/QtGuimod.sip","QtXml/QtXmlmod.sip","kdecore/kdecoremod.sip","kdeui/kdeuimod.sip"],
+    copyrightNotice=qtkdemacros.copyrightNotice(),
+    exportMacros=["KUTILS_EXPORT","KDE_EXPORT"],
+    
+    annotationRules=[
+        toolkit.AnnotationRule(
+            methodTypeMatch="ctor",
+            parameterTypeMatch=["QWidget*","QObject*"],
+            parameterNameMatch="parent",
+            annotations="TransferThis"),
+            
+        toolkit.AnnotationRule(
+            methodTypeMatch="function",
+            parameterTypeMatch=["QWidget*","QObject*"],
+            parameterNameMatch="parent",
+            annotations="Transfer")
+        ]
+    )
+
+###########################################################################
 
 #kdecore.run()
-kdeui.run()
+#kdeui.run()
+kutils.run()

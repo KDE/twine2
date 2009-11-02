@@ -190,8 +190,50 @@ solid = toolkit.ModuleGenerator(
     )
 
 ###########################################################################
+kparts = toolkit.ModuleGenerator(
+    module="PyKDE4.kparts",
+    outputDirectory=os.path.join(outputBaseDirectory,"sip/kparts"),
+    
+    # .h file extraction
+    cmakelists=[os.path.join(cmakelistBaseDirectory,"kparts/CMakeLists.txt")],
+    
+    ignoreHeaders="""componentfactory.h genericfactory.h kparts_export.h""".split(" "),
+    #noUpdateSip=["typedefs.sip"],
+    
+    # Cpp parsing    
+    preprocessSubstitutionMacros=qtkdemacros.QtPreprocessSubstitutionMacros(),
+    preprocessorValues={"Q_WS_X11": 1},
+    
+    macros=qtkdemacros.QtMacros(),
+    bareMacros=qtkdemacros.QtBareMacros(["KPARTS_EXPORT","KDE_EXPORT","KDE_DEPRECATED"]),
+    
+    # Sip generation
+    sipImportDirs=["/usr/share/sip/PyQt4/",os.path.join(outputBaseDirectory,"sip")],
+    sipImports=["QtCore/QtCoremod.sip","QtGui/QtGuimod.sip","QtXml/QtXmlmod.sip","kdecore/kdecoremod.sip","kdeui/kdeuimod.sip","kio/kiomod.sip"],
+    copyrightNotice=qtkdemacros.copyrightNotice(),
+    exportMacros=["KPARTS_EXPORT","KDE_EXPORT"],
+    noCTSCC=["GenericFactoryBase"],
+    
+    annotationRules=[
+        toolkit.AnnotationRule(
+            methodTypeMatch="ctor",
+            parameterTypeMatch=["QWidget*","QObject*"],
+            parameterNameMatch="parent",
+            annotations="TransferThis"),
+            
+        toolkit.AnnotationRule(
+            methodTypeMatch="function",
+            parameterTypeMatch=["QWidget*","QObject*"],
+            parameterNameMatch="parent",
+            annotations="Transfer")
+        ]
+    )
+
+
+###########################################################################
 
 #kdecore.run()
 #kdeui.run()
 #kutils.run()
-solid.run()
+#solid.run()
+kparts.run()

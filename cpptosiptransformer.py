@@ -428,9 +428,14 @@ class _UpdateConvertToSubClassCodeDirectives(object):
             
     def _updateSubclassBaseMapping(self,mapping,class_):
         lastBase = None
+        
         for baseName in class_.bases():
             try:
                 base = self._symbolData.lookupType(baseName,class_.parentScope())
+                if isinstance(base, self._symbolData.Typedef):
+                    print("Warning: %s Skipping typedef base '%s' while updating CTSCC." % (class_.sourceLocation(),baseName))
+                    continue
+                
                 if lastBase is None:
                     lastBase = base
                 subClassList = mapping.setdefault(base,set())

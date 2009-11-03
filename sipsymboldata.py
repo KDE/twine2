@@ -50,7 +50,9 @@ class SymbolData(cppsymboldata.SymbolData):
             for base in context.bases():
                 resolvedBase = self._SafeLookupType(base,context.parentScope())
                 if resolvedBase is not None:
-                    return self._SafeLookupType(name,resolvedBase)
+                    result = self._SafeLookupType(name,resolvedBase)
+                    if result is not None:
+                        return result
                     
         return None
             

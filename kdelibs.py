@@ -229,11 +229,61 @@ kparts = toolkit.ModuleGenerator(
         ]
     )
 
+###########################################################################
+plasma = toolkit.ModuleGenerator(
+    module="PyKDE4.plasma",
+    outputDirectory=os.path.join(outputBaseDirectory,"sip/plasma"),
+    
+    # .h file extraction
+    cmakelists=[os.path.join(cmakelistBaseDirectory,"plasma/CMakeLists.txt")],
+    
+    ignoreHeaders="""plasma_export.h""".split(" "),
+    #noUpdateSip=["typedefs.sip"],
+    
+    # Cpp parsing    
+    preprocessSubstitutionMacros=qtkdemacros.QtPreprocessSubstitutionMacros(),
+    preprocessorValues={"Q_WS_X11": 1},
+    
+    macros=qtkdemacros.QtMacros(),
+    bareMacros=qtkdemacros.QtBareMacros(["PLASMA_EXPORT","KDE_EXPORT","KDE_DEPRECATED","Q_INVOKABLE"]),
+    
+    # Sip generation
+    sipImportDirs=["/usr/share/sip/PyQt4/",os.path.join(outputBaseDirectory,"sip")],
+    sipImports=[
+        "QtCore/QtCoremod.sip",
+        "QtGui/QtGuimod.sip",
+        "QtNetwork/QtNetworkmod.sip",
+        "QtSvg/QtSvgmod.sip",
+        "QtWebKit/QtWebKitmod.sip",
+        "QtXml/QtXmlmod.sip",
+        "kdecore/kdecoremod.sip",
+        "kdeui/kdeuimod.sip"],
+    copyrightNotice=qtkdemacros.copyrightNotice(),
+    exportMacros=["PLASMA_EXPORT","KDE_EXPORT"],
+    #noCTSCC=["GenericFactoryBase"],
+    ignoreBases=["QSharedData","KShared","QList<KUrl>"],
+    
+    annotationRules=[
+        toolkit.AnnotationRule(
+            methodTypeMatch="ctor",
+            parameterTypeMatch=["QWidget*","QObject*","QGraphicsWidget*"],
+            parameterNameMatch=["parent","pParent"],
+            annotations="TransferThis"),
+            
+        toolkit.AnnotationRule(
+            methodTypeMatch="function",
+            parameterTypeMatch=["QWidget*","QObject*","QGraphicsWidget*"],
+            parameterNameMatch="parent",
+            annotations="Transfer")
+        ]
+    )
 
 ###########################################################################
 
 #kdecore.run()
 #kdeui.run()
+#kio FIXME
 #kutils.run()
 #solid.run()
-kparts.run()
+#kparts.run()
+plasma.run()

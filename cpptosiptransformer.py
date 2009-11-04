@@ -17,6 +17,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os.path
+import re
 from sealed import sealed
 import sipsymboldata
 import cppsymboldata
@@ -227,35 +228,11 @@ def _ExpandClassNamesForArguments(sipsym,context,sipFunction):
 _PrimitiveTypes = ["char","signed char","unsigned char","wchar_t","int","unsigned",
     "unsigned int","short","unsigned short","long","unsigned long","long long",
     "unsigned long long","float","double","bool","void"]
+    
+_templateArgRegex = re.compile(r'([^<]*)<([^>]*)>')
 
 def _ExpandArgument(sipsym,context,argument):
-    className = argument.argumentType()
-    
-    suffix = ""
-    if className.endswith('*'):
-        className = className[:-1]
-        suffix = '*'
-    if className.endswith('&'):
-        className = className[:-1]
-        suffix = '&'
-        
-    prefix = ""
-    if className.startswith("const "):
-        className = className[6:]
-        prefix = "const "
-    
-    #if '<' in className:
-    #    return argument
-    if className not in _PrimitiveTypes:
-        #    return argument
-        try:
-            classObject = sipsym.lookupType(className,context)
-            if classObject.fqName()==className:
-                return argument # Nothing to do.
-            className = classObject.fqName()
-        except KeyError:
-            print("Warning: %s Unrecognized type '%s' was found when expanding argument type names." % (context.sourceLocation(),className))
-            return argument
+    className = _ExpandArgumentType(sipsym,context,argument.argumentType())
 
     defaultValue = argument.defaultValue()
     if defaultValue is not None:
@@ -275,12 +252,48 @@ def _ExpandArgument(sipsym,context,argument):
                     defaultValue = valueObject.fqName()
                 except KeyError:
                     pass
-                
             
-    newArgument = sipsym.Argument(prefix + className + suffix, argument.name(), defaultValue,
+    newArgument = sipsym.Argument(className, argument.name(), defaultValue,
                     argument.template(), argument.defaultTypes())
     newArgument.setAnnotations(argument.annotations())
     return newArgument
+    
+def _ExpandArgumentType(sipsym,context,origClassName):
+    className = origClassName
+
+    suffix = ""
+    if className.endswith('*'):
+        className = className[:-1]
+        suffix = '*'
+    if className.endswith('&'):
+        className = className[:-1]
+        suffix = '&'
+        
+    prefix = ""
+    if className.startswith("const "):
+        className = className[6:]
+        prefix = "const "
+    
+    match = re.match(_templateArgRegex,className)
+    if match is not None:
+        # Got a templated thingy.
+        firstPart = _ExpandArgumentType(sipsym,context,match.group(1))
+        containedPart = _ExpandArgumentType(sipsym,context,match.group(2))
+        return "%s%s<%s>%s" % (prefix,firstPart,containedPart,suffix)
+        
+    else:
+        if className not in _PrimitiveTypes:
+            #    return argument
+            try:
+                classObject = sipsym.lookupType(className,context)
+                if classObject.fqName()==className:
+                    return origClassName # Nothing to do.
+                className = classObject.fqName()
+            except KeyError:
+                print("Warning: %s Unrecognized type '%s' was found when expanding argument type names." % (context.sourceLocation(),className))
+                return origClassName
+
+        return prefix + className + suffix
     
 ###########################################################################
 class MethodAnnotationRule(object):

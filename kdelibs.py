@@ -279,6 +279,58 @@ plasma = toolkit.ModuleGenerator(
     )
 
 ###########################################################################
+khtml = toolkit.ModuleGenerator(
+    module="PyKDE4.khtml",
+    outputDirectory=os.path.join(outputBaseDirectory,"sip/khtml"),
+    
+    # .h file extraction
+    cmakelists=[os.path.join(cmakelistBaseDirectory,"khtml/CMakeLists.txt"),
+        #os.path.join(cmakelistBaseDirectory,"khtml/dom/CMakeLists.txt")
+        ],
+    
+    ignoreHeaders="""khtmldefaults.h dom_core.h dom_html.h khtml_events.h khtml_export.h""".split(" "),
+    #noUpdateSip=["typedefs.sip"],
+    
+    # Cpp parsing    
+    preprocessSubstitutionMacros=qtkdemacros.QtPreprocessSubstitutionMacros(),
+    preprocessorValues={"Q_WS_X11": 1},
+    
+    macros=qtkdemacros.QtMacros(),
+    bareMacros=qtkdemacros.QtBareMacros(["KHTML_EXPORT","KDE_EXPORT","KDE_DEPRECATED","Q_INVOKABLE"]),
+    
+    # Sip generation
+    sipImportDirs=["/usr/share/sip/PyQt4/",os.path.join(outputBaseDirectory,"sip")],
+    sipImports=[
+        "QtCore/QtCoremod.sip",
+        "QtGui/QtGuimod.sip",
+        "QtXml/QtXmlmod.sip",
+        "kdecore/kdecoremod.sip",
+        "kdeui/kdeuimod.sip",
+        "kio/kiomod.sip",
+        "kutils/kutilsmod.sip",
+        "kparts/kpartsmod.sip",],
+    copyrightNotice=qtkdemacros.copyrightNotice(),
+    exportMacros=["KHTML_EXPORT","KDE_EXPORT"],
+    noCTSCC=["CSSRule","CSSCharsetRule","CSSFontFaceRule","CSSImportRule","CSSMediaRule","CSSPageRule",
+        "CSSStyleRule","CSSUnknownRule","CSSStyleSheet","CSSPrimitiveValue","CSSValueList"],
+    ignoreBases=["khtml::KHTMLWidget"],
+    
+    annotationRules=[
+        toolkit.AnnotationRule(
+            methodTypeMatch="ctor",
+            parameterTypeMatch=["QWidget*","QObject*"],
+            parameterNameMatch=["parent"],
+            annotations="TransferThis"),
+            
+        toolkit.AnnotationRule(
+            methodTypeMatch="function",
+            parameterTypeMatch=["QWidget*","QObject*"],
+            parameterNameMatch="parent",
+            annotations="Transfer")
+        ]
+    )
+
+###########################################################################
 
 #kdecore.run()
 #kdeui.run()
@@ -286,4 +338,5 @@ plasma = toolkit.ModuleGenerator(
 #kutils.run()
 #solid.run()
 #kparts.run()
-plasma.run()
+#plasma.run()
+khtml.run()

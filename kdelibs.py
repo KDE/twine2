@@ -331,12 +331,67 @@ khtml = toolkit.ModuleGenerator(
     )
 
 ###########################################################################
+knewstuff = toolkit.ModuleGenerator(
+    module="PyKDE4.knewstuff",
+    outputDirectory=os.path.join(outputBaseDirectory,"sip/knewstuff"),
+    
+    # .h file extraction
+    cmakelists=[os.path.join(cmakelistBaseDirectory,"knewstuff/CMakeLists.txt"),
+        os.path.join(cmakelistBaseDirectory,"knewstuff/knewstuff2/CMakeLists.txt")],
+    
+    ignoreHeaders="""knewstuff_export.h""".split(" "),
+    #noUpdateSip=["typedefs.sip"],
+    
+    # Cpp parsing    
+    preprocessSubstitutionMacros=qtkdemacros.QtPreprocessSubstitutionMacros(),
+    preprocessorValues={"Q_WS_X11": 1},
+    
+    macros=qtkdemacros.QtMacros(),
+    bareMacros=qtkdemacros.QtBareMacros(["KNEWSTUFF_EXPORT","KDE_EXPORT","KDE_DEPRECATED","Q_INVOKABLE"]),
+    
+    # Sip generation
+    sipImportDirs=["/usr/share/sip/PyQt4/",os.path.join(outputBaseDirectory,"sip")],
+    sipImports=[
+        "QtCore/QtCoremod.sip",
+        "QtGui/QtGuimod.sip",
+        "QtXml/QtXmlmod.sip",
+        "kdecore/kdecoremod.sip",
+        "kdeui/kdeuimod.sip"],
+    copyrightNotice=qtkdemacros.copyrightNotice(),
+    exportMacros=["KNEWSTUFF_EXPORT","KDE_EXPORT"],
+    #noCTSCC=[],
+    #ignoreBases=["khtml::KHTMLWidget"],
+    
+    annotationRules=[
+        toolkit.AnnotationRule(
+            methodTypeMatch="ctor",
+            parameterTypeMatch=["QWidget*","QObject*"],
+            parameterNameMatch=["parent"],
+            annotations="TransferThis"),
+            
+        toolkit.AnnotationRule(
+            methodTypeMatch="function",
+            parameterTypeMatch=["QWidget*","QObject*"],
+            parameterNameMatch="parent",
+            annotations="Transfer")
+        ]
+    )
+
+###########################################################################
 
 #kdecore.run()
 #kdeui.run()
+
 #kio FIXME
+
 #kutils.run()
 #solid.run()
 #kparts.run()
 #plasma.run()
-khtml.run()
+#khtml.run()
+
+knewstuff.run()
+#dnssd
+#nepomuk
+#soprano
+#akonadi

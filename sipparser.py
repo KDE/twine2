@@ -305,6 +305,7 @@ class SipParser(object):
         'namespace_name : namespace ID'
         name = p[2]
         namespace = self.symbolData.Namespace(self.scope, name, self.filename, self.lexer.lineno)
+        namespace.setIgnore(self.ignore)
         self._pushScope(namespace)
                 
     def p_empty (self, p):

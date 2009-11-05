@@ -510,26 +510,30 @@ class SymbolData(cppsymboldata.SymbolData):
         def format(self,indent=0):
             pre = SymbolData._indentString(indent)
             accu = []
+            accu.append(self._formatIgnore(indent))
             accu.append(pre)
             accu.append("namespace ")
             accu.append(self._name)
-            accu.append("\n")
-            accu.append(pre)
-            accu.append("{\n")
-           
-            force = False
-            for item in self._items:
-                if isinstance(item,cppsymboldata.SymbolData._CppEntity) or isinstance(item,SymbolData.SipDirective):
-                    if item.force()!=force:
-                        if not force:
-                            accu.append("//force\n")
-                        else:
-                            accu.append("//end\n")
-                        force = not force
-                accu.append(item.format(indent))
-            if force:
-                accu.append("//end\n")
+            if self.ignore():
+                accu.append(";\n")
+            else:
+                accu.append("\n")
+                accu.append(pre)
+                accu.append("{\n")
             
-            accu.append(pre)
-            accu.append("};\n")
+                force = False
+                for item in self._items:
+                    if isinstance(item,cppsymboldata.SymbolData._CppEntity) or isinstance(item,SymbolData.SipDirective):
+                        if item.force()!=force:
+                            if not force:
+                                accu.append("//force\n")
+                            else:
+                                accu.append("//end\n")
+                            force = not force
+                    accu.append(item.format(indent))
+                if force:
+                    accu.append("//end\n")
+                
+                accu.append(pre)
+                accu.append("};\n")
             return "".join(accu)

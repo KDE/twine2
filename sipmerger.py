@@ -73,7 +73,9 @@ def MergeSipScope(sipsym,primaryScope,updateScope):
                 
         elif isinstance(item,sipsym.Namespace):
             if item.fqName() in primaryNamespaceMap:
-                MergeSipScope(sipsym,primaryNamespaceMap[item.fqName()],item)
+                primaryNamespace = primaryNamespaceMap[item.fqName()]
+                if not primaryNamespace.ignore():
+                    MergeSipScope(sipsym,primaryNamespace,item)
             else:
                 # New namespace
                 primaryScope.append(item)

@@ -615,7 +615,8 @@ class SipParser(object):
                           | AMPERSAND
                           | ASTERISK AMPERSAND
                           | ASTERISK ASTERISK
-                          | ASTERISK ASTERISK ASTERISK"""
+                          | ASTERISK ASTERISK ASTERISK
+                          | ASTERISK CVQUAL"""
         p [0] = "".join (p [1:])
         
     def p_type_specifier_list (self, p):

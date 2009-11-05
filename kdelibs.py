@@ -376,6 +376,51 @@ knewstuff = toolkit.ModuleGenerator(
             annotations="Transfer")
         ]
     )
+    
+###########################################################################
+dnssd = toolkit.ModuleGenerator(
+    module="PyKDE4.dnssd",
+    outputDirectory=os.path.join(outputBaseDirectory,"sip/dnssd"),
+    
+    # .h file extraction
+    cmakelists=[os.path.join(cmakelistBaseDirectory,"dnssd/CMakeLists.txt")],
+    
+    ignoreHeaders="""dnssd_export.h settings.h""".split(" "),
+    #noUpdateSip=["typedefs.sip"],
+    
+    # Cpp parsing    
+    preprocessSubstitutionMacros=qtkdemacros.QtPreprocessSubstitutionMacros(),
+    preprocessorValues={"Q_WS_X11": 1},
+    
+    macros=qtkdemacros.QtMacros(),
+    bareMacros=qtkdemacros.QtBareMacros(["KDNSSD_EXPORT","KDE_EXPORT","KDE_DEPRECATED","Q_INVOKABLE"]),
+    
+    # Sip generation
+    sipImportDirs=["/usr/share/sip/PyQt4/",os.path.join(outputBaseDirectory,"sip")],
+    sipImports=[
+        "QtCore/QtCoremod.sip",
+        "QtGui/QtGuimod.sip",
+        "kdecore/kdecoremod.sip",
+        "kdeui/kdeuimod.sip"],
+    copyrightNotice=qtkdemacros.copyrightNotice(),
+    exportMacros=["KDNSSD_EXPORT","KDE_EXPORT"],
+    #noCTSCC=[],
+    #ignoreBases=["khtml::KHTMLWidget"],
+    
+    annotationRules=[
+        toolkit.AnnotationRule(
+            methodTypeMatch="ctor",
+            parameterTypeMatch=["QWidget*","QObject*"],
+            parameterNameMatch=["parent"],
+            annotations="TransferThis"),
+            
+        toolkit.AnnotationRule(
+            methodTypeMatch="function",
+            parameterTypeMatch=["QWidget*","QObject*"],
+            parameterNameMatch="parent",
+            annotations="Transfer")
+        ]
+    )
 
 ###########################################################################
 
@@ -389,9 +434,9 @@ knewstuff = toolkit.ModuleGenerator(
 #kparts.run()
 #plasma.run()
 #khtml.run()
+#knewstuff.run()
 
-knewstuff.run()
-#dnssd
+dnssd.run()
 #nepomuk
 #soprano
 #akonadi

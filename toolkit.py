@@ -81,7 +81,7 @@ class ModuleGenerator(object):
         headerScopeTuples = self._parseHeaders(cppHeaderFilenameList)
         
         print("\nParsing imported Sip files:")
-        self._parseImportHeaders()
+        self._parseImportedSip()
         
         print("\nConverting header files into Sip files.")
         moduleSipScopes = self._convertCppToSip(headerScopeTuples)
@@ -89,7 +89,7 @@ class ModuleGenerator(object):
         print("\nExpanding class names:")
         for scope in moduleSipScopes:
             cpptosiptransformer.ExpandClassNames(self._sipSymbolData,scope)
-        
+
         print("\nAnnotating Sip files.")
         self._annotateSipScopes(moduleSipScopes)
         
@@ -148,7 +148,7 @@ class ModuleGenerator(object):
             #print(scope.format())
         return headerScopeTuples
     
-    def _parseImportHeaders(self):
+    def _parseImportedSip(self):
         scopes = []
         
         for sipImport in self._sipImports:
@@ -171,7 +171,7 @@ class ModuleGenerator(object):
     def _importSipFile(self,sipFilename,noUpdateSip=[]):
         with open(sipFilename) as fhandle:
             text = fhandle.read()
-            
+
         scope = self._sipParser.parse(self._sipSymbolData,text,filename=sipFilename,debugLevel=0)
         
         # Figure out the Cpp header file name.
@@ -195,7 +195,7 @@ class ModuleGenerator(object):
         scope.setHeaderFilename(extractHeader(directives,"%TypeHeaderCode") \
             or extractHeader(directives,"%ModuleHeaderCode") \
             or sipFilename)
-            
+
         scopeList = [scope]
         
         #print("********************************************")
@@ -255,14 +255,12 @@ class ModuleGenerator(object):
             module = module.rpartition('.')[2]
         return os.path.join(self._outputDirectory,module) + "mod.sip"
         
-    def _updateScopes(self,moduleSipScopes):
+    def _updateScopes(self,updateSipScopes):
         previousSipScopes = self._importSipFile(self._indexFilename(),self._noUpdateSip)
         
-        updateSipScopes = moduleSipScopes
-        
-        # Match moduleSipScopes
+        # Match updateSipScopes
         updateSipMap = {}
-        for scope in moduleSipScopes:
+        for scope in updateSipScopes:
             #print("header sip name: " + self._convertHeaderNameToSip(scope.headerFilename()))
             updateSipMap[self._convertHeaderNameToSip(scope.headerFilename())] = scope
             

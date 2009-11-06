@@ -112,6 +112,52 @@ kdeui = toolkit.ModuleGenerator(
     )
 
 ###########################################################################
+kio = toolkit.ModuleGenerator(
+    module="PyKDE4.kio",
+    outputDirectory=os.path.join(outputBaseDirectory,"sip/kio"),
+    
+    # .h file extraction
+    cmakelists=[
+        os.path.join(cmakelistBaseDirectory,"kio/CMakeLists.txt"),
+        os.path.join(cmakelistBaseDirectory,"kfile/CMakeLists.txt")
+        ],
+    
+    ignoreHeaders="""http_slave_defaults.h ioslave_defaults.h kmimetyperesolver.h k3mimetyperesolver.h kfiledetailview.h kfileiconview.h kfiletreeview.h kfiletreeviewitem.h ksslpemcallback.h kpropsdialog.h kio_export.h kdirnotify.h k3filedetailview.h  k3fileiconview.h k3filetreeview.h  k3filetreeviewitem.h  k3mimetyperesolver.h kfiletreebranch.h  kfile_export.h kurlbar.h""".split(" "),
+    
+    #noUpdateSip=["typedefs.sip"],
+    
+    # Cpp parsing    
+    preprocessSubstitutionMacros=qtkdemacros.QtPreprocessSubstitutionMacros(),
+    preprocessorValues={"Q_WS_X11": 1,"Q_OS_UNIX": 1},
+    
+    macros=qtkdemacros.QtMacros(),
+    bareMacros=qtkdemacros.QtBareMacros(["KIO_EXPORT","KFILE_EXPORT","KIO_EXPORT_DEPRECATED","KDE_NO_EXPORT",
+                    "KDE_EXPORT","KDE_DEPRECATED","","KDEUI_EXPORT_DEPRECATED","KIO_CONNECTION_EXPORT"]),
+    
+    # Sip generation
+    sipImportDirs=["/usr/share/sip/PyQt4/",os.path.join(outputBaseDirectory,"sip")],
+    sipImports=["QtCore/QtCoremod.sip","QtGui/QtGuimod.sip","QtXml/QtXmlmod.sip","kdecore/kdecoremod.sip","kdeui/kdeuimod.sip","solid/solidmod.sip"],
+    copyrightNotice=qtkdemacros.copyrightNotice(),
+    exportMacros=["KIO_EXPORT","KFILE_EXPORT","KDE_EXPORT","KDEUI_EXPORT_DEPRECATED","KIO_CONNECTION_EXPORT","KIO_EXPORT_DEPRECATED"],
+    #ignoreBases=["Q3GridView"],
+    noCTSCC=["KonqBookmarkContextMenu","KImportedBookmarkMenu","KBookmark","KBookmarkGroup"],
+    
+    annotationRules=[
+        toolkit.AnnotationRule(
+            methodTypeMatch="ctor",
+            parameterTypeMatch=["QWidget*","QObject*"],
+            parameterNameMatch="parent",
+            annotations="TransferThis"),
+            
+        toolkit.AnnotationRule(
+            methodTypeMatch="function",
+            parameterTypeMatch=["QWidget*","QObject*"],
+            parameterNameMatch="parent",
+            annotations="Transfer")
+        ]
+    )
+
+###########################################################################
 kutils = toolkit.ModuleGenerator(
     module="PyKDE4.kutils",
     outputDirectory=os.path.join(outputBaseDirectory,"sip/kutils"),
@@ -427,7 +473,7 @@ dnssd = toolkit.ModuleGenerator(
 #kdecore.run()
 #kdeui.run()
 
-#kio FIXME
+kio.run()
 
 #kutils.run()
 #solid.run()
@@ -435,8 +481,8 @@ dnssd = toolkit.ModuleGenerator(
 #plasma.run()
 #khtml.run()
 #knewstuff.run()
+#dnssd.run()
 
-dnssd.run()
 #nepomuk
 #soprano
 #akonadi

@@ -18,7 +18,7 @@
 
 import re
 
-__QtBareMacros = ["Q_OBJECT", "Q_GADGET", "Q_OBJECT_CHECK", "K_DCOP"]
+__QtBareMacros = ["Q_OBJECT", "Q_GADGET", "Q_OBJECT_CHECK", "K_DCOP","Q_CORE_EXPORT"]
 
 def QtBareMacros(extraMacros=[]):
     macros = __QtBareMacros[:]

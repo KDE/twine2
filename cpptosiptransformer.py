@@ -229,7 +229,7 @@ _PrimitiveTypes = ["char","signed char","unsigned char","wchar_t","int","unsigne
     "unsigned int","short","unsigned short","long","unsigned long","long long",
     "unsigned long long","float","double","bool","void"]
     
-_templateArgRegex = re.compile(r'([^<]*)<([^>]*)>')
+_templateArgRegex = re.compile(r'^([^<]*)<(.*)>$')
 
 def _ExpandArgument(sipsym,context,argument):
     className = _ExpandArgumentType(sipsym,context,argument.argumentType())

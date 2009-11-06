@@ -244,7 +244,7 @@ def _ExpandArgument(sipsym,context,argument):
                 pass
         else:
             enum = sipsym.lookupEnum(defaultValue,context)
-            if enum is not None:
+            if enum is not None and enum.name() is not None:
                 defaultValue =  enum.fqName() + "::" + defaultValue
             else:
                 try:

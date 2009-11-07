@@ -914,13 +914,17 @@ class CppParser(object):
         self.functionObject ('operator ' + "".join (p [2:n]), p[1])
         self.arguments = []
         
+    def p_cast_operator_operator(self, p):
+        """cast_operator_keyword : operator"""
+        self.lexer.begin('function')
+        
     def p_cast_operator_name0 (self, p):
-        'cast_operator_name : operator type_specifier LPAREN RPAREN'
+        'cast_operator_name : cast_operator_keyword type_specifier LPAREN RPAREN'
         self.functionObject ('operator ' + p [2], p[2])
         self.arguments  = []
         
     def p_cast_operator_name1 (self, p):
-        'cast_operator_name : operator type_specifier LPAREN RPAREN CVQUAL'
+        'cast_operator_name : cast_operator_keyword type_specifier LPAREN RPAREN CVQUAL'
         fObj = self.functionObject ('operator ' + p [2], p[2])
         fObj.addQualifier(p[5])
         self.arguments  = []        

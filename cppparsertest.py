@@ -480,6 +480,18 @@ bool operator==( const Entity& other ) const;
 """,debugLevel=2)
         print(scope.format())
 
+    def testPureVirtualDestructor(self):
+        scope = self.parser.parse(self.syms,
+        """
+class Foo {
+public:
+    Foo();
+    virtual ~Foo() = 0;
+};
+
+""",debugLevel=2)
+        print(scope.format())
+
     def testLiveAmmo(self):
         with open("/home/sbe/devel/svn/kde/branches/KDE/4.3/kdeedu/marble/src/lib/MarbleMap.h") as fhandle:
             text = fhandle.read()

@@ -541,8 +541,22 @@ class SymbolData(object):
 
         def format(self,indent=0):
             pre = SymbolData._indentString(indent)
-            storage = self._storage+" " if self._storage is not None else ""
-            return pre + storage + "~" + self._name + " ();\n"
+            accu = []
+            accu.append(pre)
+            if 'virtual' in self._qualifier:
+                accu.append("virtual ")
+            if self._storage is not None:
+                accu.append(self._storage)
+                accu.append(" ")
+            accu.append("~")
+            accu.append(self._name)
+            accu.append(" ()")
+            if 'const' in self._qualifier:
+                accu.append(" const")
+            if 'pure' in self._qualifier:
+                accu.append("=0")
+            accu.append(";\n")
+            return ''.join(accu)
             
     class Typedef(_CppEntity):
         @sealed

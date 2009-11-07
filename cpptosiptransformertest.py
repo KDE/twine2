@@ -261,6 +261,11 @@ namespace FooSpace {
 }
 """)
 
+    def testNestedTemplate(self):
+        self.convert("""
+KBookmarkGroup addBookmarks(const QList< QPair<QString, QString>> & list);
+""")
+
     def testCTSCC(self):
         parser = sipparser.SipParser()
         syms = sipsymboldata.SymbolData()

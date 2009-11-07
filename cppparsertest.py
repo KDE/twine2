@@ -451,6 +451,35 @@ void PlainPostFunc ();
 """)
         print(scope.format())
 
+    def testFunnyNamespace(self):
+        scope = self.parser.parse(self.syms,
+        """
+class KJob;
+namespace KIO {
+    class Job;
+}
+class KAutoMountPrivate;
+""")
+        print(scope.format())
+
+    def testNestedTemplate(self):
+        scope = self.parser.parse(self.syms,
+        """
+KBookmarkGroup addBookmarks(const QList< QPair<QString, QString> > & list);
+""")
+        print(scope.format())
+
+    def testOperatorQUrlConst(self):
+        scope = self.parser.parse(self.syms,
+        """
+class Foo {
+void reset( bool recursive = false );
+operator QUrl() const { return uri(); }
+bool operator==( const Entity& other ) const;
+};
+""",debugLevel=2)
+        print(scope.format())
+
     def testLiveAmmo(self):
         with open("/home/sbe/devel/svn/kde/branches/KDE/4.3/kdeedu/marble/src/lib/MarbleMap.h") as fhandle:
             text = fhandle.read()

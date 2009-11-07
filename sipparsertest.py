@@ -488,6 +488,12 @@ class Foo {
 };
 """,debugLevel=2)
 
+    def testNestedTemplate(self):
+        self.mirrorTest(
+"""
+KBookmarkGroup addBookmarks(const QList< QPair<QString, QString>>& list);
+""")
+
     def testCppSigs1(self):
         self.mirrorTest("""
 class Foo {

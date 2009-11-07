@@ -173,7 +173,7 @@ class CppToSipTransformer(object):
         sipEnum = self._sipsym.Enum(parentScope, cppEnum.name())
         sipEnum.setAccess(cppEnum.access())
         for item in cppEnum:
-            sipEnum.append(item)
+            sipEnum.append(self._sipsym.Enumerator(item.name(),item.value()))
 
     def _convertTypedef(self,cppTypedef,parentScope):
         sipTypedef = self._sipsym.Typedef(parentScope, cppTypedef.name(),

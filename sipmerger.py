@@ -35,6 +35,7 @@ def MergeSipScope(sipsym,primaryScope,updateScope):
     primaryClassMap = {}
     primaryNamespaceMap = {}
     primaryEnumMap = {}
+    primaryTypedefMap = {}
     
     handledFunctions = set()
     
@@ -48,6 +49,8 @@ def MergeSipScope(sipsym,primaryScope,updateScope):
             primaryNamespaceMap[item.fqName()] = item
         elif isinstance(item,sipsym.Enum):    
             primaryEnumMap[item.fqName()] = item
+        elif isinstance(item,sipsym.Typedef):
+            primaryTypedefMap[item.fqName()] = item
 
     # Update
     for item in updateScope[:]:
@@ -88,6 +91,13 @@ def MergeSipScope(sipsym,primaryScope,updateScope):
                 # New enum
                 primaryScope.append(item)
         
+        elif isinstance(item,sipsym.Typedef):
+            # FIXME Try to be independant from Qt not hard code QFlags in.
+            if "QFlags" in item.argumentType():
+                if item.fqName() not in primaryTypedefMap:
+                    primaryScope.append(item)
+            else:
+                print("Warning: Skipping typdef " +str(item))
         else:
             if not isinstance(item,sipsym.SipDirective) and not isinstance(item,sipsym.Comment):
                 print("Warning: Unknown object " +str(item))

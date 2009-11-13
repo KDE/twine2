@@ -21,7 +21,8 @@ import qtkdemacros
 import os.path
 
 outputBaseDirectory = "/home/sbe/devel/svn/kde/trunk/KDE/kdebindings/python/pykde4"
-cmakelistBaseDirectory = "/home/sbe/devel/svn/kde/branches/KDE/4.3/kdelibs"
+#cmakelistBaseDirectory = "/home/sbe/devel/svn/kde/branches/KDE/4.3/kdelibs"
+cmakelistBaseDirectory = "/home/sbe/devel/svn/kde/trunk/KDE/kdelibs"
 
 kdecore = toolkit.ModuleGenerator(
     module="PyKDE4.kdecore",
@@ -283,7 +284,7 @@ plasma = toolkit.ModuleGenerator(
     # .h file extraction
     cmakelists=[os.path.join(cmakelistBaseDirectory,"plasma/CMakeLists.txt")],
     
-    ignoreHeaders="""plasma_export.h""".split(" "),
+    ignoreHeaders="""plasma_export.h credentials.h rotationstacked.h animation.h abstractanimation.h animationgroup.h""".split(" "),
     #noUpdateSip=["typedefs.sip"],
     
     # Cpp parsing    
@@ -291,7 +292,8 @@ plasma = toolkit.ModuleGenerator(
     preprocessorValues={"Q_WS_X11": 1},
     
     macros=qtkdemacros.QtMacros(),
-    bareMacros=qtkdemacros.QtBareMacros(["PLASMA_EXPORT","KDE_EXPORT","KDE_DEPRECATED","Q_INVOKABLE"]),
+    bareMacros=qtkdemacros.QtBareMacros(["PLASMA_EXPORT","PLASMA_EXPORT_DEPRECATED","KDE_EXPORT",
+            "KDE_DEPRECATED","Q_INVOKABLE"]),
     
     # Sip generation
     sipImportDirs=["/usr/share/sip/PyQt4/",os.path.join(outputBaseDirectory,"sip")],
@@ -305,7 +307,7 @@ plasma = toolkit.ModuleGenerator(
         "kdecore/kdecoremod.sip",
         "kdeui/kdeuimod.sip"],
     copyrightNotice=qtkdemacros.copyrightNotice(),
-    exportMacros=["PLASMA_EXPORT","KDE_EXPORT"],
+    exportMacros=["PLASMA_EXPORT","PLASMA_EXPORT_DEPRECATED","KDE_EXPORT"],
     #noCTSCC=["GenericFactoryBase"],
     ignoreBases=["QSharedData","KShared","QList<KUrl>"],
     
@@ -469,12 +471,57 @@ dnssd = toolkit.ModuleGenerator(
     )
 
 ###########################################################################
+nepomuk = toolkit.ModuleGenerator(
+    module="PyKDE4.nepomuk",
+    outputDirectory=os.path.join(outputBaseDirectory,"sip/nepomuk"),
+    
+    # .h file extraction
+    cmakelists=[os.path.join(cmakelistBaseDirectory,"nepomuk/CMakeLists.txt"),
+        os.path.join(cmakelistBaseDirectory,"nepomuk/core/CMakeLists.txt"),
+        os.path.join(cmakelistBaseDirectory,"nepomuk/core/ontology/CMakeLists.txt"),
+        os.path.join(cmakelistBaseDirectory,"nepomuk/core/ui/CMakeLists.txt")],
+    
+    ignoreHeaders="""nepomuk_export.h ontologyloader.h desktopontologyloader.h fileontologyloader.h ontologymanager.h nepomukontologyloader.h""".split(" "),
+    #noUpdateSip=["typedefs.sip"],
+    
+    # Cpp parsing    
+    preprocessSubstitutionMacros=qtkdemacros.QtPreprocessSubstitutionMacros(),
+    preprocessorValues={"Q_WS_X11": 1},
+    
+    macros=qtkdemacros.QtMacros(),
+    bareMacros=qtkdemacros.QtBareMacros(["NEPOMUK_EXPORT","KDE_EXPORT","KDE_DEPRECATED","Q_INVOKABLE"]),
+    
+    # Sip generation
+    sipImportDirs=["/usr/share/sip/PyQt4/",os.path.join(outputBaseDirectory,"sip")],
+    sipImports=[
+        "QtCore/QtCoremod.sip",
+        "kdecore/kdecoremod.sip",
+        "soprano/sopranomod.sip"],
+    copyrightNotice=qtkdemacros.copyrightNotice(),
+    exportMacros=["NEPOMUK_EXPORT","KDE_EXPORT"],
+    #noCTSCC=[],
+    #ignoreBases=["khtml::KHTMLWidget"],
+    
+    annotationRules=[
+        toolkit.AnnotationRule(
+            methodTypeMatch="ctor",
+            parameterTypeMatch=["QWidget*","QObject*"],
+            parameterNameMatch=["parent"],
+            annotations="TransferThis"),
+            
+        toolkit.AnnotationRule(
+            methodTypeMatch="function",
+            parameterTypeMatch=["QWidget*","QObject*"],
+            parameterNameMatch="parent",
+            annotations="Transfer")
+        ]
+    )
+
+###########################################################################
 
 #kdecore.run()
 #kdeui.run()
-
-kio.run()
-
+#kio.run()
 #kutils.run()
 #solid.run()
 #kparts.run()
@@ -483,6 +530,6 @@ kio.run()
 #knewstuff.run()
 #dnssd.run()
 
-#nepomuk
+nepomuk.run()
 #soprano
 #akonadi

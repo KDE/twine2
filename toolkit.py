@@ -73,7 +73,9 @@ class ModuleGenerator(object):
         
     def run(self):
         print("Extracting header file list from CMake:")
-        cppHeaderFilenameList = self.extractCmakeListsHeaders()
+        cppHeaderFilenameSet = self.extractCmakeListsHeaders()
+        cppHeaderFilenameList = list(cppHeaderFilenameSet)
+        cppHeaderFilenameList.sort()
         for filename in cppHeaderFilenameList:
             print("    Found %s" % (filename,))
         
@@ -272,7 +274,7 @@ class ModuleGenerator(object):
                 sipmerger.MergeSipScope(self._sipSymbolData,scope,updateSipMap[filename])
                 del updateSipMap[filename]
             else:
-                print("    (Missing header file %s. Skipping merge.)" % (filename,) )
+                print("    (Missing header file to match %s. Skipping merge.)" % (filename,) )
             
         for key in updateSipMap.iterkeys():
             print("    Adding new header "+key)

@@ -23,6 +23,7 @@ import os.path
 outputBaseDirectory = "/home/sbe/devel/svn/kde/trunk/KDE/kdebindings/python/pykde4"
 #cmakelistBaseDirectory = "/home/sbe/devel/svn/kde/branches/KDE/4.3/kdelibs"
 cmakelistBaseDirectory = "/home/sbe/devel/svn/kde/trunk/KDE/kdelibs"
+cmakelistSupportBaseDirectory = "/home/sbe/devel/svn/kde/trunk/kdesupport"
 
 kdecore = toolkit.ModuleGenerator(
     module="PyKDE4.kdecore",
@@ -518,6 +519,55 @@ nepomuk = toolkit.ModuleGenerator(
     )
 
 ###########################################################################
+soprano = toolkit.ModuleGenerator(
+    module="PyKDE4.soprano",
+    outputDirectory=os.path.join(outputBaseDirectory,"sip/soprano"),
+    
+    # .h file extraction
+    cmakelists=[os.path.join(cmakelistSupportBaseDirectory,"soprano/CMakeLists.txt"),
+            os.path.join(cmakelistSupportBaseDirectory,"soprano/soprano/CMakeLists.txt"),
+            os.path.join(cmakelistSupportBaseDirectory,"soprano/server/CMakeLists.txt"),
+            os.path.join(cmakelistSupportBaseDirectory,"soprano/server/sparql/CMakeLists.txt"),
+            os.path.join(cmakelistSupportBaseDirectory,"soprano/server/dbus/CMakeLists.txt")],
+    
+    ignoreHeaders="""soprano_export.h sopranomacros.h soprano.h vocabulary.h iterator.h version.h iteratorbackend.h""".split(" "),
+    #noUpdateSip=["iterator.sip"],
+    
+    # Cpp parsing    
+    preprocessSubstitutionMacros=qtkdemacros.QtPreprocessSubstitutionMacros(),
+    preprocessorValues={"Q_WS_X11": 1, "USING_SOPRANO_NRLMODEL_UNSTABLE_API":1},
+    
+    macros=qtkdemacros.QtMacros(),
+    bareMacros=qtkdemacros.QtBareMacros(["SOPRANO_EXPORT","SOPRANO_CLIENT_EXPORT","SOPRANO_SERVER_EXPORT",
+                    "USING_SOPRANO_NRLMODEL_UNSTABLE_API","KDE_EXPORT","KDE_DEPRECATED","Q_INVOKABLE",
+                    "SOPRANO_DEPRECATED"]),
+    
+    # Sip generation
+    sipImportDirs=["/usr/share/sip/PyQt4/",os.path.join(outputBaseDirectory,"sip")],
+    sipImports=["QtCore/QtCoremod.sip","QtGui/QtGuimod.sip","QtNetwork/QtNetworkmod.sip"],
+    
+    copyrightNotice=qtkdemacros.copyrightNotice(),
+    exportMacros=["SOPRANO_EXPORT","SOPRANO_CLIENT_EXPORT","SOPRANO_SERVER_EXPORT","KDE_EXPORT"],
+    #noCTSCC=[],
+    ignoreBases=["IteratorBackend<BindingSet>","Iterator<Node>","Iterator<BindingSet>","Iterator<Statement>"],
+    
+    annotationRules=[
+        toolkit.AnnotationRule(
+            methodTypeMatch="ctor",
+            parameterTypeMatch=["QWidget*","QObject*"],
+            parameterNameMatch=["parent"],
+            annotations="TransferThis"),
+            
+        toolkit.AnnotationRule(
+            methodTypeMatch="function",
+            parameterTypeMatch=["QWidget*","QObject*"],
+            parameterNameMatch="parent",
+            annotations="Transfer")
+        ]
+    )
+
+
+###########################################################################
 
 #kdecore.run()
 #kdeui.run()
@@ -529,7 +579,7 @@ nepomuk = toolkit.ModuleGenerator(
 #khtml.run()
 #knewstuff.run()
 #dnssd.run()
+#nepomuk.run()
 
-nepomuk.run()
-#soprano
+soprano.run()
 #akonadi

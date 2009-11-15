@@ -180,7 +180,7 @@ def t_define (t):
     t.lexer.lineno += 1
     
 def t_anyline (t):
-    r'.*?\n[^#]*'
+    r'[^\n]*?\n(([^#\n][^\n]*\n)|\n)*'
     """
     Process anything that's not a preprocesor directive.
 
@@ -201,10 +201,10 @@ def t_anyline (t):
         t.lexer.lineno += 1   
 
 # this needs to be HERE - not above token definitions
-ppLexer = lex.lex ()
+ppLexer = lex.lex (debug=0)
 
     
-def preprocess (text, global_values, global_macros):
+def preprocess (text, global_values={}, global_macros=[]):
     """
     Preprocess a C/C++ header file text
     
@@ -239,7 +239,7 @@ def preprocess (text, global_values, global_macros):
     if text[-1]!='\n':
         text = text + '\n'
     ppLexer.input (text)
-    token = ppLexer.token ()
+    token = ppLexer.token()
     #print(newtext)
     #return "".join (fixDoc (newtext))
     return "".join(newtext)

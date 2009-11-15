@@ -32,6 +32,38 @@ enum TimeFormatOption {
     TimeDuration       = 0x6   ///< Read/format time string as duration. This will strip
 };
 """.split('\n')))#,[],[]))
+    def testDefinesFunction(self):
+        print(pplexer.preprocess("""
+            /**
+             * http://freedesktop.org/standards/xesam/1.0/core#definesClass 
+             * 
+             * Source code defines class 
+             */
+            SOPRANO_EXPORT QUrl definesClass();
+
+"""))
+
+    def testDefinesFunction2(self):
+        print(pplexer.preprocess("""/*
+ * foo
+ */
+
+#ifndef _SOPRANO_SERVER_DBUS_CLIENT_H_
+#define _SOPRANO_SERVER_DBUS_CLIENT_H_
+
+#include <QtCore/QObject>
+
+#include "backend.h"
+#include "error.h"
+#include "soprano_export.h"
+
+namespace Soprano {
+
+    class Model;
+
+};
+#endif 
+"""))
 
 if __name__ == '__main__':
     unittest.main()

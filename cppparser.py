@@ -292,7 +292,8 @@ class CppParser(object):
                   | function_decl
                   | variable_decl
                   | bare_macro
-                  | skip_macro"""
+                  | skip_macro
+                  | SEMI"""
         self.lexer.lexstate = 'variable'
         self.arguments = []
         self.template = None

@@ -331,6 +331,17 @@ namespace FooSpace {
 };
 """)
 
+    def testClassNameExpandVars(self):
+        self.expandClassNames("""
+namespace FooSpace {
+    class Foo { };
+    class Bar {
+        static const Foo fodo;
+        Foo doFooz(Foo inputFoo);
+        Foo doFoozRef(Foo &inputFoo);
+    };
+};
+""")
 
     def testSanityCheck(self):
         self.sanityCheck("""

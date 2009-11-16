@@ -203,6 +203,9 @@ def ExpandClassNames(sipsym,scope):
             
         elif isinstance(item,sipsym.Function):
             _ExpandClassNamesForFunction(sipsym,scope,item)
+            
+        elif isinstance(item,sipsym.Variable):
+            _ExpandClassNamesForVariable(sipsym,scope,item)
 
 def _ExpandClassNamesForClass(sipsym,sipClass):
     # Use FQNs when talking about base classes, otherwise SIP fails.
@@ -221,6 +224,9 @@ def _ExpandClassNamesForFunction(sipsym,context,sipFunction):
     sipFunction.setReturn(_ExpandArgument(sipsym,context,sipFunction.return_()))
     
     _ExpandClassNamesForArguments(sipsym,context,sipFunction)
+    
+def _ExpandClassNamesForVariable(sipsym,context,sipVariable):
+    sipVariable.setArgument(_ExpandArgument(sipsym,context,sipVariable.argument()))
     
 def _ExpandClassNamesForArguments(sipsym,context,sipFunction):
     sipFunction.setArguments( [_ExpandArgument(sipsym,context,argument) for argument in sipFunction.arguments()] )
@@ -294,7 +300,7 @@ def _ExpandArgumentType(sipsym,context,origClassName):
                 return origClassName
 
         return prefix + className + suffix
-    
+
 ###########################################################################
 class MethodAnnotationRule(object):
     @sealed

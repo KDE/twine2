@@ -24,6 +24,7 @@ outputBaseDirectory = "/home/sbe/devel/svn/kde/trunk/KDE/kdebindings/python/pykd
 #cmakelistBaseDirectory = "/home/sbe/devel/svn/kde/branches/KDE/4.3/kdelibs"
 cmakelistBaseDirectory = "/home/sbe/devel/svn/kde/trunk/KDE/kdelibs"
 cmakelistSupportBaseDirectory = "/home/sbe/devel/svn/kde/trunk/kdesupport"
+cmakelistPimlibsBaseDirectory = "/home/sbe/devel/svn/kde/trunk/KDE/kdepimlibs"
 
 kdecore = toolkit.ModuleGenerator(
     module="PyKDE4.kdecore",
@@ -566,6 +567,50 @@ soprano = toolkit.ModuleGenerator(
         ]
     )
 
+###########################################################################
+akonadi = toolkit.ModuleGenerator(
+    module="PyKDE4.akonadi",
+    outputDirectory=os.path.join(outputBaseDirectory,"sip/akonadi"),
+    
+    # .h file extraction
+    cmakelists=[os.path.join(cmakelistPimlibsBaseDirectory,"akonadi/CMakeLists.txt"),
+        os.path.join(cmakelistPimlibsBaseDirectory,"akonadi/kmime/CMakeLists.txt"),
+        os.path.join(cmakelistPimlibsBaseDirectory,"akonadi/kabc/CMakeLists.txt")],
+    
+    ignoreHeaders="""akonadi_export.h akonadi-kmime_export.h akonadi-kabc_export.h itempayloadinternals_p.h collectionpathresolver_p.h resourcebase.h agentbase.h qtest_akonadi.h exception.h""".split(" "),
+    #noUpdateSip=["iterator.sip"],
+    
+    # Cpp parsing    
+    preprocessSubstitutionMacros=qtkdemacros.QtPreprocessSubstitutionMacros(),
+    preprocessorValues={"Q_WS_X11": 1},
+    
+    macros=qtkdemacros.QtMacros(["AKONADI_DECLARE_PRIVATE"]),
+    bareMacros=qtkdemacros.QtBareMacros(["AKONADI_EXPORT","KDE_EXPORT","KDE_DEPRECATED","Q_INVOKABLE",
+                    "AKONADI_KABC_EXPORT","AKONADI_KMIME_EXPORT"]),
+    
+    # Sip generation
+    sipImportDirs=["/usr/share/sip/PyQt4/",os.path.join(outputBaseDirectory,"sip")],
+    sipImports=["QtCore/QtCoremod.sip","QtGui/QtGuimod.sip","kdeui/kdeuimod.sip","kdecore/kdecoremod.sip","kio/kiomod.sip"],
+    
+    copyrightNotice=qtkdemacros.copyrightNotice(),
+    exportMacros=["AKONADI_EXPORT","AKONADI_KABC_EXPORT","AKONADI_KMIME_EXPORT","KDE_EXPORT"],
+    #noCTSCC=[],
+    #ignoreBases=[],
+    
+    annotationRules=[
+        toolkit.AnnotationRule(
+            methodTypeMatch="ctor",
+            parameterTypeMatch=["QWidget*","QObject*"],
+            parameterNameMatch=["parent"],
+            annotations="TransferThis"),
+            
+        toolkit.AnnotationRule(
+            methodTypeMatch="function",
+            parameterTypeMatch=["QWidget*","QObject*"],
+            parameterNameMatch="parent",
+            annotations="Transfer")
+        ]
+    )
 
 ###########################################################################
 
@@ -580,6 +625,7 @@ soprano = toolkit.ModuleGenerator(
 #knewstuff.run()
 #dnssd.run()
 #nepomuk.run()
+#soprano.run()
 
-soprano.run()
-#akonadi
+akonadi.run()
+#polkit

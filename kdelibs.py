@@ -577,8 +577,10 @@ akonadi = toolkit.ModuleGenerator(
         os.path.join(cmakelistPimlibsBaseDirectory,"akonadi/kmime/CMakeLists.txt"),
         os.path.join(cmakelistPimlibsBaseDirectory,"akonadi/kabc/CMakeLists.txt")],
     
-    ignoreHeaders="""akonadi_export.h akonadi-kmime_export.h akonadi-kabc_export.h itempayloadinternals_p.h collectionpathresolver_p.h resourcebase.h agentbase.h qtest_akonadi.h exception.h""".split(" "),
+    ignoreHeaders="""akonadi_export.h akonadi-kmime_export.h akonadi-kabc_export.h itempayloadinternals_p.h collectionpathresolver_p.h qtest_akonadi.h exception.h contactparts.h""".split(" "),
+    #resourcebase.h agentbase.h 
     #noUpdateSip=["iterator.sip"],
+    ignoreBases=["QDBusContext"],
     
     # Cpp parsing    
     preprocessSubstitutionMacros=qtkdemacros.QtPreprocessSubstitutionMacros(),
@@ -594,8 +596,7 @@ akonadi = toolkit.ModuleGenerator(
     
     copyrightNotice=qtkdemacros.copyrightNotice(),
     exportMacros=["AKONADI_EXPORT","AKONADI_KABC_EXPORT","AKONADI_KMIME_EXPORT","KDE_EXPORT"],
-    #noCTSCC=[],
-    #ignoreBases=[],
+    noCTSCC=["Akonadi::Collection","Akonadi::Entity","Akonadi::Item"],
     
     annotationRules=[
         toolkit.AnnotationRule(
@@ -626,6 +627,6 @@ akonadi = toolkit.ModuleGenerator(
 #dnssd.run()
 #nepomuk.run()
 #soprano.run()
+#akonadi.run()
 
-akonadi.run()
-#polkit
+polkit.run()

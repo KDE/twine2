@@ -596,7 +596,7 @@ akonadi = toolkit.ModuleGenerator(
     
     copyrightNotice=qtkdemacros.copyrightNotice(),
     exportMacros=["AKONADI_EXPORT","AKONADI_KABC_EXPORT","AKONADI_KMIME_EXPORT","KDE_EXPORT"],
-    noCTSCC=["Akonadi::Collection","Akonadi::Entity","Akonadi::Item"],
+    noCTSCC=["Collection","Entity","Item"],
     
     annotationRules=[
         toolkit.AnnotationRule(
@@ -614,6 +614,51 @@ akonadi = toolkit.ModuleGenerator(
     )
 
 ###########################################################################
+polkitqt = toolkit.ModuleGenerator(
+    module="PyKDE4.polkitqt",
+    outputDirectory=os.path.join(outputBaseDirectory,"sip/polkitqt"),
+    
+    # .h file extraction
+    cmakelists=[os.path.join(cmakelistSupportBaseDirectory,"polkit-qt/CMakeLists.txt")],
+    
+    ignoreHeaders="""export.h""".split(" "),
+    #resourcebase.h agentbase.h 
+    #noUpdateSip=["iterator.sip"],
+    #ignoreBases=["QDBusContext"],
+    
+    # Cpp parsing    
+    preprocessSubstitutionMacros=qtkdemacros.QtPreprocessSubstitutionMacros(),
+    preprocessorValues={"Q_WS_X11": 1},
+    
+    macros=qtkdemacros.QtMacros(),
+    bareMacros=qtkdemacros.QtBareMacros(["POLKIT_QT_EXPORT"]),
+    
+    # Sip generation
+    sipImportDirs=["/usr/share/sip/PyQt4/",os.path.join(outputBaseDirectory,"sip")],
+    sipImports=["QtCore/QtCoremod.sip","QtGui/QtGuimod.sip"],
+    
+    copyrightNotice=qtkdemacros.copyrightNotice(),
+    exportMacros=["POLKIT_QT_EXPORT","KDE_EXPORT"],
+    #noCTSCC=[],
+    
+    annotationRules=[
+        toolkit.AnnotationRule(
+            methodTypeMatch="ctor",
+            parameterTypeMatch=["QWidget*","QObject*"],
+            parameterNameMatch=["parent"],
+            annotations="TransferThis"),
+            
+        toolkit.AnnotationRule(
+            methodTypeMatch="function",
+            parameterTypeMatch=["QWidget*","QObject*"],
+            parameterNameMatch="parent",
+            annotations="Transfer")
+        ]
+    )
+
+
+
+###########################################################################
 
 #kdecore.run()
 #kdeui.run()
@@ -628,5 +673,4 @@ akonadi = toolkit.ModuleGenerator(
 #nepomuk.run()
 #soprano.run()
 #akonadi.run()
-
-polkit.run()
+polkitqt.run()

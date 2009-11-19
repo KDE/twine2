@@ -93,7 +93,7 @@ def MergeSipScope(sipsym,primaryScope,updateScope):
         
         elif isinstance(item,sipsym.Typedef):
             # FIXME Try to be independant from Qt not hard code QFlags in.
-            if "QFlags" in item.argumentType():
+            if item.argumentType() is not None and "QFlags" in item.argumentType():
                 if item.fqName() not in primaryTypedefMap:
                     primaryScope.append(item)
             else:

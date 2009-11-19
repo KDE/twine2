@@ -430,6 +430,7 @@ class _UpdateConvertToSubClassCodeDirectives(object):
         self._classList = self._findClasses(self._scopeList)
         
         # Filter out uninteresting classes from the _classList.
+        # FIXME compare the fqn instead of name().
         self._subclassList = [class_ for class_ in self._classList
             if len(class_.bases())!=0 and class_.name() not in self._ignoreClassList]
         
@@ -467,7 +468,7 @@ class _UpdateConvertToSubClassCodeDirectives(object):
         return lastBase
 
     def _generateCTSCC(self,classToSubclassMapping,class_):
-        return "%%ConvertToSubClassCode\n    // CTSCC for subclasses of '%s'\n    sipClass = NULL;\n\n%s%%End" % (class_.name(),self._generateCTSCCPart(classToSubclassMapping,class_,self.INDENT))
+        return "%%ConvertToSubClassCode\n    // CTSCC for subclasses of '%s'\n    sipType = NULL;\n\n%s%%End" % (class_.name(),self._generateCTSCCPart(classToSubclassMapping,class_,self.INDENT))
             
     def _generateCTSCCPart(self,classToSubclassMapping,class_,indent="",joiner=""):
         accu = []
@@ -491,7 +492,7 @@ class _UpdateConvertToSubClassCodeDirectives(object):
             if class_ in self._subclassList:
                 accu.append(indent)
                 accu.append(self.INDENT)
-                accu.append("sipClass = sipClass_")
+                accu.append("sipType = sipType_")
                 accu.append(class_.fqName().replace("::","_"))
                 accu.append(";\n")
             extraIndent = self.INDENT                

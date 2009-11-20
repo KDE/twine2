@@ -656,6 +656,51 @@ polkitqt = toolkit.ModuleGenerator(
         ]
     )
 
+###########################################################################
+phonon = toolkit.ModuleGenerator(
+    module="PyKDE4.phonon",
+    outputDirectory=os.path.join(outputBaseDirectory,"sip/phonon"),
+    
+    # .h file extraction
+    cmakelists=[os.path.join(cmakelistSupportBaseDirectory,"phonon/phonon/CMakeLists.txt")],
+    
+    ignoreHeaders="""phonondefs.h  phonon_export.h export.h kaudiodevicelist_export.h phononnamespace.h addoninterface.h volumefaderinterface.h backendinterface.h effectinterface.h mediaobjectinterface.h platformplugin.h audiodataoutputinterface.h audiooutputinterface.h""".split(" "),
+
+    noUpdateSip=["phononnamespace.sip"],
+    ignoreBases=["QSharedData"],
+    #ignoreBases=["AbstractAudioOutput", "Phonon::AbstractAudioOutput", "QSharedData", "AbstractVideoOutput",
+    #                "Phonon::AbstractVideoOutput"],
+    
+    # Cpp parsing    
+    preprocessSubstitutionMacros=qtkdemacros.QtPreprocessSubstitutionMacros(),
+    preprocessorValues={"Q_WS_X11": 1, "QT_VERSION": "0x040400", "_MSC_VER": 0},
+    
+    macros=qtkdemacros.QtMacros(),
+    bareMacros=qtkdemacros.QtBareMacros(["PHONON_EXPORT","PHONONEXPERIMENTAL_EXPORT",
+        "KAUDIODEVICELIST_EXPORT"]),
+    
+    # Sip generation
+    sipImportDirs=["/usr/share/sip/PyQt4/",os.path.join(outputBaseDirectory,"sip")],
+    sipImports=["QtCore/QtCoremod.sip","QtGui/QtGuimod.sip","QtXml/QtXmlmod.sip","solid/solidmod.sip"],
+    
+    copyrightNotice=qtkdemacros.copyrightNotice(),
+    exportMacros=["PHONON_EXPORT","KDE_EXPORT","PHONONEXPERIMENTAL_EXPORT","KAUDIODEVICELIST_EXPORT"],
+    #noCTSCC=[],
+    
+    annotationRules=[
+        toolkit.AnnotationRule(
+            methodTypeMatch="ctor",
+            parameterTypeMatch=["QWidget*","QObject*"],
+            parameterNameMatch=["parent"],
+            annotations="TransferThis"),
+            
+        toolkit.AnnotationRule(
+            methodTypeMatch="function",
+            parameterTypeMatch=["QWidget*","QObject*"],
+            parameterNameMatch="parent",
+            annotations="Transfer")
+        ]
+    )
 
 
 ###########################################################################
@@ -673,4 +718,5 @@ polkitqt = toolkit.ModuleGenerator(
 #nepomuk.run()
 #soprano.run()
 #akonadi.run()
-polkitqt.run()
+#polkitqt.run()
+phonon.run()

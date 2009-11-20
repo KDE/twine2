@@ -18,7 +18,8 @@
 
 import re
 
-__QtBareMacros = ["Q_OBJECT", "Q_GADGET", "Q_OBJECT_CHECK", "K_DCOP","Q_CORE_EXPORT"]
+__QtBareMacros = ["Q_OBJECT", "Q_GADGET", "Q_OBJECT_CHECK", "K_DCOP", "Q_CORE_EXPORT",
+                    "QT_BEGIN_HEADER","QT_BEGIN_NAMESPACE", "QT_END_HEADER","QT_END_NAMESPACE"]
 
 def QtBareMacros(extraMacros=[]):
     macros = __QtBareMacros[:]
@@ -35,6 +36,7 @@ __QtMacros = [
         "KDEUI_DECLARE_PRIVATE", "KPARTS_DECLARE_PRIVATE", "Q_INTERFACES",\
         '__attribute__', 'Q_DISABLE_COPY', 'K_SYCOCATYPE', 'Q_DECLARE_TR_FUNCTIONS',\
         'Q_DECLARE_TYPEINFO']
+
 
 def QtMacros(extraMacros=[]):
     macros = __QtMacros[:]

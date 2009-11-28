@@ -876,6 +876,10 @@ class CppParser(object):
         'operator_pfx : type_specifier operator'
         p [0] = p [1]      
         
+    def p_operator_pfx2 (self, p):
+        'operator_pfx : type_specifier bare_macro operator'
+        p [0] = p [1]
+        
     def p_operator_name (self, p):
         """operator_name : operator_pfx PLUS LPAREN
                          | operator_pfx MINUS LPAREN

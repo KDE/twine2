@@ -272,6 +272,7 @@ class ModuleGenerator(object):
             if previousScope is not None:
                 print("    Merging %s" % (filename,))
                 sipmerger.MergeSipScope(self._sipSymbolData,scope,updateSipMap[filename])
+                self._sipSymbolData.removeScope(updateSipMap[filename])
                 del updateSipMap[filename]
             else:
                 print("    (Missing header file to match %s. Skipping merge.)" % (filename,) )

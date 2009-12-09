@@ -30,7 +30,6 @@ def MergeSipScope(sipsym,primaryScope,updateScope):
     """
     newScope = primaryScope
     oldScope = updateScope
-
     primaryFunctionMap = {}
     primaryClassMap = {}
     primaryNamespaceMap = {}
@@ -110,6 +109,8 @@ def MergeSipScope(sipsym,primaryScope,updateScope):
     for primaryEnumName,enum in primaryEnumMap.items():
         if not enum.force():
             del primaryScope[primaryScope.index(enum)]
+            
+    primaryScope._fixScope()
 
 def _MergeSipFunction(sipsym,primaryFunction,updateFunction):
     if updateFunction.annotations() is not None:

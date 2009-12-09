@@ -46,18 +46,107 @@ class SymbolData(object):
     def __init__(self):
         """Instantiate a new SymbolData."""
         self._scopes = []
+        self._typeIndex = None
+        
+    def lookupType(self,name,context):
+        resolvedType = self._SafeLookupType(name,context)
+        if resolvedType is None:
+            raise KeyError()
+        return resolvedType
+    
+    def _SafeLookupType(self,name,context):
+        if self._typeIndex is None:
+            self._buildTypeIndex()
+            
+        contextFqName = context.fqName()
+        if contextFqName is not None:
+            pathParts = contextFqName.split("::")
+            for i in range(len(pathParts)):
+                canidate = '::'.join(pathParts[:len(pathParts)-i]) + '::' + name
+                if canidate in self._typeIndex:
+                    return self._typeIndex[canidate]
+       
+        resolvedType = self._typeIndex.get(name,None)
+        if resolvedType is not None:
+            return resolvedType
+            
+        if isinstance(context,SymbolData.CppClass):
+            for base in context.bases():
+                resolvedBase = self._SafeLookupType(base,context.parentScope())
+                if resolvedBase is not None:
+                    result = self._SafeLookupType(name,resolvedBase)
+                    if result is not None:
+                        return result
+                    
+        return None
+            
+    def _buildTypeIndex(self):
+        self._typeIndex = {}
+        for scope in self._scopes:
+            self._indexScope(scope)
+        
+    def _indexScope(self,scope):
+        for item in scope:
+            if isinstance(item,SymbolData.CppClass):
+                if item.fqName() in self._typeIndex:
+                    print("ERROR SymbolData _indexScope: "+item.fqName()+ " already in index")
+                self._typeIndex[item.fqName()] = item
+                self._indexScope(item)
+            elif isinstance(item,SymbolData.Enum) or isinstance(item,SymbolData.Typedef):
+                fqName = item.fqName()
+                if fqName is not None:
+                    self._typeIndex[item.fqName()] = item
+            elif isinstance(item,SymbolData.Namespace):
+                self._indexScope(item)
+            elif isinstance(item,SymbolData.Variable):
+                self._typeIndex[item.fqName()] = item
+            
+    def _changed(self):
+        self._typeIndex = None
+
+    def dumpKnownTypes(self):
+        if self._typeIndex is None:
+            self._buildTypeIndex()
+        
+        print("Known types (%i)---------------------------------" % (len(self._typeIndex.keys()),) )
+        print("Top levels: %i" % (len(self._scopes),) )
+        typesKeys = list(self._typeIndex.keys())
+        typesKeys.sort()
+        print(", ".join( (self._typeIndex[x].fqName()+":"+str(id(self._typeIndex[x])) for x in typesKeys) ))
+
+    def lookupEnum(self,value,context):
+        scope = context
+        while scope is not None:
+            for item in scope:
+                if isinstance(item,SymbolData.Enum):
+                    for enum in item:
+                        if enum.name()==value:
+                            return item
+            scope = scope.parentScope()
+            
+        if isinstance(context,self.SipClass):
+            for base in context.bases():
+                resolvedBase = self._SafeLookupType(base,context.parentScope())
+                if resolvedBase is not None:
+                    enum = self.lookupEnum(value,resolvedBase)
+                    if enum is not None:
+                        return enum
+        return None
 
     def newScope(self):
         scope = self.TopLevelScope(self)
         self._scopes.append(scope)
         return scope
+        
+    def removeScope(self,scope):
+        if scope not in self._scopes:
+            return
+        self._scopes.remove(scope)
+        self._changed()
 
     @classmethod
     def _indentString(cls, indent):
         return ' ' * (4*indent)
-        
-    def _changed(self):
-        pass
         
     # Query interface goes here.
     
@@ -74,7 +163,17 @@ class SymbolData(object):
                 self._scope.insertIntoScope(None, self)
             self._items = []
             self._name = name
-            
+        
+        def _fixScope(self):
+            # A bit of an ugly hack to 
+            for item in self:
+                if isinstance(item,SymbolData.Entity):
+                    #print("Fixing scope: " + str(id(item)))
+                    if item._scope is not self:
+                        print("Fixing scope found an error!")
+                    item._scope = self
+                    item._fixScope()
+        
         def name(self):
             return self._name
             
@@ -227,7 +326,7 @@ class SymbolData(object):
             if self.name() is None:
                 return None
                 
-            parentFqn = self.parentScope().fqName()
+            parentFqn = self.parentScope().fqName() if self.parentScope() is not None else None
             if parentFqn is not None:
                 return parentFqn + "::" + self.name()
             else:
@@ -341,7 +440,7 @@ class SymbolData(object):
                 access = SymbolData.ACCESS_PRIVATE
                 pre2 = SymbolData._indentString(indent+1)
                 for item in self._items:
-                    if item.access() is not access:
+                    if isinstance(item,SymbolData._CppEntity) and item.access() is not access:
                         accu.append(pre2)
                         accu.append(item.formatAccess())
                         accu.append(":\n")

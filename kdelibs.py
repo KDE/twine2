@@ -285,8 +285,7 @@ plasma = toolkit.ModuleGenerator(
     
     # .h file extraction
     cmakelists=[os.path.join(cmakelistBaseDirectory,"plasma/CMakeLists.txt")],
-    
-    ignoreHeaders="""plasma_export.h credentials.h rotationstacked.h animation.h abstractanimation.h animationgroup.h""".split(" "),
+    ignoreHeaders="""plasma_export.h credentials.h """.split(" "),
     #noUpdateSip=["typedefs.sip"],
     
     # Cpp parsing    
@@ -397,7 +396,7 @@ knewstuff = toolkit.ModuleGenerator(
     preprocessorValues={"Q_WS_X11": 1},
     
     macros=qtkdemacros.QtMacros(),
-    bareMacros=qtkdemacros.QtBareMacros(["KNEWSTUFF_EXPORT","KDE_EXPORT","KDE_DEPRECATED","Q_INVOKABLE"]),
+    bareMacros=qtkdemacros.QtBareMacros(["KNEWSTUFF_EXPORT","KNEWSTUFF_EXPORT_DEPRECATED","KDE_EXPORT","KDE_DEPRECATED","Q_INVOKABLE"]),
     
     # Sip generation
     sipImportDirs=["/usr/share/sip/PyQt4/",os.path.join(outputBaseDirectory,"sip")],
@@ -408,7 +407,7 @@ knewstuff = toolkit.ModuleGenerator(
         "kdecore/kdecoremod.sip",
         "kdeui/kdeuimod.sip"],
     copyrightNotice=qtkdemacros.copyrightNotice(),
-    exportMacros=["KNEWSTUFF_EXPORT","KDE_EXPORT"],
+    exportMacros=["KNEWSTUFF_EXPORT","KNEWSTUFF_EXPORT_DEPRECATED","KDE_EXPORT"],
     #noCTSCC=[],
     #ignoreBases=["khtml::KHTMLWidget"],
     
@@ -528,7 +527,7 @@ soprano = toolkit.ModuleGenerator(
     cmakelists=[os.path.join(cmakelistSupportBaseDirectory,"soprano/CMakeLists.txt"),
             os.path.join(cmakelistSupportBaseDirectory,"soprano/soprano/CMakeLists.txt"),
             os.path.join(cmakelistSupportBaseDirectory,"soprano/server/CMakeLists.txt"),
-            os.path.join(cmakelistSupportBaseDirectory,"soprano/server/sparql/CMakeLists.txt"),
+            #os.path.join(cmakelistSupportBaseDirectory,"soprano/server/sparql/CMakeLists.txt"),
             os.path.join(cmakelistSupportBaseDirectory,"soprano/server/dbus/CMakeLists.txt")],
     
     ignoreHeaders="""soprano_export.h sopranomacros.h soprano.h vocabulary.h iterator.h version.h iteratorbackend.h""".split(" "),

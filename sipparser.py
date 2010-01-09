@@ -20,7 +20,7 @@
 import sys
 from sealed import sealed
 import ply.yacc as yacc
-from siplexer import sipLexer, tokens, setStateInfoTarget
+from siplexer import sipLexer, tokens
 
 class SipParser(object):
     """Parser for SIP files
@@ -851,6 +851,7 @@ class SipParser(object):
         
     def p_operator_stmt1 (self, p):
         """operator_stmt : operator_primary CVQUAL SEMI
+                         | operator_primary CVQUAL pure_virtual_suffix SEMI
                          | operator_primary CVQUAL exception SEMI
                          | operator_primary CVQUAL annotation SEMI
                          | operator_primary CVQUAL exception annotation SEMI

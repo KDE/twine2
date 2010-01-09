@@ -422,14 +422,16 @@ class CppParser(object):
         """class_name : class ID
                       | struct ID
                       | union ID
-                      | class template_type"""
+                      | class template_type
+                      | struct template_type"""
         self.classObject(p[2], p[1])
         
     def p_class_name1 (self, p):
         """class_name : class BAREMACRO ID
                       | struct BAREMACRO ID
                       | union BAREMACRO ID
-                      | class BAREMACRO template_type"""
+                      | class BAREMACRO template_type
+                      | struct BAREMACRO template_type"""
         self.classObject(p[3], p[1])
         self.currentClass.addMacro(self.symbolData.Macro(p[2]))
         

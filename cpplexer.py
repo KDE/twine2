@@ -288,9 +288,8 @@ class CppLexerClass(object):
     def t_enum_BackDO2COMMENT(self,t):
         r'/\*\*\<(.|\n)*?\*/'
         t.lexer.lineno += t.value.count ('\n')
-        if t.lexer.lexstate == 'enum':
-            t.type = 'UPDOC'        
-            return t
+        t.type = 'UPDOC'
+        return t
 
     def t_enum_BackDO2CPPCOMMENT(self,t):
         r'///\<[^\n]*\n'
@@ -302,9 +301,8 @@ class CppLexerClass(object):
     def t_ANY_DO2COMMENT(self,t):
         r'/\*\*(.|\n)*?\*/'
         t.lexer.lineno += t.value.count ('\n')
-        if t.lexer.lexstate == 'enum':
-            t.type = 'DOC'        
-            return t
+        t.type = 'DOC'
+        return t
 
     def t_ANY_DO2CPPCOMMENT(self,t):
         r'///[^\n]*\n'

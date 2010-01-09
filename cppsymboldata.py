@@ -739,4 +739,19 @@ class SymbolData(object):
                 return pre + self._name + "\n"
             else:
                 return pre + self._name + "(" + self._argument + ")\n"
+                
+    class Comment(Entity):
+        @sealed
+        def __init__(self, parentScope, filename=None, lineno=-1):
+            SymbolData.Entity.__init__(self, parentScope, None, filename, lineno)
+            self._comment = None
+            
+        def setValue(self,comment):
+            self._comment = comment
+            
+        def value(self):
+            return self._comment
+            
+        def format(self,indent=0):
+            return self._comment
             

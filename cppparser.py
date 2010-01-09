@@ -191,7 +191,12 @@ class CppParser(object):
                     newObj.enumerators = originalObj.enumerators
         else:
             for id in idList:
-                self.variableObject (id, self.stateInfo.currentObject ().name)         
+                self.variableObject (id, self.stateInfo.currentObject ().name)
+                
+    def commentObject(self,value):
+        comment = self.symbolData.Comment(self.scope, self.filename, self.lexer.lineno)
+        comment.setValue(value)
+        return comment
     
     def classObject (self, name, type_):
         class_ = self.symbolData.CppClass(self.scope, name, self.filename, self.lexer.lineno)
@@ -293,6 +298,7 @@ class CppParser(object):
                   | variable_decl
                   | bare_macro
                   | skip_macro
+                  | doccomment
                   | SEMI"""
         self.lexer.lexstate = 'variable'
         self.arguments = []
@@ -368,6 +374,7 @@ class CppParser(object):
                         | access_specifier
                         | function_decl
                         | variable_decl
+                        | doccomment
                         | bare_macro
                         | skip_macro"""
         self.lexer.lexstate  = 'variable'
@@ -1328,6 +1335,10 @@ class CppParser(object):
     def p_macro_call_element_list3 (self, p):
         'macro_call_element_list : macro_call_parens'
         p [0] = ''
+
+    def p_doccomment(self, p):
+        'doccomment : DOC'
+        self.commentObject(p[1])
 
     def p_error(self, p):
         if p is not None:

@@ -492,6 +492,21 @@ public:
 """,debugLevel=2)
         print(scope.format())
 
+
+    def testComments(self):
+        scope = self.parser.parse(self.syms,
+        """
+class Foo {
+public:
+    /**
+     * bar docs.
+     */
+    void bar();
+};
+
+""",debugLevel=2)
+        print(scope.format())
+
     def testLiveAmmo(self):
         with open("/home/sbe/devel/svn/kde/branches/KDE/4.3/kdeedu/marble/src/lib/MarbleMap.h") as fhandle:
             text = fhandle.read()

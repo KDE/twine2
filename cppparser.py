@@ -1033,19 +1033,25 @@ class CppParser(object):
     def p_dtor_primary0 (self, p):
         'dtor_primary : dtor_name LPAREN RPAREN'
         pass
-        
+
     def p_dtor_primary1 (self, p):
+        'dtor_primary_pure : dtor_name LPAREN RPAREN pure_virtual_suffix'
+        self.currentFunction.addQualifier('pure')
+
+        
+    def p_dtor_primary2 (self, p):
         'dtor_primary : virtual_dtor_name LPAREN RPAREN'
         self.currentFunction.addQualifier('virtual')
     
-    def p_dtor_primary2 (self, p):
+    def p_dtor_primary3 (self, p):
         'dtor_primary_pure_virtual : virtual_dtor_name LPAREN RPAREN pure_virtual_suffix'
         self.currentFunction.addQualifier('virtual')
         self.currentFunction.addQualifier('pure')
 
     def p_dtor_stmt (self, p):
         """dtor_stmt : dtor_primary decl_end
-                     | dtor_primary_pure_virtual"""
+                     | dtor_primary_pure_virtual
+                     | dtor_primary_pure"""
         pass
         
     def p_virtual_primary (self, p):

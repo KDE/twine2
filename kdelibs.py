@@ -19,6 +19,7 @@
 import toolkit
 import qtkdemacros
 import os.path
+import sipsymboldata
 
 outputBaseDirectory = "/home/sbe/devel/svn/kde/trunk/KDE/kdebindings/python/pykde4"
 #cmakelistBaseDirectory = "/home/sbe/devel/svn/kde/branches/KDE/4.3/kdelibs"
@@ -26,14 +27,17 @@ cmakelistBaseDirectory = "/home/sbe/devel/svn/kde/trunk/KDE/kdelibs"
 cmakelistSupportBaseDirectory = "/home/sbe/devel/svn/kde/trunk/kdesupport"
 cmakelistPimlibsBaseDirectory = "/home/sbe/devel/svn/kde/trunk/KDE/kdepimlibs"
 
+###########################################################################
 kdecore = toolkit.ModuleGenerator(
     module="PyKDE4.kdecore",
     outputDirectory=os.path.join(outputBaseDirectory, "sip/kdecore"),
+    docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/html/kdecore"),
+    mainDocs=os.path.join(cmakelistBaseDirectory,"kdecore/Mainpage.dox"),
     
     # .h file extraction
     cmakelists=os.path.join(cmakelistBaseDirectory,"kdecore/CMakeLists.txt"),
     
-    ignoreHeaders="""conversion_check.h kallocator.h kdebug.h kcodecs.h kgenericfactory.h ksortablelist.h ktrader.h ktypelist.h  kmulticastsocket.h kmulticastsocketdevice.h kdecore_export.h kde_file.h ksocks.h kde_file.h ksharedptr.h klauncher_iface.h k3bufferedsocket.h  k3clientsocketbase.h  k3datagramsocket.h k3httpproxysocketdevice.h k3iobuffer.h  k3processcontroller.h  k3process.h  k3procio.h  k3resolver.h k3reverseresolver.h k3serversocket.h  k3socketaddress.h  k3socketbase.h  k3socketdevice.h  k3socks.h k3sockssocketdevice.h  k3streamsocket.h qtest_kde.h kdefakes.h kdeversion.h kauth.h""".split(" "),
+    ignoreHeaders="""conversion_check.h kallocator.h kdebug.h kcodecs.h kgenericfactory.h ksortablelist.h ktrader.h ktypelist.h  kmulticastsocket.h kmulticastsocketdevice.h kdecore_export.h kde_file.h ksocks.h kde_file.h ksharedptr.h klauncher_iface.h k3bufferedsocket.h  k3clientsocketbase.h  k3datagramsocket.h k3httpproxysocketdevice.h k3iobuffer.h  k3processcontroller.h  k3process.h  k3procio.h  k3resolver.h k3reverseresolver.h k3serversocket.h  k3socketaddress.h  k3socketbase.h  k3socketdevice.h  k3socks.h k3sockssocketdevice.h  k3streamsocket.h qtest_kde.h kdefakes.h kdeversion.h kauth.h ktypelistutils.h""".split(" "),
     
     noUpdateSip=["typedefs.sip"],
     
@@ -68,6 +72,8 @@ kdecore = toolkit.ModuleGenerator(
 kdeui = toolkit.ModuleGenerator(
     module="PyKDE4.kdeui",
     outputDirectory=os.path.join(outputBaseDirectory,"sip/kdeui"),
+    docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/html/kdeui"),
+    mainDocs=os.path.join(cmakelistBaseDirectory,"kdeui/Mainpage.dox"),
     
     # .h file extraction
     cmakelists=[
@@ -118,6 +124,8 @@ kdeui = toolkit.ModuleGenerator(
 kio = toolkit.ModuleGenerator(
     module="PyKDE4.kio",
     outputDirectory=os.path.join(outputBaseDirectory,"sip/kio"),
+    docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/html/kio"),
+    mainDocs=os.path.join(cmakelistBaseDirectory,"kio/Mainpage.dox"),
     
     # .h file extraction
     cmakelists=[
@@ -164,6 +172,8 @@ kio = toolkit.ModuleGenerator(
 kutils = toolkit.ModuleGenerator(
     module="PyKDE4.kutils",
     outputDirectory=os.path.join(outputBaseDirectory,"sip/kutils"),
+    docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/html/kutils"),
+    mainDocs=os.path.join(cmakelistBaseDirectory,"kutils/Mainpage.dox"),
     
     # .h file extraction
     cmakelists=[os.path.join(cmakelistBaseDirectory,"kutils/CMakeLists.txt")],
@@ -203,6 +213,8 @@ kutils = toolkit.ModuleGenerator(
 solid = toolkit.ModuleGenerator(
     module="PyKDE4.solid",
     outputDirectory=os.path.join(outputBaseDirectory,"sip/solid"),
+    docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/html/solid"),
+    mainDocs=os.path.join(cmakelistBaseDirectory,"solid/Mainpage.dox"),
     
     # .h file extraction
     cmakelists=[os.path.join(cmakelistBaseDirectory,"solid/solid/CMakeLists.txt")],
@@ -242,6 +254,8 @@ solid = toolkit.ModuleGenerator(
 kparts = toolkit.ModuleGenerator(
     module="PyKDE4.kparts",
     outputDirectory=os.path.join(outputBaseDirectory,"sip/kparts"),
+    docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/html/kparts"),
+    mainDocs=os.path.join(cmakelistBaseDirectory,"kparts/Mainpage.dox"),
     
     # .h file extraction
     cmakelists=[os.path.join(cmakelistBaseDirectory,"kparts/CMakeLists.txt")],
@@ -282,6 +296,8 @@ kparts = toolkit.ModuleGenerator(
 plasma = toolkit.ModuleGenerator(
     module="PyKDE4.plasma",
     outputDirectory=os.path.join(outputBaseDirectory,"sip/plasma"),
+    docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/html/plasma"),
+    mainDocs=os.path.join(cmakelistBaseDirectory,"plasma/Mainpage.dox"),
     
     # .h file extraction
     cmakelists=[os.path.join(cmakelistBaseDirectory,"plasma/CMakeLists.txt")],
@@ -331,6 +347,8 @@ plasma = toolkit.ModuleGenerator(
 khtml = toolkit.ModuleGenerator(
     module="PyKDE4.khtml",
     outputDirectory=os.path.join(outputBaseDirectory,"sip/khtml"),
+    docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/html/khtml"),
+    mainDocs=os.path.join(cmakelistBaseDirectory,"khtml/Mainpage.dox"),
     
     # .h file extraction
     cmakelists=[os.path.join(cmakelistBaseDirectory,"khtml/CMakeLists.txt"),
@@ -383,6 +401,8 @@ khtml = toolkit.ModuleGenerator(
 knewstuff = toolkit.ModuleGenerator(
     module="PyKDE4.knewstuff",
     outputDirectory=os.path.join(outputBaseDirectory,"sip/knewstuff"),
+    docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/html/knewstuff"),
+    mainDocs=os.path.join(cmakelistBaseDirectory,"knewstuff/Mainpage.dox"),
     
     # .h file extraction
     cmakelists=[os.path.join(cmakelistBaseDirectory,"knewstuff/CMakeLists.txt"),
@@ -430,6 +450,8 @@ knewstuff = toolkit.ModuleGenerator(
 dnssd = toolkit.ModuleGenerator(
     module="PyKDE4.dnssd",
     outputDirectory=os.path.join(outputBaseDirectory,"sip/dnssd"),
+    docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/html/dnssd"),
+    mainDocs=os.path.join(cmakelistBaseDirectory,"dnssd/Mainpage.dox"),
     
     # .h file extraction
     cmakelists=[os.path.join(cmakelistBaseDirectory,"dnssd/CMakeLists.txt")],
@@ -475,6 +497,8 @@ dnssd = toolkit.ModuleGenerator(
 nepomuk = toolkit.ModuleGenerator(
     module="PyKDE4.nepomuk",
     outputDirectory=os.path.join(outputBaseDirectory,"sip/nepomuk"),
+    docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/html/nepomuk"),
+    mainDocs=os.path.join(cmakelistBaseDirectory,"nepomuk/Mainpage.dox"),
     
     # .h file extraction
     cmakelists=[os.path.join(cmakelistBaseDirectory,"nepomuk/CMakeLists.txt"),
@@ -522,6 +546,8 @@ nepomuk = toolkit.ModuleGenerator(
 soprano = toolkit.ModuleGenerator(
     module="PyKDE4.soprano",
     outputDirectory=os.path.join(outputBaseDirectory,"sip/soprano"),
+    docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/html/soprano"),
+    mainDocs=os.path.join(cmakelistSupportBaseDirectory,"soprano/Mainpage.dox"),
     
     # .h file extraction
     cmakelists=[os.path.join(cmakelistSupportBaseDirectory,"soprano/CMakeLists.txt"),
@@ -570,6 +596,8 @@ soprano = toolkit.ModuleGenerator(
 akonadi = toolkit.ModuleGenerator(
     module="PyKDE4.akonadi",
     outputDirectory=os.path.join(outputBaseDirectory,"sip/akonadi"),
+    docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/html/akonadi"),
+    mainDocs=os.path.join(cmakelistPimlibsBaseDirectory,"akonadi/Mainpage.dox"),
     
     # .h file extraction
     cmakelists=[os.path.join(cmakelistPimlibsBaseDirectory,"akonadi/CMakeLists.txt"),
@@ -616,11 +644,13 @@ akonadi = toolkit.ModuleGenerator(
 polkitqt = toolkit.ModuleGenerator(
     module="PyKDE4.polkitqt",
     outputDirectory=os.path.join(outputBaseDirectory,"sip/polkitqt"),
+    docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/html/polkitqt"),
+    mainDocs=os.path.join(cmakelistSupportBaseDirectory,"polkit-qt/Mainpage.dox"),
     
     # .h file extraction
     cmakelists=[os.path.join(cmakelistSupportBaseDirectory,"polkit-qt/CMakeLists.txt")],
     
-    ignoreHeaders="""export.h""".split(" "),
+    ignoreHeaders="""export.h polkitqtversion.h""".split(" "),
     #resourcebase.h agentbase.h 
     #noUpdateSip=["iterator.sip"],
     #ignoreBases=["QDBusContext"],
@@ -659,6 +689,8 @@ polkitqt = toolkit.ModuleGenerator(
 phonon = toolkit.ModuleGenerator(
     module="PyKDE4.phonon",
     outputDirectory=os.path.join(outputBaseDirectory,"sip/phonon"),
+    docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/html/phonon"),
+    mainDocs=os.path.join(cmakelistSupportBaseDirectory,"phonon/Mainpage.dox"),
     
     # .h file extraction
     cmakelists=[os.path.join(cmakelistSupportBaseDirectory,"phonon/phonon/CMakeLists.txt")],
@@ -705,12 +737,12 @@ phonon = toolkit.ModuleGenerator(
 ###########################################################################
 
 #kdecore.run()
+#plasma.run()
 #kdeui.run()
 #kio.run()
 #kutils.run()
 #solid.run()
 #kparts.run()
-#plasma.run()
 #khtml.run()
 #knewstuff.run()
 #dnssd.run()
@@ -718,4 +750,45 @@ phonon = toolkit.ModuleGenerator(
 #soprano.run()
 #akonadi.run()
 #polkitqt.run()
-phonon.run()
+#phonon.run()
+
+
+classNames = []
+nsNames = []
+
+def UpdateClassNamespaceList(moduleName,sipScopes):
+    nsNames.append( (moduleName,'global', 'global') )
+    def ExtractClassNamespace(scope):
+        for item in scope:
+            if isinstance(item,sipsymboldata.SymbolData.SipClass):
+                classNames.append( (moduleName, item.fqPythonName(), item.fqPythonName()) )
+                ExtractClassNamespace(item)
+            elif isinstance(item,sipsymboldata.SymbolData.Namespace):
+                nsTuple = (moduleName,item.fqPythonName(),item.fqPythonName())
+                if nsTuple not in nsNames:
+                    nsNames.append( nsTuple )
+                ExtractClassNamespace(item)
+    for scope in sipScopes:
+        ExtractClassNamespace(scope)
+
+#UpdateClassNamespaceList('kdecore',kdecore.docs())
+UpdateClassNamespaceList('plasma',plasma.docs())
+"""UpdateClassNamespaceList('kdeui',kdeui.docs())
+UpdateClassNamespaceList('kio',kio.docs())
+UpdateClassNamespaceList('kutils',kutils.docs())
+UpdateClassNamespaceList('solid',solid.docs())
+UpdateClassNamespaceList('kparts',kparts.docs())
+UpdateClassNamespaceList('khtml',khtml.docs())
+UpdateClassNamespaceList('knewstuff',knewstuff.docs())
+UpdateClassNamespaceList('dnssd',dnssd.docs())
+UpdateClassNamespaceList('nepomuk',nepomuk.docs())
+UpdateClassNamespaceList('soprano',soprano.docs())
+UpdateClassNamespaceList('akonadi',akonadi.docs())
+UpdateClassNamespaceList('polkitqt',polkitqt.docs())
+UpdateClassNamespaceList('phonon',phonon.docs())
+
+print("Writing all classes index:")
+toolkit.ModuleGenerator.WriteAllClasses(os.path.join(outputBaseDirectory,"new_docs/html"),nsNames,classNames)
+print("Done")
+
+"""

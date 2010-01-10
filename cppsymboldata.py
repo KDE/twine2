@@ -16,7 +16,10 @@
 # along with this program; if not, write to the
 # Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
 from sealed import sealed
+from argvalidate import accepts,returns,one_of
+import types
 
 RETURN_INDENT = 24
 
@@ -47,18 +50,19 @@ class SymbolData(object):
         """Instantiate a new SymbolData."""
         self._scopes = []
         self._typeIndex = None
-        
+        self._nsIndex = None
+
     def lookupType(self,name,context):
-        resolvedType = self._SafeLookupType(name,context)
+        resolvedType = self._safeLookupType(name,context)
         if resolvedType is None:
             raise KeyError()
         return resolvedType
     
-    def _SafeLookupType(self,name,context):
+    def _safeLookupType(self,name,context):
         if self._typeIndex is None:
             self._buildTypeIndex()
             
-        contextFqName = context.fqName()
+        contextFqName = context.fqName() if context is not None else None
         if contextFqName is not None:
             pathParts = contextFqName.split("::")
             for i in range(len(pathParts)):
@@ -72,9 +76,9 @@ class SymbolData(object):
             
         if isinstance(context,SymbolData.CppClass):
             for base in context.bases():
-                resolvedBase = self._SafeLookupType(base,context.parentScope())
+                resolvedBase = self._safeLookupType(base,context.parentScope())
                 if resolvedBase is not None:
-                    result = self._SafeLookupType(name,resolvedBase)
+                    result = self._safeLookupType(name,resolvedBase)
                     if result is not None:
                         return result
                     
@@ -82,27 +86,50 @@ class SymbolData(object):
             
     def _buildTypeIndex(self):
         self._typeIndex = {}
-        for scope in self._scopes:
-            self._indexScope(scope)
         
-    def _indexScope(self,scope):
-        for item in scope:
-            if isinstance(item,SymbolData.CppClass):
-                if item.fqName() in self._typeIndex:
-                    print("ERROR SymbolData _indexScope: "+item.fqName()+ " already in index")
-                self._typeIndex[item.fqName()] = item
-                self._indexScope(item)
-            elif isinstance(item,SymbolData.Enum) or isinstance(item,SymbolData.Typedef):
-                fqName = item.fqName()
-                if fqName is not None:
+        def IndexScope(scope):
+            for item in scope:
+                if isinstance(item,SymbolData.CppClass):
+                    if item.fqName() in self._typeIndex:
+                        if not self._typeIndex[item.fqName()].opaque():
+                            continue
                     self._typeIndex[item.fqName()] = item
-            elif isinstance(item,SymbolData.Namespace):
-                self._indexScope(item)
-            elif isinstance(item,SymbolData.Variable):
-                self._typeIndex[item.fqName()] = item
-            
+                    IndexScope(item)
+                elif isinstance(item,SymbolData.Enum) or isinstance(item,SymbolData.Typedef):
+                    fqName = item.fqName()
+                    if fqName is not None:
+                        self._typeIndex[item.fqName()] = item
+                elif isinstance(item,SymbolData.Namespace):
+                    self._typeIndex[item.fqName()] = item
+                    IndexScope(item)
+                elif isinstance(item,SymbolData.Variable):
+                    self._typeIndex[item.fqName()] = item
+
+        for scope in self._scopes:
+            IndexScope(scope)
+
+    def lookupNamespace(self,nsName):
+        if self._nsIndex is None:
+            self._buildNSIndex()
+
+        return self._nsIndex.setdefault(nsName,[])
+
+    def _buildNSIndex(self):
+        self._nsIndex = {}
+
+        def IndexScope(scope):
+            for item in scope:
+                if isinstance(item,SymbolData.Namespace):
+                    entry = self._nsIndex.setdefault(item.fqName(), [])
+                    entry.append(item)
+                    IndexScope(item)
+
+        for scope in self._scopes:
+            IndexScope(scope)
+
     def _changed(self):
         self._typeIndex = None
+        self._nsIndex = None
 
     def dumpKnownTypes(self):
         if self._typeIndex is None:
@@ -126,7 +153,7 @@ class SymbolData(object):
             
         if isinstance(context,self.SipClass):
             for base in context.bases():
-                resolvedBase = self._SafeLookupType(base,context.parentScope())
+                resolvedBase = self._safeLookupType(base,context.parentScope())
                 if resolvedBase is not None:
                     enum = self.lookupEnum(value,resolvedBase)
                     if enum is not None:
@@ -174,9 +201,11 @@ class SymbolData(object):
                     item._scope = self
                     item._fixScope()
         
+        @returns(one_of(str,types.NoneType))
         def name(self):
             return self._name
             
+        @returns(str)
         def fqName(self):
             parentFqn = self.parentScope().fqName()
             
@@ -212,7 +241,7 @@ class SymbolData(object):
             return self._items[key]
             
         def __setitem__(self, key, value):
-            oldValue = self_items.get(key,None)
+            oldValue = self._items.get(key,None)
             
             self._items[key] = value
             
@@ -396,30 +425,38 @@ class SymbolData(object):
             self._opaque = False
             self._macros = []
 
+        @accepts(str)
         def addBase(self, base):
             self._bases.append(base)
             
+        @accepts(list)
         def setBases(self,baseList):
             self._bases = baseList
         
+        @returns(list)
         def bases(self):
             """List of base class names
             
             Returns a list of string base class names."""
             return self._bases
         
+        @accepts(bool)
         def setOpaque(self,opaque):
             self._opaque = opaque
             
+        @returns(bool)
         def opaque(self):
             return self._opaque
             
         def addMacro(self,macro):
             self._macros.append(macro)
             
+        @returns(list)
         def macros(self):
             return self._macros
             
+        @accepts(indent=int)
+        @returns(str)
         def format(self,indent=0):
             pre = SymbolData._indentString(indent)
             accu = []
@@ -465,12 +502,15 @@ class SymbolData(object):
             #self._attributes = Attributes ()
             self._template = template           # the parsed info from any template-type argument
 
+        @returns(one_of(str,types.NoneType))
         def argumentType(self):
             return self._argumentType
             
+        @returns(one_of(str,types.NoneType))
         def name(self):
             return self._argumentName
             
+        @returns(one_of(str,types.NoneType))
         def defaultValue(self):
             return self._defaultValue
             
@@ -504,16 +544,20 @@ class SymbolData(object):
             self._argument = None
             self._bitfield = None
             
+        #@accepts(SymbolData.Argument)
         def setArgument(self, argument):
             self._argument = argument
             
+        #@returns(SymbolData.Argument)
         def argument(self):
             return self._argument
             
+        @accepts(one_of(str,types.NoneType))
         def setStorage(self,storage):
             self._storage = storage
             # "auto", "register", "static", "extern", "mutable"
             
+        @returns(one_of(str,types.NoneType))
         def storage(self):
             return self._storage
             
@@ -523,6 +567,8 @@ class SymbolData(object):
         def bitfield(self):
             return self._bitfield
             
+        @accepts(indent=int)
+        @returns(str)
         def format(self,indent=0):
             pre = SymbolData._indentString(indent)
             storage = self._storage+" " if self._storage is not None else ""

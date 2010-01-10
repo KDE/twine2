@@ -16,96 +16,14 @@
 # Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 from sealed import sealed
+from argvalidate import accepts,returns,one_of
+import types
 import cppsymboldata
 
 class SymbolData(cppsymboldata.SymbolData):
     @sealed
     def __init__(self):
         cppsymboldata.SymbolData.__init__(self)
-        self._typeIndex = None
-        
-    def lookupType(self,name,context):
-        resolvedType = self._SafeLookupType(name,context)
-        if resolvedType is None:
-            raise KeyError()
-        return resolvedType
-    
-    def _SafeLookupType(self,name,context):
-        if self._typeIndex is None:
-            self._buildTypeIndex()
-            
-        contextFqName = context.fqName()
-        if contextFqName is not None:
-            pathParts = contextFqName.split("::")
-            for i in range(len(pathParts)):
-                canidate = '::'.join(pathParts[:len(pathParts)-i]) + '::' + name
-                if canidate in self._typeIndex:
-                    return self._typeIndex[canidate]
-       
-        resolvedType = self._typeIndex.get(name,None)
-        if resolvedType is not None:
-            return resolvedType
-            
-        if isinstance(context,self.SipClass):
-            for base in context.bases():
-                resolvedBase = self._SafeLookupType(base,context.parentScope())
-                if resolvedBase is not None:
-                    result = self._SafeLookupType(name,resolvedBase)
-                    if result is not None:
-                        return result
-                    
-        return None
-            
-    def _buildTypeIndex(self):
-        self._typeIndex = {}
-        for scope in self._scopes:
-            self._indexScope(scope)
-        
-    def _indexScope(self,scope):
-        for item in scope:
-            if isinstance(item,SymbolData.SipClass):
-                self._typeIndex[item.fqName()] = item
-                self._indexScope(item)
-            elif isinstance(item,SymbolData.Enum) or isinstance(item,SymbolData.Typedef):
-                fqName = item.fqName()
-                if fqName is not None:
-                    self._typeIndex[item.fqName()] = item
-            elif isinstance(item,SymbolData.Namespace):
-                self._indexScope(item)
-            elif isinstance(item,SymbolData.Variable):
-                self._typeIndex[item.fqName()] = item
-            
-    def _changed(self):
-        self._typeIndex = None
-
-    def dumpKnownTypes(self):
-        if self._typeIndex is None:
-            self._buildTypeIndex()
-        
-        print("Known types (%i)---------------------------------" % (len(self._typeIndex.keys()),) )
-        print("Top levels: %i" % (len(self._scopes),) )
-        typesKeys = list(self._typeIndex.keys())
-        typesKeys.sort()
-        print(", ".join(typesKeys))
-
-    def lookupEnum(self,value,context):
-        scope = context
-        while scope is not None:
-            for item in scope:
-                if isinstance(item,SymbolData.Enum):
-                    for enum in item:
-                        if enum.name()==value:
-                            return item
-            scope = scope.parentScope()
-            
-        if isinstance(context,self.SipClass):
-            for base in context.bases():
-                resolvedBase = self._SafeLookupType(base,context.parentScope())
-                if resolvedBase is not None:
-                    enum = self.lookupEnum(value,resolvedBase)
-                    if enum is not None:
-                        return enum
-        return None
         
     class _SipEntityExtra(object):
         @sealed
@@ -117,6 +35,18 @@ class SymbolData(cppsymboldata.SymbolData):
             self._cppreturn = None
             self._force = False
             
+        @returns(str)
+        def fqPythonName(self):
+            parentFqn = self.parentScope().fqPythonName()
+            
+            if self.name() is None:
+                return ""
+            
+            if parentFqn is not None:
+                return parentFqn + "." + self.name()
+            else:
+                return self.name()
+                
         def ignore(self):
             return self._ignore
             
@@ -167,6 +97,7 @@ class SymbolData(cppsymboldata.SymbolData):
         @sealed
         def __init__(self,symbolData):
             cppsymboldata.SymbolData.TopLevelScope.__init__(self,symbolData)
+            self._module = None
             
         def format(self,indent=0):
             accu = []
@@ -184,8 +115,17 @@ class SymbolData(cppsymboldata.SymbolData):
                 accu.append("//end\n")
                 
             return ''.join(accu)
+            
+        def setModule(self,module):
+            self._module = module
+            
+        def module(self):
+            return self._module
 
-    class SipClass(cppsymboldata.SymbolData.CppClass, _SipEntityExtra):
+        def fqPythonName(self):
+            return None
+
+    class SipClass(_SipEntityExtra, cppsymboldata.SymbolData.CppClass):
         @sealed
         def __init__(self,parentScope, name, filename=None, lineno=-1):
             cppsymboldata.SymbolData.CppClass.__init__(self, parentScope, name, filename, lineno)
@@ -205,7 +145,17 @@ class SymbolData(cppsymboldata.SymbolData):
                     allBases.update(class_.allSuperClassNames())
                     
             return allBases
-
+            
+        def classHierarchy(self):
+            symbolData = self._symbolData()
+            if len(self._bases)==0:
+                return [self]
+            base = symbolData.lookupType(self._bases[0],self)
+            if base is not None:
+                return [self] + base.classHierarchy()
+            else:
+                return [self]
+        
         def format(self,indent=0):
             pre = SymbolData._indentString(indent)
             accu = []
@@ -294,7 +244,7 @@ class SymbolData(cppsymboldata.SymbolData):
         def format(self):
             return self._returnType + " (*" + self._argumentName + ")("+self._functionArguments+")"
 
-    class Function(cppsymboldata.SymbolData.Function, _SipEntityExtra):
+    class Function(_SipEntityExtra, cppsymboldata.SymbolData.Function):
         @sealed
         def __init__(self, parentScope, name, filename=None, lineno=-1):
             cppsymboldata.SymbolData.Function.__init__(self,parentScope,name,filename,lineno)
@@ -318,7 +268,7 @@ class SymbolData(cppsymboldata.SymbolData):
             return ''.join(accu)
 
 
-    class Constructor(cppsymboldata.SymbolData.Constructor, _SipEntityExtra):
+    class Constructor(_SipEntityExtra, cppsymboldata.SymbolData.Constructor):
         @sealed
         def __init__(self, parentScope, name, filename=None, lineno=-1):
             cppsymboldata.SymbolData.Constructor.__init__(self,parentScope,name,filename,lineno)
@@ -333,7 +283,7 @@ class SymbolData(cppsymboldata.SymbolData):
                 annotations + self._formatCppArgs() + ";\n" + \
                 ''.join( (block.format(indent) for block in self._blocks))
 
-    class Destructor(cppsymboldata.SymbolData.Destructor, _SipEntityExtra):
+    class Destructor(_SipEntityExtra, cppsymboldata.SymbolData.Destructor):
         @sealed
         def __init__(self, parentScope, name, filename=None, lineno=-1):
             cppsymboldata.SymbolData.Destructor.__init__(self,parentScope,name,filename,lineno)
@@ -348,7 +298,7 @@ class SymbolData(cppsymboldata.SymbolData):
                 annotations + self._formatCppArgs() + ";\n" + \
                 ''.join( (block.format(indent) for block in self._blocks))
             
-    class Variable(cppsymboldata.SymbolData.Variable, _SipEntityExtra):
+    class Variable(_SipEntityExtra, cppsymboldata.SymbolData.Variable):
         @sealed
         def __init__(self, parentScope, name, filename=None, lineno=-1):
             cppsymboldata.SymbolData.Variable.__init__(self,parentScope,name,filename,lineno)
@@ -392,19 +342,10 @@ class SymbolData(cppsymboldata.SymbolData):
         def format(self,indent=0):
             return SymbolData.SipBlock.format(self,indent)
         
-    class Comment(cppsymboldata.SymbolData.Entity):
-        @sealed
-        def __init__(self, parentScope, filename=None, lineno=-1):
-            cppsymboldata.SymbolData.Entity.__init__(self, parentScope, None, filename, lineno)
-            self._comment = None
-            
-        def setValue(self,comment):
-            self._comment = comment
-            
-        def format(self,indent=0):
-            return self._comment
+    class Comment(cppsymboldata.SymbolData.Comment):
+        pass
 
-    class Template(cppsymboldata.SymbolData._CppEntity,_SipEntityExtra):
+    class Template(_SipEntityExtra, cppsymboldata.SymbolData._CppEntity):
         @sealed
         def __init__(self, parentScope, filename, lineno):
             cppsymboldata.SymbolData._CppEntity.__init__(self, parentScope, None, filename, lineno)
@@ -431,8 +372,9 @@ class SymbolData(cppsymboldata.SymbolData):
         def format(self,indent=0):
             return SymbolData.SipBlock.format(self,indent)
 
-    class Enum(cppsymboldata.SymbolData.Enum, _SipEntityExtra):
+    class Enum(_SipEntityExtra, cppsymboldata.SymbolData.Enum):
         @sealed
+        @accepts(cppsymboldata.SymbolData.Entity,one_of(str,types.NoneType),filename=one_of(str,types.NoneType),lineno=int)
         def __init__(self, parentScope, name, filename=None, lineno=-1):
             cppsymboldata.SymbolData.Enum.__init__(self, parentScope, name, filename, lineno)
             SymbolData._SipEntityExtra.__init__(self)
@@ -482,7 +424,7 @@ class SymbolData(cppsymboldata.SymbolData):
         def format(self):
             return self._body
 
-    class Typedef(cppsymboldata.SymbolData.Typedef, _SipEntityExtra):
+    class Typedef(_SipEntityExtra, cppsymboldata.SymbolData.Typedef):
         @sealed
         def __init__(self,parentScope, name, filename=None, lineno=-1):
             cppsymboldata.SymbolData.Typedef.__init__(self,parentScope, name, filename, lineno)
@@ -501,7 +443,7 @@ class SymbolData(cppsymboldata.SymbolData):
             pre = SymbolData._indentString(indent)
             return self._formatIgnore(indent) + pre + "typedef "+ self._functionArgument.format() + ";\n"
             
-    class Namespace(cppsymboldata.SymbolData.Namespace, _SipEntityExtra):
+    class Namespace(_SipEntityExtra, cppsymboldata.SymbolData.Namespace):
         @sealed
         def __init__(self, parentScope, name, filename=None, lineno=-1):
             cppsymboldata.SymbolData.Namespace.__init__(self, parentScope, name, filename, lineno)

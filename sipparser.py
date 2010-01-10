@@ -985,7 +985,12 @@ class SipParser(object):
         pass
         
     def p_dtor_primary1 (self, p):
-        'dtor_primary : virtual_dtor_name LPAREN RPAREN'
+        """dtor_primary : virtual_dtor_name LPAREN RPAREN"""
+        self.currentFunction.addQualifier('virtual')
+
+    def p_dtor_primary2 (self, p):
+        """dtor_primary : virtual_dtor_name LPAREN RPAREN pure_virtual_suffix"""
+        self.currentFunction.addQualifier('pure')
         self.currentFunction.addQualifier('virtual')
         
     def p_dtor_stmt (self, p):

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#     Copyright 2009 Simon Edwards <simon@simonzone.com>
+#     Copyright 2009-2010 Simon Edwards <simon@simonzone.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,11 +21,13 @@ import qtkdemacros
 import os.path
 import sipsymboldata
 
-outputBaseDirectory = "/home/sbe/devel/svn/kde/trunk/KDE/kdebindings/python/pykde4"
+#branch = "trunk/KDE"
+branch = "branches/KDE/4.4"
+outputBaseDirectory = "/home/sbe/devel/svn/kde/"+branch+"/kdebindings/python/pykde4"
 #cmakelistBaseDirectory = "/home/sbe/devel/svn/kde/branches/KDE/4.3/kdelibs"
-cmakelistBaseDirectory = "/home/sbe/devel/svn/kde/trunk/KDE/kdelibs"
+cmakelistBaseDirectory = "/home/sbe/devel/svn/kde/"+branch+"/kdelibs"
 cmakelistSupportBaseDirectory = "/home/sbe/devel/svn/kde/trunk/kdesupport"
-cmakelistPimlibsBaseDirectory = "/home/sbe/devel/svn/kde/trunk/KDE/kdepimlibs"
+cmakelistPimlibsBaseDirectory = "/home/sbe/devel/svn/kde/"+branch+"/kdepimlibs"
 
 ###########################################################################
 kdecore = toolkit.ModuleGenerator(
@@ -398,6 +400,23 @@ khtml = toolkit.ModuleGenerator(
     )
 
 ###########################################################################
+def KNewStuffMapper(mod,headerName):
+    print("KNewStuffMapper: "+headerName)
+    filename = os.path.basename(headerName)
+    if filename.endswith(".h"):
+        sipName = filename[:-2]+".sip"
+        if "knewstuff3" in headerName:
+            return "knewstuff3_"+sipName
+        else:
+            return sipName
+    return filename
+
+def KNewStuffCppHeaderMapper(mod,filename):
+    if "knewstuff3" in filename:
+        return "knewstuff3/" + os.path.basename(filename)
+    else:
+        return os.path.basename(filename)
+
 knewstuff = toolkit.ModuleGenerator(
     module="PyKDE4.knewstuff",
     outputDirectory=os.path.join(outputBaseDirectory,"sip/knewstuff"),
@@ -406,7 +425,8 @@ knewstuff = toolkit.ModuleGenerator(
     
     # .h file extraction
     cmakelists=[os.path.join(cmakelistBaseDirectory,"knewstuff/CMakeLists.txt"),
-        os.path.join(cmakelistBaseDirectory,"knewstuff/knewstuff2/CMakeLists.txt")],
+        os.path.join(cmakelistBaseDirectory,"knewstuff/knewstuff2/CMakeLists.txt"),
+        os.path.join(cmakelistBaseDirectory,"knewstuff/knewstuff3/CMakeLists.txt")],
     
     ignoreHeaders="""knewstuff_export.h""".split(" "),
     #noUpdateSip=["typedefs.sip"],
@@ -443,7 +463,9 @@ knewstuff = toolkit.ModuleGenerator(
             parameterTypeMatch=["QWidget*","QObject*"],
             parameterNameMatch="parent",
             annotations="Transfer")
-        ]
+        ],
+    filenameMappingFunction=KNewStuffMapper,
+    cppHeaderMappingFunction=KNewStuffCppHeaderMapper
     )
     
 ###########################################################################
@@ -772,8 +794,8 @@ def UpdateClassNamespaceList(moduleName,sipScopes):
         ExtractClassNamespace(scope)
 
 #UpdateClassNamespaceList('kdecore',kdecore.docs())
-UpdateClassNamespaceList('plasma',plasma.docs())
-"""UpdateClassNamespaceList('kdeui',kdeui.docs())
+"""UpdateClassNamespaceList('plasma',plasma.docs())
+UpdateClassNamespaceList('kdeui',kdeui.docs())
 UpdateClassNamespaceList('kio',kio.docs())
 UpdateClassNamespaceList('kutils',kutils.docs())
 UpdateClassNamespaceList('solid',solid.docs())

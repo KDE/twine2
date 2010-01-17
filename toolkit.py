@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#     Copyright 2009 Simon Edwards <simon@simonzone.com>
+#     Copyright 2009-2010 Simon Edwards <simon@simonzone.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -37,7 +37,8 @@ class ModuleGenerator(object):
     @sealed
     def __init__(self,module,cmakelists=[],ignoreHeaders=[],noUpdateSip=[],outputDirectory=None,
             preprocessorValues=[],preprocessSubstitutionMacros=[],macros=[],bareMacros=[],exportMacros=None,
-            ignoreBases=None,noCTSCC=[],sipImportDirs=[],sipImports=[],copyrightNotice=None,annotationRules=[],docsOutputDirectory=None,mainDocs=None):
+            ignoreBases=None,noCTSCC=[],sipImportDirs=[],sipImports=[],copyrightNotice=None,annotationRules=[],
+            docsOutputDirectory=None,mainDocs=None,filenameMappingFunction=None,cppHeaderMappingFunction=None):
             
         self._module = module
         self._cmakelists = [cmakelists] if isinstance(cmakelists,str) else cmakelists
@@ -49,7 +50,10 @@ class ModuleGenerator(object):
         self._preprocessSubstitutionMacros = preprocessSubstitutionMacros
         self._macros = macros
         self._bareMacros = bareMacros
-        
+
+        self._filenameMappingFunction = filenameMappingFunction
+        self._cppHeaderMappingFunction = cppHeaderMappingFunction
+
         self._symbolData = cppsymboldata.SymbolData()
         self._cppParser = cppparser.CppParser()
         self._cppParser.preprocessorValues = self._preprocessorValues
@@ -82,6 +86,7 @@ class ModuleGenerator(object):
     def run(self):
         print("Extracting header file list from CMake:")
         cppHeaderFilenameSet = self.extractCmakeListsHeaders()
+
         cppHeaderFilenameList = list(cppHeaderFilenameSet)
         cppHeaderFilenameList.sort()
         for filename in cppHeaderFilenameList:
@@ -151,7 +156,12 @@ class ModuleGenerator(object):
             print("    Parsing %s" % (filename,))
             with open(filename) as fhandle:
                 text = fhandle.read()
-            basename = os.path.basename(filename)
+
+            if self._cppHeaderMappingFunction is not None:
+                basename = self._cppHeaderMappingFunction(self,filename)
+            else:
+                basename = os.path.basename(filename)
+
             scope = self._cppParser.parse(self._symbolData, text, filename=filename, debugLevel=0)
             scope.setHeaderFilename(basename)
             headerScopeTuples.append( (basename,scope) )
@@ -249,6 +259,9 @@ class ModuleGenerator(object):
             self._annotator.applyRules(scope)
         
     def _convertHeaderNameToSip(self,headerName):
+        if self._filenameMappingFunction is not None:
+            return self._filenameMappingFunction(self,headerName)
+
         filename = os.path.basename(headerName)
         if filename.endswith(".h"):
             return filename[:-2]+".sip"

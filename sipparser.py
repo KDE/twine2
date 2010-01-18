@@ -1315,6 +1315,7 @@ class SipParser(object):
                       | gt_expression
                       | lshift_expression
                       | rshift_expression
+                      | arrow_expression
                       | ICONST
                       | FCONST
                       | HEXCONST
@@ -1424,6 +1425,10 @@ class SipParser(object):
 
     def p_bitnot_expression (self, p):
         'bitnot_expression : TILDE expression'
+        p [0] = "".join (p [1:])
+
+    def p_arrow_expression (self, p):
+        'arrow_expression : expression ARROW expression'
         p [0] = "".join (p [1:])
         
     def p_error(self, p):

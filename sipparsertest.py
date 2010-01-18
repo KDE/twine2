@@ -541,6 +541,14 @@ namespace Foo {
 };
 """)
 
+    def testArrowDefaults(self):
+        self.mirrorTest("""
+class Foo
+{
+    QString                 label (const QString& language = KGlobal::locale()->language());
+};
+""")
+
     def testCTSCC(self):
         self.mirrorTest("""
 class Foo {

@@ -609,14 +609,6 @@ class ModuleGenerator(object):
 #            if param != '':
 #                print(obj.name + "~> "+param)
                 
-            if obj.access() is self._sipSymbolData.ACCESS_SIGNALS:
-                args = []
-                for arg in obj.arguments():
-                    if 'const' in arg.argumentType():
-                        args.append ('const %s' % arg.argumentType)
-                    else:
-                        args.append (arg.argumentType)
-                
             if isinstance(obj, self._sipSymbolData.Constructor):
                 memname = "__init__"
                 ret = ""
@@ -760,12 +752,7 @@ class ModuleGenerator(object):
 
         page.write(self.formatDoxygen(comment))
         if obj.access() is self._sipSymbolData.ACCESS_SIGNALS:
-            args = []
-            for arg in obj.arguments():
-                if 'const' in arg.argumentType():
-                    args.append('const %s' % arg.argumentType())
-                else:
-                    args.append(arg.argumentType())
+            args = [arg.argumentType() for arg in obj.arguments()]
             page.write("""<dl compact><dt><b>Signal syntax:</b></dt><dd>""")
             page.write("""<code>QObject.connect(source, SIGNAL("%s(%s)"), target_slot)</code>""" % (pyName(obj), ', '.join (args)))
             page.write("""</dd></dl>""")

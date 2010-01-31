@@ -21,15 +21,18 @@ import qtkdemacros
 import os.path
 import sipsymboldata
 
-outputBaseDirectory = "/home/sbe/devel/svn/kde/trunk/KDE/kdeedu"
+#branch = "trunk/KDE"
+branch = "branches/KDE/4.4"
+
+outputBaseDirectory = "/home/sbe/devel/svn/kde/" + branch + "/kdeedu"
 #cmakelistBaseDirectory = "/home/sbe/devel/svn/kde/branches/KDE/4.3/kdelibs"
-cmakelistBaseDirectory = "/home/sbe/devel/svn/kde/trunk/KDE/kdeedu"
+cmakelistBaseDirectory = "/home/sbe/devel/svn/kde/" + branch + "/kdeedu"
 
 ###########################################################################
 marble = toolkit.ModuleGenerator(
     module="PyKDE4.marble",
     outputDirectory=os.path.join(outputBaseDirectory,"marble/src/bindings/python/sip"),
-    docsOutputDirectory=os.path.join(outputBaseDirectory, "marble/docs/bindings/python/new_html/marble"),
+    docsOutputDirectory=os.path.join(outputBaseDirectory, "marble/docs/bindings/python/html/marble"),
     mainDocs=os.path.join(outputBaseDirectory,"marble/Mainpage.dox"),
     
     # .h file extraction
@@ -79,7 +82,6 @@ marble = toolkit.ModuleGenerator(
 
 ###########################################################################
 #marble.run()
-#marble.docs()
 
 classNames = []
 nsNames = []
@@ -101,5 +103,5 @@ def UpdateClassNamespaceList(moduleName,sipScopes):
 
 UpdateClassNamespaceList('marble',marble.docs())
 print("Writing all classes index:")
-toolkit.ModuleGenerator.WriteAllClasses(os.path.join(outputBaseDirectory,"marble/docs/bindings/python/new_html"),nsNames,classNames)
+toolkit.ModuleGenerator.WriteAllClasses(os.path.join(outputBaseDirectory,"marble/docs/bindings/python/html"),nsNames,classNames)
 print("Done")

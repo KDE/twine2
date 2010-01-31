@@ -810,7 +810,6 @@ UpdateClassNamespaceList('polkitqt',polkitqt.docs())
 UpdateClassNamespaceList('phonon',phonon.docs())
 
 print("Writing all classes index:")
-toolkit.ModuleGenerator.WriteAllClasses(os.path.join(outputBaseDirectory,"new_docs/html"),nsNames,classNames)
+toolkit.ModuleGenerator.WriteAllClasses(os.path.join(outputBaseDirectory,"docs/html"),nsNames,classNames)
 print("Done")
-
 """

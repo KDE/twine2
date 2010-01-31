@@ -32,6 +32,7 @@ enum TimeFormatOption {
     TimeDuration       = 0x6   ///< Read/format time string as duration. This will strip
 };
 """.split('\n')))#,[],[]))
+
     def testDefinesFunction(self):
         print(pplexer.preprocess("""
             /**
@@ -64,6 +65,19 @@ namespace Soprano {
 };
 #endif 
 """))
+
+    def testComments(self):
+        print(pplexer.preprocess("""
+class Foo {
+public:
+    /**
+     * bar docs.
+     */
+    void bar();
+};
+
+"""))
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -20,6 +20,10 @@ import unittest
 import cppparser
 import cppsymboldata
 import qtkdemacros
+import re
+
+def CleanWhitespace(code):
+    return re.sub(r"\s+"," ",code).strip()
 
 class TestCppParser(unittest.TestCase):
 
@@ -27,53 +31,64 @@ class TestCppParser(unittest.TestCase):
         self.parser = cppparser.CppParser()
         self.syms = cppsymboldata.SymbolData()
 
+    def mirrorTest(self,code,debugLevel=0):
+        scope = self.parser.parse(self.syms, code, debugLevel=debugLevel);
+        new_code = scope.format()
+        if CleanWhitespace(new_code)!=CleanWhitespace(code):
+            self.fail("Output code doesn't match input code.\n---- Original:\n" + code + "\n---- Result:" + new_code)
+
+    def ioTest(self,incode,outcode,debugLevel=0):
+        scope = self.parser.parse(self.syms, incode, debugLevel=debugLevel);
+        new_code = scope.format()
+        if CleanWhitespace(new_code)!=CleanWhitespace(outcode):
+            self.fail("Output code doesn't match expected output code.\n---- Expected:\n" + outcode + "\n---- Result:\n" + new_code)
+
     def testClass1(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             class Foo {
             };
             """)
-        print(scope.format())
-        #self.assertEqual(self.seq, range(10))
 
     def testClass2(self):
-        scope = self.parser.parse(self.syms,
+        self.ioTest(
             """
             class Foo {
                 public:
+            };""","""
+            class Foo {
             };""")
-        print(scope.format())
 
     def testClass3(self):
-        scope = self.parser.parse(self.syms,
+        self.ioTest(
             """
             class Foo : public Bar {
+            };""","""
+            class Foo : Bar {
             };""")
-        print(scope.format())
 
     def testClass4(self):
-        scope = self.parser.parse(self.syms,
+        self.ioTest(
             """
             class Foo : private Bar {
+            };""","""
+            class Foo : Bar {
             };""")
-        print(scope.format())
 
     def testClass5(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             class Foo : Bar, Zyzz {
             };""")
-        print(scope.format())
 
     def testClass6(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             class OpaqueFoo;
             """)
-        print(scope.format())
 
     def testClassVariable(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             class Foo {
                 public:
@@ -83,184 +98,164 @@ class TestCppParser(unittest.TestCase):
                 protected:
                     int protected_z;
             };""")
-        print(scope.format())
 
     def testClassVariable2(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             class Foo {
                 public:
-                    int x=0;
+                    int x = 0;
             };""")
-        print(scope.format())
 
     def testClassVariable3(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             class Foo {
                 static int x;
                 const int y;
             };""")
-        print(scope.format())
 
     def testClassConstructor(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             class Foo {
-                Foo();
+                Foo ();
             };""")
-        print(scope.format())
 
     def testClassConstructor2(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             class Foo {
-                Foo(int x,int y);
+                Foo (int x, int y);
             };""")
-        print(scope.format())
 
     def testClassConstructor3(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             class Foo {
-                explicit Foo(int x);
+                explicit Foo (int x);
             };""")
-        print(scope.format())
 
     def testClassConstructor4(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             class Foo {
                 public:
-                    Foo();
+                    Foo ();
                 private:
-                    Foo(int x);
+                    Foo (int x);
             };""")
-        print(scope.format())
 
     def testClassDestructor1(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             class Foo {
-                ~Foo();
+                ~Foo ();
             };""")
-        print(scope.format())
 
     def testClassMethod(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             class Foo {
-                int getFooValue(int x);
+                int getFooValue (int x);
             };""")
-        print(scope.format())
 
     def testClassVirtualMethod(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             class Foo {
-                virtual int getFooValue(int x);
+                virtual int getFooValue (int x);
             };""")
-        print(scope.format())
 
     def testClassPureVirtualMethod(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             class Foo {
-                virtual int getFooValue(int x)=0;
+                virtual int getFooValue (int x)=0;
             };""")
-        print(scope.format())
 
     def testFunctions(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
             """
-            int DoFoo(int x);
-            void StopFoo();
+            int DoFoo (int x);
+            void StopFoo ();
             """)
-        print(scope.format())
 
     def testFunctions2(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
             """
-            const int *DoFoo(int x);
+            const int* DoFoo (int x);
             """)
-        print(scope.format())
 
     def testFunctions3(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
             """
-            QString& FooConst() const;
+            QString& FooConst () const;
             """)
-        print(scope.format())
 
     def testFunctions4(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
             """
-            void Foo(unsigned long x);
+            void Foo (unsigned long x);
             """)
-        print(scope.format())
 
     def testFunctions5(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
             """
-            void Foo(long x[5]);
+            void Foo (long x [5]);
             """)
-        print(scope.format())
 
     def testFunctions6(self):
-        scope = self.parser.parse(self.syms,
+        self.ioTest(
             """
             void* foo (int, double (*doublePtr)(float, QString*));
+            ""","""
+void* foo (int, $fpdouble (* doublePtr = float,QString*);
             """)
-        print(scope.format())
 
     def testFunctions7(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             template <T>
             void foo (T t);
             """)
-        print(scope.format())
         
     def testFunctions8(self):
-        scope = self.parser.parse(self.syms,
-            """
-template<typename T>
-    inline T readCheck(const char *key, const T &defaultValue) const;
+        self.ioTest(
+            """template<typename T>
+inline T readCheck(const char *key, const T &defaultValue) const;
+            ""","""template<T>
+ T                      readCheck (const char* key, const T& defaultValue) const;
             """)
-        print(scope.format())
 
     def testFunctions9(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
             """
 KConfigGroup            group (const QByteArray& group);
 const KConfigGroup      group (const QByteArray& group);
 const KConfigGroup      group (const QByteArray& group) const;
             """)
-        print(scope.format())
-
 
     def testOperator1(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             class Foo {
                 bool operator == (int);
             };
             """)
-        print(scope.format())
-
 
     def testNamespace(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
             """
-            namespace FooSpace {
-                int DoFoo(int x);
-                void StopFoo();
-            }
+            namespace FooSpace
+            {
+            int DoFoo (int x);
+            void StopFoo ();
+            };
             """)
-        print(scope.format())
 
     def testEnum(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             enum global {
                 earth,
@@ -268,38 +263,39 @@ const KConfigGroup      group (const QByteArray& group) const;
                 globe
             };
             """)
-        print(scope.format())
 
     def testEnumInClass(self):
-        scope = self.parser.parse(self.syms,
+        self.ioTest(
             """
 enum TimeFormatOption {
     TimeDefault        = 0x0,   ///< Default formatting using seconds and the format
                                 ///< as specified by the locale.
     TimeDuration       = 0x6   ///< Read/format time string as duration. This will strip
 };
-              """,debugLevel=0)
-        print(scope.format())
+              ""","""
+enum TimeFormatOption {
+    TimeDefault=0x0,
+    TimeDuration=0x6
+};
+              """)
 
     def testNamespaceEnum(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
             """
 namespace Foo {
 
-    const KComponentData &mainComponent();
+    const KComponentData& mainComponent ();
 
     enum global {
         earth,
         orb,
         globe
     };
-}
-            """,debugLevel=0)
-        print(scope.format())
-
+};
+            """)
 
     def testEnumAnonymous(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             enum {
                 earth,
@@ -307,118 +303,122 @@ namespace Foo {
                 globe
             };
             """)
-        print(scope.format())
 
     def testFriendClass(self):
-        scope = self.parser.parse(self.syms,
+        self.ioTest(
             """
             class Foo {
                 friend class Bar;
             };
+            ""","""
+            class Foo {
+            };
             """)
-        print(scope.format())
 
     def testTypedef1(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             typedef QString& stringref;
             """)
-        print(scope.format())
 
     def testTypedef2(self):
-        scope = self.parser.parse(self.syms,
+        self.ioTest(
             """
             typedef enum simple {easy, bobsyouruncle, noproblem};
+            ""","""
+            typedef enum
+            {
+                easy,
+                bobsyouruncle,
+                noproblem
+            } simple;
             """)
-        print(scope.format())
     
     def testTypedef3(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
             """typedef QObject** objPtrPtr;
             """)
-        print(scope.format())
 
     def testTypedef4(self):
-        scope = self.parser.parse(self.syms,
-            """typedef QObject *(*CreateInstanceFunction)(QWidget *, QObject *, const QVariantList &);
+        self.mirrorTest(
+            """typedef QObject* (*CreateInstanceFunction)(QWidget*,QObject*,const QVariantList&);
             """)
-        print(scope.format())
 
     def testTypedef5(self):
-        scope = self.parser.parse(self.syms,
-            """typedef QFlags< SearchOption > SearchOptions;
+        self.mirrorTest(
+            """typedef QFlags<SearchOption> SearchOptions;
             """)
-        print(scope.format())
         
     def testTypedef6(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
             """typedef enum { Name, FromUrl } FileNameUsedForCopying;
             """)
-        print(scope.format())
 
     def testTypedef7(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
             """typedef enum { Name, FromUrl } FileNameUsedForCopying;
             """)
-        print(scope.format())
 
     def testTemplate(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             QList<int> intlist;
             """)
-        print(scope.format())
 
     def testInline(self):
-        scope = self.parser.parse(self.syms,
+        self.ioTest(
             """
             inline operator bool() const { return ( d != 0 ); }
-            """,debugLevel=2)
-        print(scope.format())
+            ""","""
+            bool operator bool () const;
+            """)
 
     def testMacro(self):
         self.parser.bareMacros = ["Q_OBJECT"]
-        scope = self.parser.parse(self.syms,
+        self.ioTest(
             """
             class FooWidget : public QObject {
                     Q_OBJECT
                 public:
                     FooWidget();
             };
+            """,            """
+            class FooWidget : QObject {
+                    Q_OBJECT
+                public:
+                    FooWidget ();
+            };
             """)
-        print(scope.format())
 
     def testMacro2(self):
         self.parser.bareMacros = ["FOO_EXPORT"]
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             class FOO_EXPORT FooWidget {
             };
             """)
-        print(scope.format())
 
     def testMacro3(self):
         self.parser.macros = ["Q_DISABLE_COPY"]
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             class FooWidget {
                 public:
-                    Foo();
+                    Foo ();
                 private:
-                    Q_DISABLE_COPY( FooWidget )
+                    Q_DISABLE_COPY(FooWidget)
             };
             """)
-        print(scope.format())
 
     def testMacro4(self):
         self.parser.bareMacros = ["KGGZMOD_EXPORT"]
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
             """
 class Module
 {
 public:
-    Module(const QString &name);
-    ~Module();
+    Module (const QString& name);
+    ~Module ();
 
     enum State
     {
@@ -427,17 +427,15 @@ public:
     };
 };
             """)
-        print(scope.format())
 
     def testBitfield(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
             """
             bool mHasMin : 1;
-            """,debugLevel=2)
-        print(scope.format())
+            """,debugLevel=0)
 
     def testAccess(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
             """void PlainPreFunc ();
 class Foo {
     public:
@@ -449,65 +447,65 @@ class Foo {
 };
 void PlainPostFunc ();
 """)
-        print(scope.format())
 
     def testFunnyNamespace(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
         """
 class KJob;
-namespace KIO {
-    class Job;
-}
+namespace KIO
+{
+class Job;
+};
 class KAutoMountPrivate;
 """)
-        print(scope.format())
 
     def testNestedTemplate(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
         """
-KBookmarkGroup addBookmarks(const QList< QPair<QString, QString> > & list);
+KBookmarkGroup addBookmarks (const QList<QPair<QString,QString>>& list);
 """)
-        print(scope.format())
 
     def testOperatorQUrlConst(self):
-        scope = self.parser.parse(self.syms,
+        self.ioTest(
         """
 class Foo {
 void reset( bool recursive = false );
 operator QUrl() const { return uri(); }
 bool operator==( const Entity& other ) const;
 };
-""",debugLevel=2)
-        print(scope.format())
+""","""
+class Foo {
+        void                    reset (bool recursive = false);
+        QUrl                    operator QUrl () const;
+        bool                    operator == (const Entity& other) const;
+};
+""")
 
     def testPureVirtualDestructor(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
         """
 class Foo {
 public:
-    Foo();
-    virtual ~Foo() = 0;
+    Foo ();
+    virtual ~Foo ()=0;
 };
 
-""",debugLevel=2)
-        print(scope.format())
-
+""")
 
     def testComments(self):
-        scope = self.parser.parse(self.syms,
+        self.mirrorTest(
         """
 class Foo {
-public:
     /**
      * bar docs.
      */
-    void bar();
+public:
+    void bar ();
 };
 
-""",debugLevel=2)
-        print(scope.format())
+""")
 
-    def testLiveAmmo(self):
+    def xtestLiveAmmo(self):
         with open("/home/sbe/devel/svn/kde/branches/KDE/4.3/kdeedu/marble/src/lib/MarbleMap.h") as fhandle:
             text = fhandle.read()
         self.parser.bareMacros = qtkdemacros.QtBareMacros(["MARBLE_EXPORT"])
@@ -516,6 +514,19 @@ public:
         scope = self.parser.parse(self.syms, text)
         print(scope.format())
 
+    def testFriendOperator(self):
+        self.ioTest(
+        """
+class GeoDataLatLonAltBox : public GeoDataLatLonBox
+{
+friend bool operator == ( GeoDataLatLonAltBox const& lhs, GeoDataLatLonAltBox const& rhs);
+};
+""","""
+class GeoDataLatLonAltBox : GeoDataLatLonBox
+{
+bool operator == (const GeoDataLatLonAltBox& lhs, const GeoDataLatLonAltBox& rhs);
+};
+""")
 
 if __name__ == '__main__':
     unittest.main()

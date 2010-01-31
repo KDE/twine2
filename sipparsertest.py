@@ -41,6 +41,12 @@ class TestSipParser(unittest.TestCase):
         if CleanWhitespace(new_code)!=CleanWhitespace(code):
             self.fail("Output code doesn't match input code.\n---- Original:\n" + code + "\n---- Result:" + new_code)
 
+    def ioTest(self,incode,outcode,debugLevel=0):
+        scope = self.parser.parse(self.syms, incode, debugLevel=debugLevel);
+        new_code = scope.format()
+        if CleanWhitespace(new_code)!=CleanWhitespace(outcode):
+            self.fail("Output code doesn't match expected output code.\n---- Expected:\n" + outcode + "\n---- Result:" + new_code)
+
     def strictMirrorTest(self,code,debugLevel=0):
         scope = self.parser.parse(self.syms, code, debugLevel=debugLevel);
         new_code = scope.format()
@@ -284,7 +290,7 @@ public:
             class Foo {
                 QVariant operator QVariant ();
             };
-            """,debugLevel=2)
+            """,debugLevel=0)
 
     def testNamespace(self):
         self.mirrorTest(
@@ -345,17 +351,24 @@ public:
             """)
 
     def testEnumSipIf(self):
-        self.mirrorTest(
+        self.ioTest(
             """
-            enum {
-                earth,
-                // This is a comment
+enum {
+    earth,
+    // This is a comment
 %If (FOO -)
-                orb,
+    orb,
 %End
-                globe
-            };
-            """,debugLevel=2)
+    globe
+};
+""","""
+enum {
+    earth,
+    // This is a comment
+    orb,
+    globe
+};
+            """,debugLevel=0)
 
     def testTypedef1(self):
         self.mirrorTest(
@@ -486,12 +499,12 @@ class Foo {
 {
 // Foo
 };
-""",debugLevel=2)
+""",debugLevel=0)
 
     def testNestedTemplate(self):
         self.mirrorTest(
 """
-KBookmarkGroup addBookmarks(const QList< QPair<QString, QString>>& list);
+KBookmarkGroup          addBookmarks (const QList<QPair<QString,QString>>& list);
 """)
 
     def testCppSigs1(self):
@@ -607,10 +620,13 @@ void                    generate (const QStringList& source, QStringList& target
 #include <kaccelgen.h>
 %End
 """
-        scope = self.parser.parse(self.syms, text, debugLevel=0);
-        for item in scope[5]:
-            print(repr(item))
-            print("-----------------------------" + item.format())
+
+        self.mirrorTest(text)
+
+#        scope = self.parser.parse(self.syms, text, debugLevel=0);
+#        for item in scope[5]:
+#            print(repr(item))
+#            print("-----------------------------" + item.format())
 
 
     def testStrict0(self):
@@ -654,8 +670,8 @@ class Foo : Zyzz {
         scope = self.parser.parse(self.syms, text)
         print(scope.format())
 
-    def testFullCompare(self):
-        sipdir = "/home/sbe/devel/svn/kde/branches/KDE/4.3/kdebindings/python/pykde4/sip/kdeui/"
+    def xtestFullCompare(self):
+        sipdir = "/home/sbe/devel/svn/kde/branches/KDE/4.4/kdebindings/python/pykde4/sip/kdeui/"
         #sipdir = "/usr/share/sip/PyQt4/QtGui/"        
         for filename in os.listdir(sipdir):
             print(filename)

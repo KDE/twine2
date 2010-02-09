@@ -267,6 +267,11 @@ def t_sipStmt_ID (t):
         t.type = "CVQUAL"
     return t
 
+def t_sipStmt_String(t):
+    r'"[^"]*"'
+    t.type = "SCONST"
+    return t
+
 t_sipStmt_SLASH    = r'\/'
 t_sipStmt_LT       = r'<'
 t_sipStmt_GT       = r'>'

@@ -663,7 +663,17 @@ class Foo : Zyzz {
         fooBases = foo.allSuperClassNames()
         self.assertTrue(fooBases is not None)
         self.assertTrue(len(fooBases)==2)
-        
+
+    def testSipStmt(self):
+        scope = self.parser.parse(self.syms, """
+template<TYPE1, TYPE2>
+%MappedType QHash<TYPE1, TYPE2> /DocType="dict-of-TYPE1-TYPE2"/
+{
+
+};
+
+""",debugLevel=2)
+
     def xtestQtCoremod(self):
         with open("/usr/share/sip/PyQt4/QtCore/QtCoremod.sip") as fhandle:
             text = fhandle.read()

@@ -343,7 +343,9 @@ class SymbolData(cppsymboldata.SymbolData):
             return SymbolData.SipBlock.format(self,indent)
         
     class Comment(cppsymboldata.SymbolData.Comment):
-        pass
+        @sealed
+        def __init__(self, parentScope, filename=None, lineno=-1):
+            cppsymboldata.SymbolData.Comment.__init__(self, parentScope, filename, lineno)
 
     class Template(_SipEntityExtra, cppsymboldata.SymbolData._CppEntity):
         @sealed

@@ -31,7 +31,7 @@ blockTokens = ('AccessCode', 'BIGetCharBufferCode', 'BIGetReadBufferCode', 'BIGe
                'RaiseCode', 'SetCode', 'TypeCode', 'TypeHeaderCode', 'UnitCode', 'VirtualCatcherCode',\
                'Makefile', 'PrePythonCode',\
                'BIGetBufferCode','BIGetCharBufferCode','BIGetReadBufferCode','BIGetSegCountCode',\
-               'BIGetWriteBufferCode','BIReleaseBufferCode', 'InitialisationCode')
+               'BIGetWriteBufferCode','BIReleaseBufferCode', 'InitialisationCode','Docstring')
 
 argumentAnnotations = ('AllowNone', 'Array', 'ArraySize', 'Constrained', 'In', 'Out', 'TransferThis',\
                        'GetWrapper')

@@ -115,6 +115,9 @@ class SipParser(object):
         self.access = self._accessStack.pop()
         
     def _lastEntity(self):
+        for i in range(len(self.scope)-1,-1,-1):
+            if not isinstance(self.scope[i], (self.symbolData.Comment, self.symbolData.SipDirective)):
+                return self.scope[i]
         return self.scope.lastMember()
 
     def _pushVersion(self, version):

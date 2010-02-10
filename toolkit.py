@@ -1178,8 +1178,6 @@ code fragments in the documentation have not been translated from C++ to Python.
         for i in range(len(ret)):
             if not ret[i] in ('*', '&'):
                 r += ret[i]
-            else:
-                break
 
         if ret=="char":
             ret = "QString"

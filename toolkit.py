@@ -810,7 +810,7 @@ class ModuleGenerator(object):
         page.write('<hr><h2>Attribute Documentation</h2>')
 
         for obj in variableList:
-            page.write("""<a class="anchor" name="var""" + str(id(obj)) + """"></a>
+            page.write("""<a class="anchor" name="var""" + linkId(obj) + """"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="memname">

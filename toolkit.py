@@ -417,7 +417,7 @@ class ModuleGenerator(object):
     @accepts(sipsymboldata.SymbolData.Entity)
     @returns(str)
     def commentMapKey(self, item):
-        if isinstance(item,self._sipSymbolData.Constructor):
+        if isinstance(item, (self._sipSymbolData.Constructor, self._symbolData.Constructor)):
             argNames = [(x.name() if x.name() is not None else "") for x in item.arguments()]
             key = item.name() + "|" + '|'.join(argNames)
         else:

@@ -433,9 +433,10 @@ class ModuleGenerator(object):
         for item in cppClass:
             if isinstance(item,self._symbolData.Comment):
                 lastComment = item.value()
-            elif isinstance(item,self._symbolData.Function) and lastComment is not None:
-                commentMap[self.commentMapKey(item)] = lastComment
-                lastComment = None
+            elif lastComment is not None:
+                if isinstance(item, (self._symbolData.Function,self._symbolData.Enum) ):
+                    commentMap[self.commentMapKey(item)] = lastComment
+                    lastComment = None
         return commentMap
             
     @accepts(sipsymboldata.SymbolData.SipClass, dict, one_of(sipsymboldata.SymbolData.CppClass,types.NoneType), str)
@@ -873,7 +874,7 @@ class ModuleGenerator(object):
                     print("Couldn't find enum:"+obj.name())
 
             for e in obj:
-                if isinstance(e,self._sipSymbolData.Enumerator):
+                if isinstance(e,self._symbolData.Enumerator):
                     #docLine = self.formatDoxygen(e.doc).strip().replace('/', ' ')
                     docLine = ''
                     if e.value():

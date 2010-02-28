@@ -296,7 +296,6 @@ class ModuleGenerator(object):
         for scope in updateSipScopes:
             #print("header sip name: " + self._convertHeaderNameToSip(scope.headerFilename()))
             updateSipMap[self._convertHeaderNameToSip(scope.headerFilename())] = scope
-        print(repr(updateSipMap.keys()))
             
         for scope in previousSipScopes:
             filename = self._convertHeaderNameToSip(scope.headerFilename())
@@ -587,17 +586,17 @@ class ModuleGenerator(object):
                 
             retList = []
             if obj.return_():
-                    retList.append(self.formatArgument(obj.return_(),obj))
+                retList.append(self.formatArgument(obj.return_(),obj))
                 
             for arg in obj.arguments():
                 if 'Out' in arg.annotations():
                     if arg.name():
-                        retList.append ('%s (%s)' % (self.formatType(arg.argumentType(),obj), arg.name()))
+                        retList.append ('%s %s' % (self.formatType(arg.argumentType(),obj), arg.name()))
                     else:
                         retList.append (self.formatType(arg.argumentType(),obj))
             
             if retList:
-                ret = ', '.join (retList)
+                ret = ', '.join ( (item for item in retList if item!='') )
             else:
                 ret = ''
                 
@@ -619,10 +618,11 @@ class ModuleGenerator(object):
                 
             result.append('<tr><td class="memItemLeft" nowrap align="right" valign="top">' + ret +'&nbsp;</td><td class="memItemRight" valign="bottom">' + memname + ' (')
             
+            comma = ""
             if useSelf:
                 result.append('self')
                 if len(obj.arguments())!=0:
-                    result.append(", ")
+                    comma = ", "
 
             i = 0
             for a in obj.arguments():
@@ -634,9 +634,9 @@ class ModuleGenerator(object):
                     if a.defaultValue() is not None:
                         paramname += "=" + a.defaultValue().replace ('::', '.')
                         
-                    comma = ", " if a is not obj.arguments()[-1] else ""
+                    comma = ", "
                 
-                    result.append(paramtype + " " + paramname + comma)
+                    result.append(comma + paramtype + " " + paramname)
                     i += 1
             result.append(')</td></tr>\n')
         return "".join(result)
@@ -660,12 +660,12 @@ class ModuleGenerator(object):
         for arg in obj.arguments():
             if 'Out' in arg.annotations():
                 if arg.name():
-                    retList.append ('%s (%s)' % (self.formatArgument(arg,obj), arg.name()))
+                    retList.append ('%s %s' % (self.formatArgument(arg,obj), arg.name()))
                 else:
                     retList.append (self.formatArgument(arg,obj))
         
         if retList:
-            ret = ', '.join (retList)
+            ret = ', '.join ( (item for item in retList if item!='') )
         else:
             ret = ''
 
@@ -688,7 +688,9 @@ class ModuleGenerator(object):
         else:
             memname = ret + " " + pyName(obj)
         
-        if not obj.arguments():
+        filteredArguments = [a for a in obj.arguments() if 'In' in a.annotations() or not 'Out' in a.annotations()]
+        
+        if not filteredArguments:
             selfarg = '<em>self</em>&nbsp;' if 'static' not in obj.qualifier() and not function else ''
             args += """<tr>
 <td class="memname">%s</td>
@@ -712,27 +714,26 @@ class ModuleGenerator(object):
                 bracket = ""
             
             i = 0
-            for a in obj.arguments():
-                if 'In' in a.annotations() or not 'Out' in a.annotations():
-                    paramtype = self.formatArgument(a,obj)
-                    paramname = a.name()
-                    if paramname is None:
-                        paramname = 'a%i' % i
-                    if a.defaultValue() is not None:
-                        paramname += "=" + a.defaultValue().replace ('::', '.')
-                        
-                    comma = ", " if a is not obj.arguments()[-1] else ""
-                
-                    args += """<tr>
+            for a in filteredArguments:
+                paramtype = self.formatArgument(a,obj)
+                paramname = a.name()
+                if paramname is None:
+                    paramname = 'a%i' % i
+                if a.defaultValue() is not None:
+                    paramname += "=" + a.defaultValue().replace ('::', '.')
+                    
+                comma = ", " if a is not filteredArguments[-1] else ""
+            
+                args += """<tr>
 <td class="memname">%s</td>
 <td>%s</td>
 <td class="paramtype">%s&nbsp;</td>
 <td class="paramname"><em>%s</em>%s</td>
 </tr>
 """ % (memname,bracket,paramtype,paramname,comma)
-                    memname = ""
-                    bracket = ""
-                    i += 1
+                memname = ""
+                bracket = ""
+                i += 1
             args += """<tr>
 <td></td>
 <td>)</td>
@@ -945,7 +946,7 @@ class ModuleGenerator(object):
 
     @accepts(str,list,list)
     def writeNamespacePage(self,nsName,nsList,cppScopes):
-        print(repr(cppScopes))
+#        print(repr(cppScopes))
         # create namespace page and add header
         nspage = open(os.path.join(self._docsOutputDirectory, "%s.html" % nsName), 'w')
         nspage.write(htmlHeader % {'title': nsName, 'path': '../'})

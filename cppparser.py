@@ -1103,6 +1103,10 @@ class CppParser(object):
     def p_template_decl (self, p):
         'template_decl : template LT template_param_list GT'
         p[0] = p[3]
+        
+    def p_template_decl2 (self, p):
+        'template_decl : template LT GT'
+        p[0] = []
 
 # expression handling for argument default values - just parses and
 # then reassembles the default value expression (no evaluation)

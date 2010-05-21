@@ -526,9 +526,10 @@ nepomuk = toolkit.ModuleGenerator(
     cmakelists=[os.path.join(cmakelistBaseDirectory,"nepomuk/CMakeLists.txt"),
         os.path.join(cmakelistBaseDirectory,"nepomuk/core/CMakeLists.txt"),
         os.path.join(cmakelistBaseDirectory,"nepomuk/core/ontology/CMakeLists.txt"),
-        os.path.join(cmakelistBaseDirectory,"nepomuk/core/ui/CMakeLists.txt")],
+        os.path.join(cmakelistBaseDirectory,"nepomuk/core/ui/CMakeLists.txt"),
+        os.path.join(cmakelistBaseDirectory,"nepomuk/query/CMakeLists.txt")],
     
-    ignoreHeaders="""nepomuk_export.h ontologyloader.h desktopontologyloader.h fileontologyloader.h ontologymanager.h nepomukontologyloader.h""".split(" "),
+    ignoreHeaders="""nepomuk_export.h ontologyloader.h desktopontologyloader.h fileontologyloader.h ontologymanager.h nepomukontologyloader.h nepomukquery_export.h """.split(" "),
     #noUpdateSip=["typedefs.sip"],
     
     # Cpp parsing    
@@ -536,7 +537,7 @@ nepomuk = toolkit.ModuleGenerator(
     preprocessorValues={"Q_WS_X11": 1},
     
     macros=qtkdemacros.QtMacros(),
-    bareMacros=qtkdemacros.QtBareMacros(["NEPOMUK_EXPORT","KDE_EXPORT","KDE_DEPRECATED","Q_INVOKABLE"]),
+    bareMacros=qtkdemacros.QtBareMacros(["NEPOMUK_EXPORT","KDE_EXPORT","KDE_DEPRECATED","Q_INVOKABLE","NEPOMUKQUERY_EXPORT"]),
     
     # Sip generation
     sipImportDirs=["/usr/share/sip/PyQt4/",os.path.join(outputBaseDirectory,"sip")],
@@ -545,7 +546,7 @@ nepomuk = toolkit.ModuleGenerator(
         "kdecore/kdecoremod.sip",
         "soprano/sopranomod.sip"],
     copyrightNotice=qtkdemacros.copyrightNotice(),
-    exportMacros=["NEPOMUK_EXPORT","KDE_EXPORT"],
+    exportMacros=["NEPOMUK_EXPORT","KDE_EXPORT","NEPOMUKQUERY_EXPORT"],
     #noCTSCC=[],
     #ignoreBases=["khtml::KHTMLWidget"],
     

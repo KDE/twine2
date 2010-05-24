@@ -29,19 +29,22 @@ import cpptosiptransformer
 import sipmerger
 import os
 import os.path
+import glob
 from reducetxt import Reduce
 
 reducer = Reduce()
 
 class ModuleGenerator(object):
     @sealed
-    def __init__(self,module,cmakelists=[],ignoreHeaders=[],noUpdateSip=[],outputDirectory=None,
+    def __init__(self,module,cmakelists=[],headers=[],ignoreHeaders=[],noUpdateSip=[],outputDirectory=None,
             preprocessorValues=[],preprocessSubstitutionMacros=[],macros=[],bareMacros=[],exportMacros=None,
-            ignoreBases=None,noCTSCC=[],sipImportDirs=[],sipImports=[],copyrightNotice=None,annotationRules=[],
-            docsOutputDirectory=None,mainDocs=None,filenameMappingFunction=None,cppHeaderMappingFunction=None):
+            ignoreBases=None,noCTSCC=[],sipImportDirs=[],sipImports=[],copyrightNotice=None,
+            annotationRules=[],docsOutputDirectory=None,mainDocs=None,filenameMappingFunction=None,
+            cppHeaderMappingFunction=None):
             
         self._module = module
         self._cmakelists = [cmakelists] if isinstance(cmakelists,str) else cmakelists
+        self._headers = headers
         self._ignoreHeaders = set([ignoreHeaders] if isinstance(ignoreHeaders,str) else ignoreHeaders)
         self._noUpdateSip = noUpdateSip
         self._outputDirectory = outputDirectory
@@ -87,6 +90,9 @@ class ModuleGenerator(object):
         print("Extracting header file list from CMake:")
         cppHeaderFilenameSet = self.extractCmakeListsHeaders()
 
+        extraHeaderSet = self.expandHeaders()
+        cppHeaderFilenameSet.update(extraHeaderSet)
+
         cppHeaderFilenameList = list(cppHeaderFilenameSet)
         cppHeaderFilenameList.sort()
         for filename in cppHeaderFilenameList:
@@ -116,7 +122,7 @@ class ModuleGenerator(object):
             print("(%s not found. Skipping merge with previous sip files.)" % (_indexFilename,))
             
         print("\n")
-        
+
         print("Computing 'Convert To Sub Class Code'.")
         cpptosiptransformer.UpdateConvertToSubClassCodeDirectives(self._sipSymbolData,moduleSipScopes,self._noCTSCC)
         
@@ -148,6 +154,14 @@ class ModuleGenerator(object):
                 if os.path.basename(header) not in self._ignoreHeaders:
                     filenames.append(os.path.join(dirName,header))
         return set(filenames)
+        
+    def expandHeaders(self):
+        expanded_headers = set()
+        for pattern in self._headers:
+            for header in glob.iglob(pattern):
+                if os.path.basename(header) not in self._ignoreHeaders:
+                    expanded_headers.add(header)
+        return expanded_headers
         
     def _parseHeaders(self,cppHeaderFilenameList):
         headerScopeTuples = []
@@ -1486,7 +1500,7 @@ htmlFooter = """
 <li><a href="%(path)splasma/index.html">plasma</a></li>
 <li><a href="%(path)spolkitqt/index.html">polkitqt</a></li>
 <li><a href="%(path)ssolid/index.html">solid</a></li>
-<li><a href="%(path)ssoprano/index.html">soprano</a></li>""" if False else
+<li><a href="%(path)ssoprano/index.html">soprano</a></li>""" if True else
 """<li><a href="%(path)smarble/index.html">marble</a></li>""") + \
 """
 </ul></div></div>

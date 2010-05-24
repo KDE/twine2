@@ -21,13 +21,14 @@ import qtkdemacros
 import os.path
 import sipsymboldata
 
-#branch = "trunk/KDE"
-branch = "branches/KDE/4.4"
+branch = "trunk/KDE"
+#branch = "branches/KDE/4.4"
 outputBaseDirectory = "/home/sbe/devel/svn/kde/"+branch+"/kdebindings/python/pykde4"
 #cmakelistBaseDirectory = "/home/sbe/devel/svn/kde/branches/KDE/4.3/kdelibs"
 cmakelistBaseDirectory = "/home/sbe/devel/svn/kde/"+branch+"/kdelibs"
 cmakelistSupportBaseDirectory = "/home/sbe/devel/svn/kde/trunk/kdesupport"
 cmakelistPimlibsBaseDirectory = "/home/sbe/devel/svn/kde/"+branch+"/kdepimlibs"
+cmakelistPhononBaseDirectory = "/home/sbe/devel/git/phonon"
 
 ###########################################################################
 kdecore = toolkit.ModuleGenerator(
@@ -39,20 +40,20 @@ kdecore = toolkit.ModuleGenerator(
     # .h file extraction
     cmakelists=os.path.join(cmakelistBaseDirectory,"kdecore/CMakeLists.txt"),
     
-    ignoreHeaders="""conversion_check.h kallocator.h kdebug.h kcodecs.h kgenericfactory.h ksortablelist.h ktrader.h ktypelist.h  kmulticastsocket.h kmulticastsocketdevice.h kdecore_export.h kde_file.h ksocks.h kde_file.h ksharedptr.h klauncher_iface.h k3bufferedsocket.h  k3clientsocketbase.h  k3datagramsocket.h k3httpproxysocketdevice.h k3iobuffer.h  k3processcontroller.h  k3process.h  k3procio.h  k3resolver.h k3reverseresolver.h k3serversocket.h  k3socketaddress.h  k3socketbase.h  k3socketdevice.h  k3socks.h k3sockssocketdevice.h  k3streamsocket.h qtest_kde.h kdefakes.h kdeversion.h kauth.h ktypelistutils.h""".split(" "),
+    ignoreHeaders="""conversion_check.h kallocator.h kdebug.h kcodecs.h kgenericfactory.h ksortablelist.h ktrader.h ktypelist.h  kmulticastsocket.h kmulticastsocketdevice.h kdecore_export.h kde_file.h ksocks.h kde_file.h ksharedptr.h klauncher_iface.h k3bufferedsocket.h  k3clientsocketbase.h  k3datagramsocket.h k3httpproxysocketdevice.h k3iobuffer.h  k3processcontroller.h  k3process.h  k3procio.h  k3resolver.h k3reverseresolver.h k3serversocket.h  k3socketaddress.h  k3socketbase.h  k3socketdevice.h  k3socks.h k3sockssocketdevice.h  k3streamsocket.h qtest_kde.h kdefakes.h kdeversion.h kauth.h ktypelistutils.h ktypetraits.h karchive.h kar.h ktar.h kzip.h kshareddatacache.h""".split(" "),
     
     noUpdateSip=["typedefs.sip"],
     
     # Cpp parsing    
     preprocessSubstitutionMacros=qtkdemacros.QtPreprocessSubstitutionMacros(),
     macros=qtkdemacros.QtMacros(),
-    bareMacros=qtkdemacros.QtBareMacros(["KDECORE_EXPORT","KDE_EXPORT","KIO_EXPORT","KDE_DEPRECATED"]),
+    bareMacros=qtkdemacros.QtBareMacros(["KDECORE_EXPORT","KDE_EXPORT","KIO_EXPORT","KDE_DEPRECATED", "KDECORE_EXPORT_DEPRECATED"]),
     
     # Sip generation
     sipImportDirs=["/usr/share/sip/PyQt4/"],
     sipImports=["QtCore/QtCoremod.sip","QtGui/QtGuimod.sip","QtNetwork/QtNetworkmod.sip"],
     copyrightNotice=qtkdemacros.copyrightNotice(),
-    exportMacros=["KDECORE_EXPORT","KDE_EXPORT","KIO_EXPORT"],
+    exportMacros=["KDECORE_EXPORT","KDE_EXPORT","KIO_EXPORT","KDECORE_EXPORT_DEPRECATED"],
     ignoreBases=[],
     
     annotationRules=[
@@ -85,7 +86,7 @@ kdeui = toolkit.ModuleGenerator(
         #os.path.join(cmakelistBaseDirectory,"kdeui/widgets/CMakeLists.txt")
         ],
     
-    ignoreHeaders="""kxerrorhandler.h  k3iconview.h  k3iconviewsearchline.h  k3listview.h  k3listviewlineedit.h k3listviewsearchline.h  netwm_p.h k3mimesourcefactory.h kdeui_export.h fixx11h.h kglobalshortcutinfo_p.h kkeyserver_mac.h kkeyserver_win.h""".split(" "),
+    ignoreHeaders="""kxerrorhandler.h  k3iconview.h  k3iconviewsearchline.h  k3listview.h  k3listviewlineedit.h k3listviewsearchline.h  netwm_p.h k3mimesourcefactory.h kdeui_export.h fixx11h.h kglobalshortcutinfo_p.h kkeyserver_mac.h kkeyserver_win.h kimagecache.h""".split(" "),
     
     #noUpdateSip=["typedefs.sip"],
     
@@ -134,8 +135,12 @@ kio = toolkit.ModuleGenerator(
         os.path.join(cmakelistBaseDirectory,"kio/CMakeLists.txt"),
         os.path.join(cmakelistBaseDirectory,"kfile/CMakeLists.txt")
         ],
+    headers=[os.path.join(cmakelistBaseDirectory,"kdecore/io/karchive.h"),
+        os.path.join(cmakelistBaseDirectory,"kdecore/io/kar.h"),
+        os.path.join(cmakelistBaseDirectory,"kdecore/io/ktar.h"),
+        os.path.join(cmakelistBaseDirectory,"kdecore/io/kzip.h")],
     
-    ignoreHeaders="""http_slave_defaults.h ioslave_defaults.h kmimetyperesolver.h k3mimetyperesolver.h kfiledetailview.h kfileiconview.h kfiletreeview.h kfiletreeviewitem.h ksslpemcallback.h kpropsdialog.h kio_export.h kdirnotify.h k3filedetailview.h  k3fileiconview.h k3filetreeview.h  k3filetreeviewitem.h  k3mimetyperesolver.h kfiletreebranch.h  kfile_export.h kurlbar.h""".split(" "),
+    ignoreHeaders="""http_slave_defaults.h ioslave_defaults.h kmimetyperesolver.h k3mimetyperesolver.h kfiledetailview.h kfileiconview.h kfiletreeview.h kfiletreeviewitem.h ksslpemcallback.h kpropsdialog.h kio_export.h kdirnotify.h k3filedetailview.h  k3fileiconview.h k3filetreeview.h  k3filetreeviewitem.h  k3mimetyperesolver.h kfiletreebranch.h  kfile_export.h kurlbar.h kdebug.h kdebugdbusiface_p.h kdirwatch_p.h klimitediodevice_p.h kprocess_p.h""".split(" "),
     
     #noUpdateSip=["typedefs.sip"],
     
@@ -144,14 +149,16 @@ kio = toolkit.ModuleGenerator(
     preprocessorValues={"Q_WS_X11": 1,"Q_OS_UNIX": 1},
     
     macros=qtkdemacros.QtMacros(),
-    bareMacros=qtkdemacros.QtBareMacros(["KIO_EXPORT","KFILE_EXPORT","KIO_EXPORT_DEPRECATED","KDE_NO_EXPORT",
-                    "KDE_EXPORT","KDE_DEPRECATED","","KDEUI_EXPORT_DEPRECATED","KIO_CONNECTION_EXPORT"]),
+    bareMacros=qtkdemacros.QtBareMacros(["KDECORE_EXPORT","KDECORE_EXPORT_DEPRECATED","KIO_EXPORT",
+        "KFILE_EXPORT","KIO_EXPORT_DEPRECATED","KDE_NO_EXPORT","KDE_EXPORT","KDE_DEPRECATED",
+        "KDEUI_EXPORT_DEPRECATED","KIO_CONNECTION_EXPORT"]),
     
     # Sip generation
     sipImportDirs=["/usr/share/sip/PyQt4/",os.path.join(outputBaseDirectory,"sip")],
     sipImports=["QtCore/QtCoremod.sip","QtGui/QtGuimod.sip","QtXml/QtXmlmod.sip","kdecore/kdecoremod.sip","kdeui/kdeuimod.sip","solid/solidmod.sip"],
     copyrightNotice=qtkdemacros.copyrightNotice(),
-    exportMacros=["KIO_EXPORT","KFILE_EXPORT","KDE_EXPORT","KDEUI_EXPORT_DEPRECATED","KIO_CONNECTION_EXPORT","KIO_EXPORT_DEPRECATED"],
+    exportMacros=["KDECORE_EXPORT","KDECORE_EXPORT_DEPRECATED","KIO_EXPORT","KFILE_EXPORT","KDE_EXPORT","KDEUI_EXPORT_DEPRECATED",
+        "KIO_CONNECTION_EXPORT","KIO_EXPORT_DEPRECATED"],
     #ignoreBases=["Q3GridView"],
     noCTSCC=["KonqBookmarkContextMenu","KImportedBookmarkMenu","KBookmark","KBookmarkGroup"],
     
@@ -179,7 +186,7 @@ kutils = toolkit.ModuleGenerator(
     
     # .h file extraction
     cmakelists=[os.path.join(cmakelistBaseDirectory,"kutils/CMakeLists.txt")],
-    ignoreHeaders="""kcmodulecontainer.h  kutils_export.h""".split(" "),
+    ignoreHeaders="""kcmodulecontainer.h  kutils_export.h kcmutils_export.h kemoticons_export.h kidletime_export.h kprintutils_export.h""".split(" "),
     
     #noUpdateSip=["typedefs.sip"],
     
@@ -188,13 +195,13 @@ kutils = toolkit.ModuleGenerator(
     preprocessorValues={"Q_WS_X11": 1},
     
     macros=qtkdemacros.QtMacros(),
-    bareMacros=qtkdemacros.QtBareMacros(["KUTILS_EXPORT","KDE_EXPORT","KDE_DEPRECATED"]),
+    bareMacros=qtkdemacros.QtBareMacros(["KUTILS_EXPORT","KDE_EXPORT","KDE_DEPRECATED","KCMUTILS_EXPORT","KEMOTICONS_EXPORT","KIDLETIME_EXPORT","KPRINTUTILS_EXPORT"]),
     
     # Sip generation
     sipImportDirs=["/usr/share/sip/PyQt4/",os.path.join(outputBaseDirectory,"sip")],
     sipImports=["QtCore/QtCoremod.sip","QtGui/QtGuimod.sip","QtXml/QtXmlmod.sip","kdecore/kdecoremod.sip","kdeui/kdeuimod.sip"],
     copyrightNotice=qtkdemacros.copyrightNotice(),
-    exportMacros=["KUTILS_EXPORT","KDE_EXPORT"],
+    exportMacros=["KUTILS_EXPORT","KDE_EXPORT","KCMUTILS_EXPORT","KEMOTICONS_EXPORT","KIDLETIME_EXPORT","KPRINTUTILS_EXPORT"],
     
     annotationRules=[
         toolkit.AnnotationRule(
@@ -525,11 +532,11 @@ nepomuk = toolkit.ModuleGenerator(
     # .h file extraction
     cmakelists=[os.path.join(cmakelistBaseDirectory,"nepomuk/CMakeLists.txt"),
         os.path.join(cmakelistBaseDirectory,"nepomuk/core/CMakeLists.txt"),
-        os.path.join(cmakelistBaseDirectory,"nepomuk/core/ontology/CMakeLists.txt"),
+        os.path.join(cmakelistBaseDirectory,"nepomuk/core/types/CMakeLists.txt"),
         os.path.join(cmakelistBaseDirectory,"nepomuk/core/ui/CMakeLists.txt"),
         os.path.join(cmakelistBaseDirectory,"nepomuk/query/CMakeLists.txt")],
     
-    ignoreHeaders="""nepomuk_export.h ontologyloader.h desktopontologyloader.h fileontologyloader.h ontologymanager.h nepomukontologyloader.h nepomukquery_export.h """.split(" "),
+    ignoreHeaders="""nepomuk_export.h ontologyloader.h desktopontologyloader.h fileontologyloader.h ontologymanager.h nepomukontologyloader.h nepomukquery_export.h kmetadatatagwidget.h""".split(" "),
     #noUpdateSip=["typedefs.sip"],
     
     # Cpp parsing    
@@ -547,7 +554,7 @@ nepomuk = toolkit.ModuleGenerator(
         "soprano/sopranomod.sip"],
     copyrightNotice=qtkdemacros.copyrightNotice(),
     exportMacros=["NEPOMUK_EXPORT","KDE_EXPORT","NEPOMUKQUERY_EXPORT"],
-    #noCTSCC=[],
+    noCTSCC=["Term","GroupTerm","AndTerm","OrTerm","LiteralTerm","ResourceTerm","SimpleTerm","ComparisonTerm","ResourceTypeTerm","NegationTerm","OptionalTerm","FileQuery"],
     #ignoreBases=["khtml::KHTMLWidget"],
     
     annotationRules=[
@@ -584,7 +591,7 @@ soprano = toolkit.ModuleGenerator(
     
     # Cpp parsing    
     preprocessSubstitutionMacros=qtkdemacros.QtPreprocessSubstitutionMacros(),
-    preprocessorValues={"Q_WS_X11": 1, "USING_SOPRANO_NRLMODEL_UNSTABLE_API":1},
+    preprocessorValues={"Q_WS_X11": 1, "USING_SOPRANO_NRLMODEL_UNSTABLE_API":1, "QT_VERSION": 0x040700},
     
     macros=qtkdemacros.QtMacros(),
     bareMacros=qtkdemacros.QtBareMacros(["SOPRANO_EXPORT","SOPRANO_CLIENT_EXPORT","SOPRANO_SERVER_EXPORT",
@@ -637,15 +644,15 @@ akonadi = toolkit.ModuleGenerator(
     preprocessorValues={"Q_WS_X11": 1},
     
     macros=qtkdemacros.QtMacros(["AKONADI_DECLARE_PRIVATE"]),
-    bareMacros=qtkdemacros.QtBareMacros(["AKONADI_EXPORT","KDE_EXPORT","KDE_DEPRECATED","Q_INVOKABLE",
-                    "AKONADI_KABC_EXPORT","AKONADI_KMIME_EXPORT"]),
+    bareMacros=qtkdemacros.QtBareMacros(["AKONADI_EXPORT","AKONADI_EXPORT_DEPRECATED","KDE_EXPORT",
+        "KDE_DEPRECATED","Q_INVOKABLE","AKONADI_KABC_EXPORT","AKONADI_KMIME_EXPORT","AKONADI_KMIME_EXPORT_DEPRECATED"]),
     
     # Sip generation
     sipImportDirs=["/usr/share/sip/PyQt4/",os.path.join(outputBaseDirectory,"sip")],
     sipImports=["QtCore/QtCoremod.sip","QtGui/QtGuimod.sip","kdeui/kdeuimod.sip","kdecore/kdecoremod.sip","kio/kiomod.sip"],
     
     copyrightNotice=qtkdemacros.copyrightNotice(),
-    exportMacros=["AKONADI_EXPORT","AKONADI_KABC_EXPORT","AKONADI_KMIME_EXPORT","KDE_EXPORT"],
+    exportMacros=["AKONADI_EXPORT","AKONADI_KABC_EXPORT","AKONADI_KMIME_EXPORT","KDE_EXPORT","AKONADI_EXPORT_DEPRECATED","AKONADI_KMIME_EXPORT_DEPRECATED"],
     noCTSCC=["Collection","Entity","Item"],
     
     annotationRules=[
@@ -713,10 +720,10 @@ phonon = toolkit.ModuleGenerator(
     module="PyKDE4.phonon",
     outputDirectory=os.path.join(outputBaseDirectory,"sip/phonon"),
     docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/html/phonon"),
-    mainDocs=os.path.join(cmakelistSupportBaseDirectory,"phonon/Mainpage.dox"),
+    mainDocs=os.path.join(cmakelistPhononBaseDirectory,"phonon/Mainpage.dox"),
     
     # .h file extraction
-    cmakelists=[os.path.join(cmakelistSupportBaseDirectory,"phonon/phonon/CMakeLists.txt")],
+    cmakelists=[os.path.join(cmakelistPhononBaseDirectory,"phonon/CMakeLists.txt")],
     
     ignoreHeaders="""phonondefs.h  phonon_export.h export.h kaudiodevicelist_export.h phononnamespace.h addoninterface.h volumefaderinterface.h backendinterface.h effectinterface.h mediaobjectinterface.h platformplugin.h audiodataoutputinterface.h audiooutputinterface.h""".split(" "),
 
@@ -773,7 +780,7 @@ phonon = toolkit.ModuleGenerator(
 #soprano.run()
 #akonadi.run()
 #polkitqt.run()
-#phonon.run()
+phonon.run()
 
 
 classNames = []
@@ -804,6 +811,7 @@ UpdateClassNamespaceList('kparts',kparts.docs())
 UpdateClassNamespaceList('khtml',khtml.docs())
 UpdateClassNamespaceList('knewstuff',knewstuff.docs())
 UpdateClassNamespaceList('dnssd',dnssd.docs())
+
 UpdateClassNamespaceList('nepomuk',nepomuk.docs())
 UpdateClassNamespaceList('soprano',soprano.docs())
 UpdateClassNamespaceList('akonadi',akonadi.docs())

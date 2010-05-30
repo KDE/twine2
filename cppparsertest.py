@@ -236,6 +236,10 @@ const KConfigGroup      group (const QByteArray& group);
 const KConfigGroup      group (const QByteArray& group) const;
             """)
 
+    def testFunctions10(self):
+        self.ioTest("""int downloadRegionDialog(WindowFlags const f = 0);""",
+          """ int downloadRegionDialog (const WindowFlags f = 0);""")
+
     def testOperator1(self):
         self.mirrorTest(
             """

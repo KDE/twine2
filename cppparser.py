@@ -666,6 +666,10 @@ class CppParser(object):
     def p_type_specifier4 (self, p):
         'type_specifier : type_specifier_base CVQUAL type_decorator'
         p [0] = '%s %s%s' % (p [2], p[1], p[3])
+        
+    def p_type_specifier5 (self, p):
+        'type_specifier : type_specifier_base CVQUAL'
+        p [0] = '%s %s' % (p [2], p[1])
 
     def p_type_decorator (self, p):
         """type_decorator : ASTERISK

@@ -752,9 +752,9 @@ class SipParser(object):
         self._popScope()
                 
     def p_function_name0 (self, p):
-        'function_name : type_specifier ID LPAREN'
+        'function_name : type_specifier type_specifier LPAREN'
         self.functionObject (p [2], p[1])
-        
+
     def p_function_name1 (self, p):
         'function_name : STORAGE type_specifier ID LPAREN'
         fObj = self.functionObject (p [3], p[2])

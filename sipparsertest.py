@@ -224,6 +224,12 @@ const KConfigGroup      group (const QByteArray& group);
 const KConfigGroup      group (const QByteArray& group) const;
             """)
 
+    def testFunctions10(self):
+        self.mirrorTest(
+            """
+TermPrivate QSharedDataPointer<Nepomuk::Query::TermPrivate>::clone ();
+            """)
+
     def testAccess(self):
         self.mirrorTest(
             """void PlainPreFunc ();

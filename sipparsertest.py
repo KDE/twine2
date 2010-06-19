@@ -96,6 +96,13 @@ class TestSipParser(unittest.TestCase):
                     Foo ();
             };
             """)
+    def testClass8(self):
+        self.mirrorTest(
+            """
+class ServiceBase : KShared {
+  ServiceBase (ServiceBasePrivate*const d);
+};
+""",3)
 
     def testOpaqueClass(self):
         self.mirrorTest(
@@ -678,7 +685,7 @@ template<TYPE1, TYPE2>
 
 };
 
-""",debugLevel=2)
+""",debugLevel=0)
 
     def xtestQtCoremod(self):
         with open("/usr/share/sip/PyQt4/QtCore/QtCoremod.sip") as fhandle:

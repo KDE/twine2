@@ -614,12 +614,12 @@ class SipParser(object):
         p [0] = '%s %s%s' % (p [1], p[2], p[3])
         
     def p_type_decorator (self, p):
-        """type_decorator : ASTERISK
+        """type_decorator : ASTERISK CVQUAL
                           | AMPERSAND
                           | ASTERISK AMPERSAND
                           | ASTERISK ASTERISK
                           | ASTERISK ASTERISK ASTERISK
-                          | ASTERISK CVQUAL"""
+                          | ASTERISK"""
         p [0] = "".join (p [1:])
         
     def p_type_specifier_list (self, p):

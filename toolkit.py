@@ -1154,10 +1154,10 @@ class ModuleGenerator(object):
     @staticmethod
     def WriteMainPage(htmldst):
         page = open(os.path.join(htmldst, 'modules.html'), 'w')
-        page.write(htmlHeader % {'title': 'KDE 4.4 PyKDE API Reference', 'path': ''})
+        page.write(htmlHeader % {'title': 'KDE 4.5 PyKDE API Reference', 'path': ''})
 
         page.write("""<p>
-<h2>KDE 4.4 PyKDE API Reference</h2>
+<h2>KDE 4.5 PyKDE API Reference</h2>
 </p>
 <p>
 This is the reference to the KDE API as it appears to Python programs using PyKDE. This is just
@@ -1442,7 +1442,7 @@ htmlHeader = """<?xml version="1.0" encoding="UTF-8"?>
     <div>
       <div>
         <img alt ="" src="%(path)scommon/top-kde.jpg"/>
-        KDE 4.4 PyKDE API Reference
+        KDE 4.5 PyKDE API Reference
       </div>
     </div>
   </div>

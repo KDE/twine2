@@ -648,9 +648,8 @@ class ModuleGenerator(object):
                     if a.defaultValue() is not None:
                         paramname += "=" + a.defaultValue().replace ('::', '.')
                         
-                    comma = ", "
-                
                     result.append(comma + paramtype + " " + paramname)
+                    comma = ", "
                     i += 1
             result.append(')</td></tr>\n')
         return "".join(result)

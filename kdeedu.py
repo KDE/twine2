@@ -22,9 +22,12 @@ import os.path
 import sipsymboldata
 
 #branch = "trunk/KDE"
-branch = "branches/KDE/4.4"
+branch = "branches/KDE/4.5"
 
 outputBaseDirectory = "/home/sbe/devel/svn/kde/" + branch + "/kdeedu"
+
+#outputBaseDirectory = "/home/sbe/devel/pykde4/marble_4.5"
+
 #cmakelistBaseDirectory = "/home/sbe/devel/svn/kde/branches/KDE/4.3/kdelibs"
 cmakelistBaseDirectory = "/home/sbe/devel/svn/kde/" + branch + "/kdeedu"
 
@@ -105,3 +108,4 @@ UpdateClassNamespaceList('marble',marble.docs())
 print("Writing all classes index:")
 toolkit.ModuleGenerator.WriteAllClasses(os.path.join(outputBaseDirectory,"marble/docs/bindings/python/html"),nsNames,classNames)
 print("Done")
+

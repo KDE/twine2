@@ -520,7 +520,11 @@ class ModuleGenerator(object):
         else:
             subClasses = ''
         
-        namespace = "Namespace: " + sipClass.fqPythonName() + "<br />" if sipClass.fqPythonName()!=sipClass.name() else ""
+        parentScope = sipClass.parentScope()
+        if parentScope.name() is not None:
+            namespace = "Namespace: " + self.linkType(parentScope.fqName(),None) + "<br />"
+        else:
+            namespace = ""
         
         page.write (classHeader %
             {'classname': pyName(sipClass),

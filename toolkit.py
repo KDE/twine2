@@ -1211,6 +1211,7 @@ code fragments in the documentation have not been translated from C++ to Python.
         'int': 'int',
         'float': 'float',
         'long': 'long',
+        'short': 'int',
         'qint32': 'int',
         'quint16': 'int',
         'qint64': 'long',
@@ -1222,10 +1223,11 @@ code fragments in the documentation have not been translated from C++ to Python.
         'unsigned int': 'long',
         'unsigned long': 'long',
         'qreal': 'float',
-        'unsigned short': 'long'
+        'unsigned short': 'int',
+        'long long': 'long'
     }
         
-    def linkType(self, typeName,context):
+    def linkType(self, typeName, context):
         if typeName.startswith("const "):
             typeName = typeName[6:]
         while typeName.endswith('*') or typeName.endswith('&'):

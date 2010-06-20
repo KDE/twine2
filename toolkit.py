@@ -1252,6 +1252,9 @@ code fragments in the documentation have not been translated from C++ to Python.
         # Handle QList<...>
         if typeName.startswith("QList<"):
             return '[' + self.linkType(typeName[6:-1],context) + ']'
+            
+        if typeName.startswith("QFlags<"):
+            return 'QFlags&lt;' + self.linkType(typeName[7:-1],context) + '&gt;'
 
         if typeName.startswith("QHash<"):
             pivot = typeName.index(",")
@@ -1274,7 +1277,11 @@ code fragments in the documentation have not been translated from C++ to Python.
         
         fileName = typeName.replace('::','.')
         try:
-            typeObject = self._sipSymbolData.lookupType(typeName,context)
+            typeObject = self._sipSymbolData.lookupType(typeName.replace('.','::'),context)
+            
+            if isinstance(typeObject,self._sipSymbolData.Typedef) and not (typeObject.argumentType() is not None and typeObject.argumentType().startswith('QFlags')) and typeObject.argumentType() is not None:
+                return self.linkType(typeObject.argumentType(),context)
+
             #print("typeObject: "+repr(typeObject))
             #print("typeObject.topScope():"+repr(typeObject.topScope()))
             typeModule = typeObject.topScope().module()
@@ -1289,6 +1296,15 @@ code fragments in the documentation have not been translated from C++ to Python.
                     else:
                         parentPythonName = parentScope.fqPythonName()
                     fileName = parentPythonName + ".html#" + linkId(typeObject)
+                    
+                elif isinstance(typeObject,self._sipSymbolData.Typedef):
+                    parentScope = typeObject.parentScope()
+                    if isinstance(parentScope,self._sipSymbolData.TopLevelScope):
+                        parentPythonName = "global"
+                    else:
+                        parentPythonName = parentScope.fqPythonName()
+                    fileName = parentPythonName + ".html"
+                    
                 else:
                     fileName = typeObject.fqPythonName() + ".html"
                 return '<a href="../' + typeModule[7:] + '/' + fileName + '">' + typeObject.fqPythonName() + '</a>'

@@ -1080,7 +1080,7 @@ class ModuleGenerator(object):
                 if indexstring[0].upper()=='K':
                     indexstring = indexstring[1:]
                 parentScope = obj.parentScope()
-                scope = parentScope.fqName()
+                scope = parentScope.fqPythonName()
                 if not scope:
                     cellcontents = '<a class="el" href="%s.html">%s</a>&nbsp;&nbsp;&nbsp;' \
                                     % (classname,classname)

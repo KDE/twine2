@@ -1224,7 +1224,8 @@ code fragments in the documentation have not been translated from C++ to Python.
         'unsigned long': 'long',
         'qreal': 'float',
         'unsigned short': 'int',
-        'long long': 'long'
+        'long long': 'long',
+        'unsigned long long': 'long'
     }
         
     def linkType(self, typeName, context):

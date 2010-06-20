@@ -1259,6 +1259,12 @@ code fragments in the documentation have not been translated from C++ to Python.
             rightType = self.linkType(typeName[pivot+1:-1],context)
             return '{' + leftType + ':'+ rightType + '}'
 
+        if typeName.startswith("QMap<"):
+            pivot = typeName.index(",")
+            leftType = self.linkType(typeName[5:pivot],context)
+            rightType = self.linkType(typeName[pivot+1:-1],context)
+            return '{' + leftType + ':'+ rightType + '}'
+
         if typeName.startswith("Qt.") or typeName.startswith("Qt::"):
             return '<a href="http://www.riverbankcomputing.co.uk/static/Docs/PyQt4/html/qt.html">' + typeName + '</a>'
         

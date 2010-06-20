@@ -1293,7 +1293,7 @@ code fragments in the documentation have not been translated from C++ to Python.
             typeModule = typeObject.topScope().module()
             #print("typeObject.topScope().module(): " + repr(typeModule))
             if typeModule.startswith("PyQt"):
-                return '<a href="http://www.riverbankcomputing.co.uk/static/Docs/PyQt4/html/' + typeName.lower() + '.html">' + typeObject.fqPythonName() + '</a>'
+                return '<a href="http://www.riverbankcomputing.co.uk/static/Docs/PyQt4/html/' + typeName.lower().replace('::','-') + '.html">' + typeObject.fqPythonName() + '</a>'
             elif typeModule.startswith("PyKDE4"):
                 if isinstance(typeObject,self._sipSymbolData.Enum):
                     parentScope = typeObject.parentScope()

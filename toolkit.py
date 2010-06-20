@@ -555,7 +555,7 @@ class ModuleGenerator(object):
         
         count = [0]
         def MethodFilter(obj):
-            if 'static' not in obj.qualifier():
+            if (not obj.storage() == 'static') and not (obj.access() is self._sipSymbolData.ACCESS_SIGNALS):
                 count[0] += 1
                 return True
             else:
@@ -566,7 +566,7 @@ class ModuleGenerator(object):
         
         count = [0]
         def StaticFilter(obj):
-            if 'static' in obj.qualifier():
+            if obj.storage() == 'static' and not (obj.access() is self._sipSymbolData.ACCESS_SIGNALS):
                 count[0] += 1
                 return True
             else:
@@ -577,9 +577,18 @@ class ModuleGenerator(object):
 
         page.write("</table>\n")
         
-        # methods
-        self.writeMethodDetails(page, methodList, commentMap)
         
+        # signals
+        self.writeMethodDetails(page, [x for x in methodList if SignalFilter(x)], commentMap,
+            "Signal Documentation",True)
+        
+        # methods
+        self.writeMethodDetails(page, [x for x in methodList if MethodFilter(x)], commentMap)
+
+        # Static methods
+        self.writeMethodDetails(page, [x for x in methodList if StaticFilter(x)], commentMap,
+            "Static Method Documentation",True)
+
         # variables
         self.writeVariableDetails(page, variableList, commentMap)
         
@@ -720,7 +729,7 @@ class ModuleGenerator(object):
         
         else:
             bracket = "("
-            if not function and 'static' not in obj.qualifier():
+            if not function:
                 args += """<tr>
 <td class="memname">%s</td>
 <td>%s</td>

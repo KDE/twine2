@@ -367,6 +367,10 @@ class ModuleGenerator(object):
     def docs(self):
         print("Extracting header file list from CMake:")
         cppHeaderFilenameSet = self.extractCmakeListsHeaders()
+        
+        extraHeaderSet = self.expandHeaders()
+        cppHeaderFilenameSet.update(extraHeaderSet)
+        
         cppHeaderFilenameList = list(cppHeaderFilenameSet)
         cppHeaderFilenameList.sort()
         for filename in cppHeaderFilenameList:
@@ -411,8 +415,8 @@ class ModuleGenerator(object):
         try:
             cppClass = self._symbolData.lookupType(sipClass.fqName(),sipClass)
             
-            print("\nHit " + sipClass.fqName())
-            print("parent "+repr(cppClass.parentScope()))
+            #print("\nHit " + sipClass.fqName())
+            #print("parent "+repr(cppClass.parentScope()))
             
             parentScope = cppClass.parentScope()
             for item in parentScope:
@@ -423,7 +427,7 @@ class ModuleGenerator(object):
                     break
             
         except KeyError:
-            print("Unable to find Cpp class while writing class docs.")
+            print("Unable to find Cpp class info for '" + sipClass.fqName() +" ' while writing class docs.")
 
         self.writeClassPage(sipClass,subclassMapping,cppClass,classComment)
 

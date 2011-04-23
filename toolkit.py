@@ -159,8 +159,7 @@ class ModuleGenerator(object):
         expanded_headers = set()
         for pattern in self._headers:
             for header in glob.iglob(pattern):
-                if os.path.basename(header) not in self._ignoreHeaders:
-                    expanded_headers.add(header)
+                expanded_headers.add(header)
         return expanded_headers
         
     def _parseHeaders(self,cppHeaderFilenameList):
@@ -967,7 +966,7 @@ class ModuleGenerator(object):
                     nsList = namespaceCollector.setdefault(item.fqName(),[])
                     nsList.append(item)
 
-        print("nsList: " + repr(nsList))
+        #print("nsList: " + repr(nsList))
 
         self.writeNamespacePage("global",sipScopes,cppScopes)
 
@@ -1167,10 +1166,10 @@ class ModuleGenerator(object):
     @staticmethod
     def WriteMainPage(htmldst):
         page = open(os.path.join(htmldst, 'modules.html'), 'w')
-        page.write(htmlHeader % {'title': 'KDE 4.5 PyKDE API Reference', 'path': ''})
+        page.write(htmlHeader % {'title': 'KDE 4.6 PyKDE API Reference', 'path': ''})
 
         page.write("""<p>
-<h2>KDE 4.5 PyKDE API Reference</h2>
+<h2>KDE 4.6 PyKDE API Reference</h2>
 </p>
 <p>
 This is the reference to the KDE API as it appears to Python programs using PyKDE. This is just
@@ -1484,7 +1483,7 @@ htmlHeader = """<?xml version="1.0" encoding="UTF-8"?>
     <div>
       <div>
         <img alt ="" src="%(path)scommon/top-kde.jpg"/>
-        KDE 4.5 PyKDE API Reference
+        KDE 4.6 PyKDE API Reference
       </div>
     </div>
   </div>

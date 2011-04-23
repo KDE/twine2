@@ -20,9 +20,10 @@ import toolkit
 import qtkdemacros
 import os.path
 import sipsymboldata
+import re
 
-#branch = "trunk/KDE"
-branch = "branches/KDE/4.5"
+branch = "trunk/KDE"
+#branch = "branches/KDE/4.5"
 
 outputBaseDirectory = "/home/sbe/devel/svn/kde/" + branch + "/kdeedu"
 
@@ -42,13 +43,15 @@ marble = toolkit.ModuleGenerator(
     cmakelists=[os.path.join(cmakelistBaseDirectory,"marble/src/lib/CMakeLists.txt"),
                 os.path.join(cmakelistBaseDirectory,"marble/src/lib/geodata/CMakeLists.txt")],
     
-    ignoreHeaders="""marble_export.h geodata_export.h TileCreatorDialog.h GeoDataCoordinates_p.h AbstractProjectionHelper.h EquirectProjection.h EquirectProjectionHelper.h MercatorProjection.h MercatorProjectionHelper.h SphericalProjection.h SphericalProjectionHelper.h MapThemeSortFilterProxyModel.h ExtDateTime.h MarbleWidgetInputHandler.h BoundingBox.h GeoDataDocument_p.h GeoDataMultiGeometry_p.h GeoDataPoint_p.h GeoDataFeature_p.h GeoDataLinearRing_p.h GeoDataLookAt_p.h GeoDataRegion_p.h GeoDataPlacemark_p.h GeoDataLineString_p.h GeoDataContainer_p.h GeoDataPolygon_p.h GeoDataGeometry_p.h GeoDataLod_p.h""".split(" "),
+    ignoreHeaders="""marble_export.h geodata_export.h TileCreatorDialog.h GeoDataCoordinates_p.h AbstractProjectionHelper.h EquirectProjection.h EquirectProjectionHelper.h MercatorProjection.h MercatorProjectionHelper.h SphericalProjection.h SphericalProjectionHelper.h MapThemeSortFilterProxyModel.h ExtDateTime.h MarbleWidgetInputHandler.h BoundingBox.h GeoDataDocument_p.h GeoDataMultiGeometry_p.h GeoDataPoint_p.h GeoDataFeature_p.h GeoDataLinearRing_p.h GeoDataLookAt_p.h GeoDataRegion_p.h GeoDataPlacemark_p.h GeoDataLineString_p.h GeoDataContainer_p.h GeoDataPolygon_p.h GeoDataGeometry_p.h GeoDataLod_p.h RoutingManager.h RoutingWidget.h""".split(" "),
 
     #noUpdateSip=["phononnamespace.sip"],
     ignoreBases=["QSharedData"],
     
     # Cpp parsing    
-    preprocessSubstitutionMacros=qtkdemacros.QtPreprocessSubstitutionMacros(),
+    preprocessSubstitutionMacros=qtkdemacros.QtPreprocessSubstitutionMacros([
+        (re.compile(r'MARBLE_DEPRECATED\((.*?)\);',re.DOTALL),r'\1;'),
+        ]),
     preprocessorValues={"Q_WS_X11": 1, "QT_VERSION": "0x040400"},
     
     macros=qtkdemacros.QtMacros(),
@@ -84,7 +87,7 @@ marble = toolkit.ModuleGenerator(
     )
 
 ###########################################################################
-#marble.run()
+marble.run()
 
 classNames = []
 nsNames = []

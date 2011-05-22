@@ -52,7 +52,10 @@ class TestSipParser(unittest.TestCase):
         new_code = scope.format()
         if new_code!=code:
             self.fail("Output code doesn't match input code.\n---- Original:\n" + code + "\n---- Result:" + new_code)
-            
+
+    def simpleParseTest(self,code,debugLevel=0):
+        self.parser.parse(self.syms, code, debugLevel=debugLevel);
+
     def testClass0(self):
         self.mirrorTest(
             """
@@ -687,6 +690,40 @@ template<TYPE1, TYPE2>
 
 """,debugLevel=0)
 
+    def testModule(self):
+        self.mirrorTest("""
+%Module PyKDE4.kdecore
+""")
+
+    def testModule2(self):
+        self.mirrorTest("""
+%Module(name=PyQt4.QtCore, keyword_arguments="Optional")
+
+%Timeline {Qt_4_1_1 Qt_4_1_2}""")
+
+    def testAPI(self):
+        self.simpleParseTest("""
+%API(name=QDate, version=2)
+""")
+
+    def testInclude(self):
+        self.simpleParseTest("""
+%Include(name=staticplugins.sip, optional=True)
+""")
+
+    def testGetter(self):
+        # This just has to go through the parser. PyKDE doesn't need the info which is read in.
+        self.simpleParseTest("""
+class Foo {
+public:
+    static const QMetaObject staticMetaObject {
+%GetCode
+    sipPy = qpycore_qobject_staticmetaobject(sipPyType);
+%End
+};
+};
+""")
+    
     def xtestQtCoremod(self):
         with open("/usr/share/sip/PyQt4/QtCore/QtCoremod.sip") as fhandle:
             text = fhandle.read()

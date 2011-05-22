@@ -21,7 +21,8 @@ import string
 
 states = (('enum', 'inclusive'), ('function', 'inclusive'), ('variable', 'inclusive'),\
           ('block', 'exclusive'), ('sipStmt', 'exclusive'), ('filename', 'exclusive'), \
-          ('string', 'exclusive'), ('dottedname', 'exclusive'))
+          ('string', 'exclusive'), ('dottedname', 'exclusive'), ('keypairs','exclusive'), \
+          ('keypairs2','exclusive'))
 
 blockTokens = ('AccessCode', 'BIGetCharBufferCode', 'BIGetReadBufferCode', 'BIGetSegCountCode',\
                'BIGetWriteBufferCode', 'ConvertToSubClassCode', 'ConvertToTypeCode',\
@@ -288,6 +289,26 @@ def t_filename_FILENAME (t):
     t.lexer.begin ('variable')
     return t
 
+def t_keypairs_FILENAME (t):
+    r'[._A-Za-z][._/A-Za-z0-9\-]*[._A-Za-z0-9]'
+    t.lexer.begin ('variable')
+    return t
+    
+def t_keypairs_LPAREN(t):
+    r'\('
+    t.lexer.begin('keypairs2')
+    return t
+    
+t_keypairs2_FILENAME = r'[._/A-Za-z0-9\-]+'
+t_keypairs2_STRING = r'"[^"]*"'
+def t_keypairs2_RPAREN(t):
+    r'\)'
+    t.lexer.begin ('variable')
+    return t
+
+t_keypairs2_EQUALS = r'='
+t_keypairs2_COMMA = r','
+    
 def t_string_STRING (t):
     r'"[^"]*"'
     t.lexer.begin ('variable')
@@ -335,8 +356,10 @@ def t_ID(t):
     elif t.value in sipDirectives:
         pos = t.lexer.lexpos - len (t.value) - 1
         if t.lexer.lexdata [pos] == '%':
-            if t.value in ['Import', 'Include', 'Module', 'OptionalInclude']:
+            if t.value in ['Import', 'OptionalInclude']:
                 t.lexer.begin('filename')
+            elif t.value in ['Module','API', 'Include']:
+                t.lexer.begin('keypairs')
             elif t.value=='DefaultEncoding':
                 t.lexer.begin('string')
             elif t.value in ['DefaultMetatype','DefaultSupertype']:

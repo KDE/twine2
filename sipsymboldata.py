@@ -332,12 +332,16 @@ class SymbolData(cppsymboldata.SymbolData):
             cppsymboldata.SymbolData.Entity.__init__(self, parentScope, name, filename, lineno)
             SymbolData.SipBlock.__init__(self, name)
             self._force = False
-
+            self._keypairs = None
+            
         def setForce(self,force):
             self._force = force
             
         def force(self):
             return self._force
+            
+        def setKeypairs(self, pairlist):
+            self._keypairs = pairlist   # A list of key-value tuples.
             
         def format(self,indent=0):
             return SymbolData.SipBlock.format(self,indent)

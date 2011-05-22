@@ -1221,8 +1221,10 @@ class SipParser(object):
     def p_sip_if (self, p):
         """sip_if : PERCENT If LPAREN if_expression RPAREN"""
         pass
+    
     def p_api (self, p):
-        """api : PERCENT API ID ICONST"""
+        """api : PERCENT API ID ICONST
+               | PERCENT API keypairs"""
         pass
         
     def p_sip_end (self, p):
@@ -1235,9 +1237,15 @@ class SipParser(object):
         directive.setBody('%Import ' + p[3])
         
     def p_include (self, p):
-        'include : PERCENT Include FILENAME'
+        """include : PERCENT Include FILENAME"""
         directive = self.sipDirectiveObject('Include')
         directive.setBody('%Include ' + p[3])
+        
+    def p_include2(self, p):    
+        """include : PERCENT Include keypairs"""
+        directive = self.sipDirectiveObject('Include')
+        directive.setKeypairs(p[3])
+        directive.setBody("%" + p[2] + "(" + ", ".join( (x[0]+"="+x[1] for x in p[3]) ) + ")")
         
     def p_license_annot (self, p):
         'license_annot : licenseAnnotation'
@@ -1253,12 +1261,38 @@ class SipParser(object):
         directive = self.sipDirectiveObject('License')
         directive.setBody(p[4])
         
-    def p_module (self, p):
+    def p_module(self, p):
         """module : PERCENT Module FILENAME
                   | PERCENT Module FILENAME ICONST"""
         directive = self.sipDirectiveObject('Module')
         directive.setBody("%" + " ".join(p[2:]))
-                  
+
+    def p_module2(self, p):
+        """module : PERCENT Module keypairs
+                  | PERCENT Module keypairs ICONST"""
+        directive = self.sipDirectiveObject('Module')
+        directive.setKeypairs(p[3])
+        directive.setBody("%" + p[2] + "(" + ", ".join( (x[0]+"="+x[1] for x in p[3]) ) + ")")
+
+    def p_keypairs(self, p):
+        """keypairs : LPAREN keypair_list RPAREN"""
+        p[0] = p[2]
+        
+    def p_keypairlist2(self, p):
+        """keypair_list : keypair"""
+        p[0] = [p[1]]
+        
+    def p_keypair(self, p):
+        """keypair : FILENAME EQUALS FILENAME
+                   | FILENAME EQUALS STRING"""
+        p[0] = (p[1],p[3])
+
+    def p_keypairlist(self, p):
+        """keypair_list : keypair_list COMMA keypair"""
+        new_list = list(p[1])
+        new_list.append(p[3])
+        p[0] = new_list
+
     def p_optional_include (self, p):
         'optional_include : PERCENT OptionalInclude FILENAME'
         directive = self.sipDirectiveObject('OptionalInclude')

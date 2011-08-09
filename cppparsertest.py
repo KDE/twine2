@@ -532,5 +532,17 @@ bool operator == (const GeoDataLatLonAltBox& lhs, const GeoDataLatLonAltBox& rhs
 };
 """)
 
+    def testFriendOperator(self):
+        self.parser.bareMacros = qtkdemacros.QtBareMacros(["KDECORE_EXPORT"])
+        self.mirrorTest("""
+class Foo {
+    static KDateTime realCurrentLocalDateTime();
+    friend QDataStream KDECORE_EXPORT &operator<<(QDataStream &out, const KDateTime &dateTime);
+    friend QDataStream KDECORE_EXPORT &operator>>(QDataStream &in, KDateTime &dateTime);
+};
+""",2)
+
+
+
 if __name__ == '__main__':
     unittest.main()

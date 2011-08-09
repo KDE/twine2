@@ -752,6 +752,17 @@ class SipParser(object):
         varObj.setStorage(p[1])
         self._popScope()
                 
+    def p_variable_decl2(self, p):
+        """variable_decl : STORAGE argument_specifier LBRACE declarations RBRACE SEMI"""
+        varObj = self.variableObject(p[2].name(), p[2].argumentType(), p[2].defaultValue())
+        varObj.setStorage(p[1])
+        self._popScope()
+
+    def p_variable_decl3(self, p):
+        """variable_decl : argument_specifier LBRACE declarations RBRACE SEMI"""
+        varObj = self.variableObject(p[1].name(), p[1].argumentType(), p[1].defaultValue())
+        self._popScope()
+                
     def p_function_name0 (self, p):
         'function_name : type_specifier type_specifier LPAREN'
         self.functionObject (p [2], p[1])

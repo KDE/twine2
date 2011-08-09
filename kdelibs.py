@@ -16,21 +16,18 @@
 # Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+import re
 import toolkit
 import qtkdemacros
 import os.path
 import sipsymboldata
 
-branch = "trunk/KDE"
-#branch = "branches/KDE/4.4"
-outputBaseDirectory = "/home/sbe/devel/svn/kde/"+branch+"/kdebindings/python/pykde4"
-#cmakelistBaseDirectory = "/home/sbe/devel/svn/kde/branches/KDE/4.3/kdelibs"
-cmakelistBaseDirectory = "/home/sbe/devel/svn/kde/"+branch+"/kdelibs"
-cmakelistSupportBaseDirectory = "/home/sbe/devel/svn/kde/trunk/kdesupport"
-cmakelistPimlibsBaseDirectory = "/home/sbe/devel/svn/kde/"+branch+"/kdepimlibs"
+outputBaseDirectory = "/home/sbe/devel/git/kde/kdebindings/pykde4"
+cmakelistBaseDirectory = "/home/sbe/devel/git/kde/kdelibs"
+cmakelistPimlibsBaseDirectory = "/home/sbe/devel/git/kde/kdepimlibs"
 cmakelistPhononBaseDirectory = "/home/sbe/devel/git/phonon"
-kdelibsBuildDirectory = "/home/sbe/devel/svn/kde/trunk_build/KDE/kdelibs"
-kdepimlibsBuildDirectory = "/home/sbe/devel/svn/kde/trunk_build/KDE/kdepimlibs"
+kdelibsBuildDirectory = "/home/sbe/devel/git_build/kde/kdelibs"
+kdepimlibsBuildDirectory = "/home/sbe/devel/git_build/kde/kdepimlibs"
 cmakelistGitBaseDirectory = "/home/sbe/devel/git"
 polkitqtBaseDirectory = "/home/sbe/devel/git/polkit-qt"
 sipImportDir = "/home/sbe/devel/kdesvninstall/share/sip/PyQt4"
@@ -45,20 +42,20 @@ kdecore = toolkit.ModuleGenerator(
     # .h file extraction
     cmakelists=os.path.join(cmakelistBaseDirectory,"kdecore/CMakeLists.txt"),
     
-    ignoreHeaders="""conversion_check.h kallocator.h kdebug.h kcodecs.h kgenericfactory.h ksortablelist.h ktrader.h ktypelist.h  kmulticastsocket.h kmulticastsocketdevice.h kdecore_export.h kde_file.h ksocks.h kde_file.h ksharedptr.h klauncher_iface.h k3bufferedsocket.h  k3clientsocketbase.h  k3datagramsocket.h k3httpproxysocketdevice.h k3iobuffer.h  k3processcontroller.h  k3process.h  k3procio.h  k3resolver.h k3reverseresolver.h k3serversocket.h  k3socketaddress.h  k3socketbase.h  k3socketdevice.h  k3socks.h k3sockssocketdevice.h  k3streamsocket.h qtest_kde.h kdefakes.h kdeversion.h kauth.h ktypelistutils.h ktypetraits.h karchive.h kar.h ktar.h kzip.h kshareddatacache.h kmountpoint.h kdirwatch.h""".split(" "),
+    ignoreHeaders="""conversion_check.h kallocator.h kdebug.h kcodecs.h kgenericfactory.h ksortablelist.h ktrader.h ktypelist.h  kmulticastsocket.h kmulticastsocketdevice.h kdecore_export.h kde_file.h ksocks.h kde_file.h ksharedptr.h klauncher_iface.h k3bufferedsocket.h  k3clientsocketbase.h  k3datagramsocket.h k3httpproxysocketdevice.h k3iobuffer.h  k3processcontroller.h  k3process.h  k3procio.h  k3resolver.h k3reverseresolver.h k3serversocket.h  k3socketaddress.h  k3socketbase.h  k3socketdevice.h  k3socks.h k3sockssocketdevice.h  k3streamsocket.h qtest_kde.h kdefakes.h kdeversion.h kauth.h ktypelistutils.h ktypetraits.h karchive.h kar.h ktar.h kzip.h kshareddatacache.h kmountpoint.h kdirwatch.h karchive_export.h""".split(" "),
     
     noUpdateSip=["typedefs.sip"],
     
     # Cpp parsing    
     preprocessSubstitutionMacros=qtkdemacros.QtPreprocessSubstitutionMacros(),
     macros=qtkdemacros.QtMacros(),
-    bareMacros=qtkdemacros.QtBareMacros(["KDECORE_EXPORT","KDE_EXPORT","KIO_EXPORT","KDE_DEPRECATED", "KDECORE_EXPORT_DEPRECATED"]),
+    bareMacros=qtkdemacros.QtBareMacros(["KDECORE_EXPORT","KDE_EXPORT","KIO_EXPORT","KDE_DEPRECATED", "KDECORE_EXPORT_DEPRECATED", "KARCHIVE_EXPORT"]),
     
     # Sip generation
     sipImportDirs=[sipImportDir],
     sipImports=["QtCore/QtCoremod.sip","QtGui/QtGuimod.sip","QtNetwork/QtNetworkmod.sip"],
     copyrightNotice=qtkdemacros.copyrightNotice(),
-    exportMacros=["KDECORE_EXPORT","KDE_EXPORT","KIO_EXPORT","KDECORE_EXPORT_DEPRECATED"],
+    exportMacros=["KDECORE_EXPORT","KDE_EXPORT","KIO_EXPORT","KDECORE_EXPORT_DEPRECATED","KARCHIVE_EXPORT"],
     ignoreBases=[],
     
     annotationRules=[
@@ -336,6 +333,7 @@ plasma = toolkit.ModuleGenerator(
         "QtWebKit/QtWebKitmod.sip",
         "QtXml/QtXmlmod.sip",
         "QtDeclarative/QtDeclarativemod.sip",
+        "QtScript/QtScriptmod.sip",
         "kdecore/kdecoremod.sip",
         "kdeui/kdeuimod.sip"],
     copyrightNotice=qtkdemacros.copyrightNotice(),
@@ -639,28 +637,38 @@ akonadi = toolkit.ModuleGenerator(
         os.path.join(cmakelistPimlibsBaseDirectory,"akonadi/kmime/CMakeLists.txt"),
         os.path.join(cmakelistPimlibsBaseDirectory,"akonadi/kabc/CMakeLists.txt")],
     
-    ignoreHeaders="""akonadi_export.h akonadi-kmime_export.h akonadi-kabc_export.h itempayloadinternals_p.h collectionpathresolver_p.h qtest_akonadi.h exception.h contactparts.h cachepolicypage.h resourcebasesettings.h dbusconnectionpool.h""".split(" "),
+    ignoreHeaders="""akonadi_export.h akonadi-kmime_export.h akonadi-kabc_export.h itempayloadinternals_p.h collectionpathresolver_p.h qtest_akonadi.h exception.h contactparts.h cachepolicypage.h resourcebasesettings.h dbusconnectionpool.h """.split(" "),
+    #addressee.h kabc_export.h
     
     headers=[os.path.join(kdepimlibsBuildDirectory,"akonadi/resourcebasesettings.h")],
+#    headers=[
+#        os.path.join(kdepimlibsBuildDirectory, "addressee.h")],
     #resourcebase.h agentbase.h 
     #noUpdateSip=["iterator.sip"],
     ignoreBases=["QDBusContext"],
     
     # Cpp parsing    
-    preprocessSubstitutionMacros=qtkdemacros.QtPreprocessSubstitutionMacros(),
+    preprocessSubstitutionMacros=qtkdemacros.QtPreprocessSubstitutionMacros( \
+        [(re.compile(r'Latin1\( "ISO-8859-1" \)'),r'Latin1'),
+        (re.compile(r'kmime_mk_trivial_ctor\(\s*(\w+)\s*\)'),r'public: explicit \1( Content *parent = 0 ); \1( Content *parent, const QByteArray &s ); \1( Content *parent, const QString &s, const QByteArray &charset ); ~\1();'),
+        (re.compile(r'kmime_mk_dptr_ctor\(\s*(\w+)\s*\)'), r'protected: explicit \1( \1::Private *d, KMime::Content *parent = 0 );'), 
+        (re.compile(r'kmime_mk_trivial_ctor_with_name\(\s*(\w+)\s*\)'),r'public: explicit \1( Content *parent = 0 ); \1( Content *parent, const QByteArray &s ); \1( Content *parent, const QString &s, const QByteArray &charset ); ~\1();const char *type() const; static const char *staticType();'),
+        ]),
+
+  
     #[(re.compile(r'AKONADI_COLLECTION_PROPERTIES_PAGE_FACTORY\s*\(\s*(\S+)\s*,\s*(\w+)\s*\)'),r'']),
     preprocessorValues={"Q_WS_X11": 1},
     
     macros=qtkdemacros.QtMacros(["AKONADI_DECLARE_PRIVATE"]),
     bareMacros=qtkdemacros.QtBareMacros(["AKONADI_EXPORT","AKONADI_EXPORT_DEPRECATED","KDE_EXPORT",
-        "KDE_DEPRECATED","Q_INVOKABLE","AKONADI_KABC_EXPORT","AKONADI_KMIME_EXPORT","AKONADI_KMIME_EXPORT_DEPRECATED"]),
+        "KDE_DEPRECATED","Q_INVOKABLE","KABC_EXPORT","KABC_EXPORT_DEPRECATED","AKONADI_KABC_EXPORT","AKONADI_KMIME_EXPORT","AKONADI_KMIME_EXPORT_DEPRECATED","KMIME_EXPORT","KMIME_EXPORT_DEPRECATED"]),
     
     # Sip generation
     sipImportDirs=[sipImportDir,os.path.join(outputBaseDirectory,"sip")],
     sipImports=["QtCore/QtCoremod.sip","QtGui/QtGuimod.sip","kdeui/kdeuimod.sip","kdecore/kdecoremod.sip","kio/kiomod.sip"],
     
     copyrightNotice=qtkdemacros.copyrightNotice(),
-    exportMacros=["AKONADI_EXPORT","AKONADI_KABC_EXPORT","AKONADI_KMIME_EXPORT","KDE_EXPORT","AKONADI_EXPORT_DEPRECATED","AKONADI_KMIME_EXPORT_DEPRECATED"],
+    exportMacros=["AKONADI_EXPORT","AKONADI_KABC_EXPORT","AKONADI_KMIME_EXPORT","KDE_EXPORT","AKONADI_EXPORT_DEPRECATED","AKONADI_KMIME_EXPORT_DEPRECATED","KABC_EXPORT","KABC_EXPORT_DEPRECATED","KMIME_EXPORT","KMIME_EXPORT_DEPRECATED"],
     noCTSCC=["Collection","Entity","Item"],
     
     annotationRules=[
@@ -745,15 +753,15 @@ phonon = toolkit.ModuleGenerator(
     preprocessorValues={"Q_WS_X11": 1, "QT_VERSION": "0x040400", "_MSC_VER": 0},
     
     macros=qtkdemacros.QtMacros(),
-    bareMacros=qtkdemacros.QtBareMacros(["PHONON_EXPORT","PHONONEXPERIMENTAL_EXPORT",
-        "KAUDIODEVICELIST_EXPORT"]),
+    bareMacros=qtkdemacros.QtBareMacros(["PHONON_EXPORT","PHONONEXPERIMENTAL_EXPORT", "PHONON_DEPRECATED",
+        "PHONON_EXPORT_DEPRECATED", "KAUDIODEVICELIST_EXPORT"]),
     
     # Sip generation
     sipImportDirs=[sipImportDir,os.path.join(outputBaseDirectory,"sip")],
     sipImports=["QtCore/QtCoremod.sip","QtGui/QtGuimod.sip","QtXml/QtXmlmod.sip","solid/solidmod.sip"],
     
     copyrightNotice=qtkdemacros.copyrightNotice(),
-    exportMacros=["PHONON_EXPORT","KDE_EXPORT","PHONONEXPERIMENTAL_EXPORT","KAUDIODEVICELIST_EXPORT"],
+    exportMacros=["PHONON_EXPORT", "KDE_EXPORT", "PHONONEXPERIMENTAL_EXPORT", "KAUDIODEVICELIST_EXPORT", "PHONON_DEPRECATED", "PHONON_EXPORT_DEPRECATED"],
     #noCTSCC=[],
     
     annotationRules=[
@@ -773,58 +781,65 @@ phonon = toolkit.ModuleGenerator(
 
 
 ###########################################################################
+def updateSIP():
+    kdecore.run()
+    plasma.run()
+    kdeui.run()
+    kio.run()
+    kutils.run()
+    solid.run()
+    kparts.run()
+    khtml.run()
+    knewstuff.run()
+    dnssd.run()
+    nepomuk.run()
+    soprano.run()
+    akonadi.run()
+    polkitqt.run()
+    phonon.run()
+    
+def updateDocs():
+    classNames = []
+    nsNames = []
 
-kdecore.run()
-plasma.run()
-kdeui.run()
-kio.run()
-kutils.run()
-solid.run()
-kparts.run()
-khtml.run()
-knewstuff.run()
-dnssd.run()
-nepomuk.run()
-soprano.run()
-akonadi.run()
-polkitqt.run()
-phonon.run()
+    def UpdateClassNamespaceList(moduleName,sipScopes):
+        nsNames.append( (moduleName,'global', 'global') )
+        def ExtractClassNamespace(scope):
+            for item in scope:
+                if isinstance(item,sipsymboldata.SymbolData.SipClass):
+                    classNames.append( (moduleName, item.fqPythonName(), item.fqPythonName()) )
+                    ExtractClassNamespace(item)
+                elif isinstance(item,sipsymboldata.SymbolData.Namespace):
+                    nsTuple = (moduleName,item.fqPythonName(),item.fqPythonName())
+                    if nsTuple not in nsNames:
+                        nsNames.append( nsTuple )
+                    ExtractClassNamespace(item)
+        for scope in sipScopes:
+            ExtractClassNamespace(scope)
 
-classNames = []
-nsNames = []
+    UpdateClassNamespaceList('kdecore',kdecore.docs())
+    UpdateClassNamespaceList('plasma',plasma.docs())
+    UpdateClassNamespaceList('kdeui',kdeui.docs())
+    UpdateClassNamespaceList('kio',kio.docs())
+    UpdateClassNamespaceList('kutils',kutils.docs())
+    UpdateClassNamespaceList('solid',solid.docs())
+    UpdateClassNamespaceList('kparts',kparts.docs())
+    UpdateClassNamespaceList('khtml',khtml.docs())
+    UpdateClassNamespaceList('knewstuff',knewstuff.docs())
+    UpdateClassNamespaceList('dnssd',dnssd.docs())
+    UpdateClassNamespaceList('nepomuk',nepomuk.docs())
+    UpdateClassNamespaceList('soprano',soprano.docs())
+    UpdateClassNamespaceList('akonadi',akonadi.docs())
+    UpdateClassNamespaceList('polkitqt',polkitqt.docs())
+    UpdateClassNamespaceList('phonon',phonon.docs())
 
-def UpdateClassNamespaceList(moduleName,sipScopes):
-    nsNames.append( (moduleName,'global', 'global') )
-    def ExtractClassNamespace(scope):
-        for item in scope:
-            if isinstance(item,sipsymboldata.SymbolData.SipClass):
-                classNames.append( (moduleName, item.fqPythonName(), item.fqPythonName()) )
-                ExtractClassNamespace(item)
-            elif isinstance(item,sipsymboldata.SymbolData.Namespace):
-                nsTuple = (moduleName,item.fqPythonName(),item.fqPythonName())
-                if nsTuple not in nsNames:
-                    nsNames.append( nsTuple )
-                ExtractClassNamespace(item)
-    for scope in sipScopes:
-        ExtractClassNamespace(scope)
+    print("Writing all classes index:")
+    toolkit.ModuleGenerator.WriteAllClasses(os.path.join(outputBaseDirectory,"docs/html"),nsNames,classNames)
+    print("Done")
+    
+def main():
+    updateSIP()
+    updateDocs()
 
-UpdateClassNamespaceList('kdecore',kdecore.docs())
-UpdateClassNamespaceList('plasma',plasma.docs())
-UpdateClassNamespaceList('kdeui',kdeui.docs())
-UpdateClassNamespaceList('kio',kio.docs())
-UpdateClassNamespaceList('kutils',kutils.docs())
-UpdateClassNamespaceList('solid',solid.docs())
-UpdateClassNamespaceList('kparts',kparts.docs())
-UpdateClassNamespaceList('khtml',khtml.docs())
-UpdateClassNamespaceList('knewstuff',knewstuff.docs())
-UpdateClassNamespaceList('dnssd',dnssd.docs())
-UpdateClassNamespaceList('nepomuk',nepomuk.docs())
-UpdateClassNamespaceList('soprano',soprano.docs())
-UpdateClassNamespaceList('akonadi',akonadi.docs())
-UpdateClassNamespaceList('polkitqt',polkitqt.docs())
-UpdateClassNamespaceList('phonon',phonon.docs())
-
-print("Writing all classes index:")
-toolkit.ModuleGenerator.WriteAllClasses(os.path.join(outputBaseDirectory,"docs/html"),nsNames,classNames)
-print("Done")
-
+if __name__=="__main__":
+    main()

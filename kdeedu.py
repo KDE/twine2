@@ -22,26 +22,20 @@ import os.path
 import sipsymboldata
 import re
 
-branch = "trunk/KDE"
-#branch = "branches/KDE/4.5"
-
-outputBaseDirectory = "/home/sbe/devel/svn/kde/" + branch + "/kdeedu"
-
-#outputBaseDirectory = "/home/sbe/devel/pykde4/marble_4.5"
-
-#cmakelistBaseDirectory = "/home/sbe/devel/svn/kde/branches/KDE/4.3/kdelibs"
-cmakelistBaseDirectory = "/home/sbe/devel/svn/kde/" + branch + "/kdeedu"
+outputBaseDirectory = "/home/sbe/devel/git/kde/marble"
+cmakelistBaseDirectory = outputBaseDirectory
+pyqt4SipDir = "/home/sbe/devel/kdesvninstall/share/sip/PyQt4/"
 
 ###########################################################################
 marble = toolkit.ModuleGenerator(
     module="PyKDE4.marble",
-    outputDirectory=os.path.join(outputBaseDirectory,"marble/src/bindings/python/sip"),
-    docsOutputDirectory=os.path.join(outputBaseDirectory, "marble/docs/bindings/python/html/marble"),
-    mainDocs=os.path.join(outputBaseDirectory,"marble/Mainpage.dox"),
+    outputDirectory=os.path.join(outputBaseDirectory,"src/bindings/python/sip"),
+    docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/bindings/python/html/marble"),
+    mainDocs=os.path.join(outputBaseDirectory,"Mainpage.dox"),
     
     # .h file extraction
-    cmakelists=[os.path.join(cmakelistBaseDirectory,"marble/src/lib/CMakeLists.txt"),
-                os.path.join(cmakelistBaseDirectory,"marble/src/lib/geodata/CMakeLists.txt")],
+    cmakelists=[os.path.join(cmakelistBaseDirectory,"src/lib/CMakeLists.txt"),
+                os.path.join(cmakelistBaseDirectory,"src/lib/geodata/CMakeLists.txt")],
     
     ignoreHeaders="""marble_export.h geodata_export.h TileCreatorDialog.h GeoDataCoordinates_p.h AbstractProjectionHelper.h EquirectProjection.h EquirectProjectionHelper.h MercatorProjection.h MercatorProjectionHelper.h SphericalProjection.h SphericalProjectionHelper.h MapThemeSortFilterProxyModel.h ExtDateTime.h MarbleWidgetInputHandler.h BoundingBox.h GeoDataDocument_p.h GeoDataMultiGeometry_p.h GeoDataPoint_p.h GeoDataFeature_p.h GeoDataLinearRing_p.h GeoDataLookAt_p.h GeoDataRegion_p.h GeoDataPlacemark_p.h GeoDataLineString_p.h GeoDataContainer_p.h GeoDataPolygon_p.h GeoDataGeometry_p.h GeoDataLod_p.h RoutingManager.h RoutingWidget.h""".split(" "),
 
@@ -58,7 +52,7 @@ marble = toolkit.ModuleGenerator(
     bareMacros=qtkdemacros.QtBareMacros(["MARBLE_EXPORT","GEODATA_EXPORT"]),
     
     # Sip generation
-    sipImportDirs=["/usr/share/sip/PyQt4/",os.path.join(outputBaseDirectory,"sip")],
+    sipImportDirs=[pyqt4SipDir,os.path.join(outputBaseDirectory,"sip")],
     sipImports=["QtCore/QtCoremod.sip","QtGui/QtGuimod.sip","QtWebKit/QtWebKitmod.sip","QtXml/QtXmlmod.sip"],
     
     copyrightNotice=qtkdemacros.copyrightNotice(),
@@ -109,6 +103,6 @@ def UpdateClassNamespaceList(moduleName,sipScopes):
 
 UpdateClassNamespaceList('marble',marble.docs())
 print("Writing all classes index:")
-toolkit.ModuleGenerator.WriteAllClasses(os.path.join(outputBaseDirectory,"marble/docs/bindings/python/html"),nsNames,classNames)
+toolkit.ModuleGenerator.WriteAllClasses(os.path.join(outputBaseDirectory,"docs/bindings/python/html"),nsNames,classNames)
 print("Done")
 

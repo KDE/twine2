@@ -723,7 +723,14 @@ public:
 };
 };
 """)
-    
+
+    def testQListSubclass(self):
+        self.simpleParseTest("""
+class AddresseeList : QList<Addressee>
+{
+};
+""", 3)
+            
     def xtestQtCoremod(self):
         with open("/usr/share/sip/PyQt4/QtCore/QtCoremod.sip") as fhandle:
             text = fhandle.read()

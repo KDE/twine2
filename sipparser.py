@@ -450,7 +450,8 @@ class SipParser(object):
         self.currentClass.setOpaque(True)
     
     def p_base_list_element (self, p):
-        'base_list_element : qualified_id'
+        """base_list_element : qualified_id
+                             | template_type"""
         self.currentClass.addBase(p[1])
      
     def p_base_list (self, p):

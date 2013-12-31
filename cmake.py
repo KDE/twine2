@@ -47,15 +47,15 @@ def ExtractInstallFilesWithContext(variables,install_list,filename=None,input=No
         command = command.lower()
 
         if command=="set":
-            variables[args[0].lower()] = ExpandArgs(variables, args[1:])
+            variables[args[0].lower()] = ExpandArgs(variables, args[1:], filename)
 
         elif command=="install":
-            install_args = ExpandArgs(variables, args)
+            install_args = ExpandArgs(variables, args, filename)
             install_list.extend( [x for x in install_args if x.endswith('.h')] )
 
         elif command=="include":
             if filename is not None:
-                command_args = ExpandArgs(variables, args)
+                command_args = ExpandArgs(variables, args, filename)
                 
                 this_dir = os.path.dirname(filename)
                 for arg in command_args:
@@ -66,7 +66,7 @@ def ExtractInstallFilesWithContext(variables,install_list,filename=None,input=No
 
         elif command=="add_subdirectory":
             if filename is not None:
-                command_args = ExpandArgs(variables, args)
+                command_args = ExpandArgs(variables, args, filename)
 
                 this_dir = os.path.dirname(filename)
                 for arg in command_args:
@@ -77,7 +77,7 @@ def ExtractInstallFilesWithContext(variables,install_list,filename=None,input=No
 
         elif command=="file":
             # This is just a basic cmake FILE() implementation. It just does GLOB.
-            command_args = ExpandArgs(variables, args)
+            command_args = ExpandArgs(variables, args, filename)
             varname = None
             result = None
             try:
@@ -109,26 +109,23 @@ def ExtractInstallFilesWithContext(variables,install_list,filename=None,input=No
                 if varname is not None and result is not None:
                     variables[varname.lower()] = result
 
-def ExpandArgs(variables, args):
+def ExpandArgs(variables, args, filename=None):
     rex  = re.compile(r'(\$\{[^\}]+\})')
     fixed_args = []
     for arg in args:
         fixed_parts = []
-        #print("arg:"+arg)
         parts = rex.split(arg)
         for part in parts:
-            #print("part:"+part)
             if part.startswith("${"):
                 name = part[2:-1].lower()
                 if name in variables:
-                    #print("hit var:"+name)
                     value = variables[name]
                     if len(value)==1:
                         fixed_parts.append(variables[name][0])
                     else:
                         fixed_args.extend(value)
                 else:
-                    print("Undefined variable: " + name)
+                    print("Undefined cmake variable '" + name + "' in " + filename)
             else:
                 fixed_parts.append(part)
         fixed_args.append(''.join(fixed_parts))

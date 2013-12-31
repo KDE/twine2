@@ -224,9 +224,9 @@ void* foo (int, $fpdouble (* doublePtr = float,QString*);
         self.ioTest(
             """template<typename T>
 inline T readCheck(const char *key, const T &defaultValue) const;
-            ""","""template<T>
+            ""","""template <T>
  T                      readCheck (const char* key, const T& defaultValue) const;
-            """)
+""")
 
     def testFunctions9(self):
         self.mirrorTest(

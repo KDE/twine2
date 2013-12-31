@@ -436,6 +436,14 @@ class SymbolData(cppsymboldata.SymbolData):
             cppsymboldata.SymbolData.Typedef.__init__(self,parentScope, name, filename, lineno)
             SymbolData._SipEntityExtra.__init__(self)
             
+        def classHierarchy(self):
+            symbolData = self._symbolData()
+            base = symbolData.lookupType(self.argumentType(),self)
+            if base is not None:
+                return base.classHierarchy()
+            else:
+                return []
+          
         def format(self,indent=0):
             return self._formatIgnore(indent) + cppsymboldata.SymbolData.Typedef.format(self,indent)
             

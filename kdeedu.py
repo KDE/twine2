@@ -34,10 +34,10 @@ marble = toolkit.ModuleGenerator(
     mainDocs=os.path.join(outputBaseDirectory,"Mainpage.dox"),
     
     # .h file extraction
-    cmakelists=[os.path.join(cmakelistBaseDirectory,"src/lib/CMakeLists.txt"),
-                os.path.join(cmakelistBaseDirectory,"src/lib/geodata/CMakeLists.txt")],
+    cmakelists=[os.path.join(cmakelistBaseDirectory,"src/lib/marble/CMakeLists.txt"),
+                os.path.join(cmakelistBaseDirectory,"src/lib/marble/geodata/CMakeLists.txt")],
     
-    ignoreHeaders="""marble_export.h geodata_export.h TileCreatorDialog.h GeoDataCoordinates_p.h AbstractProjectionHelper.h EquirectProjection.h EquirectProjectionHelper.h MercatorProjection.h MercatorProjectionHelper.h SphericalProjection.h SphericalProjectionHelper.h MapThemeSortFilterProxyModel.h ExtDateTime.h MarbleWidgetInputHandler.h BoundingBox.h GeoDataDocument_p.h GeoDataMultiGeometry_p.h GeoDataPoint_p.h GeoDataFeature_p.h GeoDataLinearRing_p.h GeoDataLookAt_p.h GeoDataRegion_p.h GeoDataPlacemark_p.h GeoDataLineString_p.h GeoDataContainer_p.h GeoDataPolygon_p.h GeoDataGeometry_p.h GeoDataLod_p.h RoutingManager.h RoutingWidget.h""".split(" "),
+    ignoreHeaders="""marble_export.h geodata_export.h TileCreatorDialog.h GeoDataCoordinates_p.h AbstractProjectionHelper.h EquirectProjection.h EquirectProjectionHelper.h MercatorProjection.h MercatorProjectionHelper.h SphericalProjection.h SphericalProjectionHelper.h MapThemeSortFilterProxyModel.h ExtDateTime.h MarbleWidgetInputHandler.h BoundingBox.h GeoDataDocument_p.h GeoDataMultiGeometry_p.h GeoDataPoint_p.h GeoDataFeature_p.h GeoDataLinearRing_p.h GeoDataLookAt_p.h GeoDataRegion_p.h GeoDataPlacemark_p.h GeoDataLineString_p.h GeoDataContainer_p.h GeoDataPolygon_p.h GeoDataGeometry_p.h GeoDataLod_p.h RoutingManager.h RoutingWidget.h global.h""".split(" "),
 
     #noUpdateSip=["phononnamespace.sip"],
     ignoreBases=["QSharedData"],

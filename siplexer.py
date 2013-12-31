@@ -27,7 +27,7 @@ states = (('enum', 'inclusive'), ('function', 'inclusive'), ('variable', 'inclus
 blockTokens = ('AccessCode', 'BIGetCharBufferCode', 'BIGetReadBufferCode', 'BIGetSegCountCode',\
                'BIGetWriteBufferCode', 'ConvertToSubClassCode', 'ConvertToTypeCode',\
                'ConvertFromTypeCode', 'Copying', 'Doc', 'ExportedDoc', 'ExportedHeaderCode',\
-               'GCClearCode', 'GCTraverseCode', 'GetCode', 'MethodCode', 'ModuleCode',\
+               'FinalisationCode', 'GCClearCode', 'GCTraverseCode', 'GetCode', 'MethodCode', 'ModuleCode',\
                'ModuleHeaderCode', 'PickleCode', 'PostInitialisationCode', 'PreInitialisationCode',\
                'RaiseCode', 'SetCode', 'TypeCode', 'TypeHeaderCode', 'UnitCode', 'VirtualCatcherCode',\
                'Makefile', 'PrePythonCode',\
@@ -87,7 +87,8 @@ tokens = cppTokens + sipDirectives + (
 'STORAGE', #'PURESFX',
 
 # Expressions we don't parse
-'ENUMINIT',  'ARRAYOP', 'FUNCPTR', 'BLOCK_BODY', 'BLOCK', 'SIPSTMT', 
+#'ENUMINIT',
+'ARRAYOP', 'FUNCPTR', 'BLOCK_BODY', 'BLOCK', 'SIPSTMT', 
 'SIPSTMT_BODY', 'FILENAME', 'licenseAnnotation', 'IG', 'throw',
 'FORCE', 'END', 'STRING', 'DOTTEDNAME', 'LINECOMMENT', 'CCOMMENT', 'BLANKLINE',
 
@@ -187,7 +188,7 @@ t_ICONST = r'(0(?![x|X])|[1-9])\d*([uU]|[lL]|[uU][lL]|[lL][uU])?'
 t_FCONST = r'((\d+)(\.\d+)(e(\+|-)?(\d+))? | (\d+)e(\+|-)?(\d+))([lL]|[fF])?'
 
 # Enumerator initializer
-t_enum_ENUMINIT = r'=[^,}]*(?=[,}])?'
+#t_enum_ENUMINIT = r'[^,}=]*(?=[,}])+'
 
 # Array operator
 t_ARRAYOP = r'[[][^(]*?[]]'

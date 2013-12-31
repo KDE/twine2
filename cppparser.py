@@ -376,7 +376,8 @@ class CppParser(object):
                         | variable_decl
                         | doccomment
                         | bare_macro
-                        | skip_macro"""
+                        | skip_macro
+                        | SEMI"""
         self.lexer.lexstate  = 'variable'
         self.arguments   = []
         self.template    = None
@@ -589,7 +590,7 @@ class CppParser(object):
     def p_nested_name_specifier0 (self, p):
         """nested_name_specifier : ID COLON2 ID
                                  | nested_name_specifier COLON2 ID
-                                 | template_type COLON2 ID"""                                 
+                                 | template_type COLON2 ID"""
         p [0] = "".join (p [1:])
 
     def p_nested_name_specifier1 (self, p):
@@ -896,45 +897,53 @@ class CppParser(object):
     def p_operator_pfx3 (self, p):
         'operator_pfx : type_specifier bare_macro type_decorator operator'
         p [0] = p [1]
+
+    def p_operator_pfx4 (self, p):
+        'operator_pfx : type_specifier ID COLON2 operator'
+        p [0] = None
     
     def p_operator_name (self, p):
-        """operator_name : operator_pfx PLUS LPAREN
-                         | operator_pfx MINUS LPAREN
-                         | operator_pfx ASTERISK LPAREN
-                         | operator_pfx SLASH LPAREN
-                         | operator_pfx PERCENT LPAREN
-                         | operator_pfx VBAR LPAREN
-                         | operator_pfx AMPERSAND LPAREN
-                         | operator_pfx LT LPAREN
-                         | operator_pfx LT LT LPAREN
-                         | operator_pfx GT LPAREN
-                         | operator_pfx GT GT LPAREN
-                         | operator_pfx LOR LPAREN
-                         | operator_pfx LAND LPAREN
-                         | operator_pfx BANG LPAREN
-                         | operator_pfx LE LPAREN
-                         | operator_pfx GE LPAREN
-                         | operator_pfx EQ LPAREN
-                         | operator_pfx EQUALS LPAREN
-                         | operator_pfx TIMESEQUAL LPAREN
-                         | operator_pfx DIVEQUAL LPAREN
-                         | operator_pfx MODEQUAL LPAREN
-                         | operator_pfx PLUSEQUAL LPAREN
-                         | operator_pfx MINUSEQUAL LPAREN
-                         | operator_pfx LSHIFTEQUAL LPAREN
-                         | operator_pfx GT GE LPAREN
-                         | operator_pfx ANDEQUAL LPAREN
-                         | operator_pfx OREQUAL LPAREN
-                         | operator_pfx XOREQUAL LPAREN
-                         | operator_pfx PLUSPLUS LPAREN
-                         | operator_pfx MINUSMINUS LPAREN
-                         | operator_pfx ARRAYOP LPAREN
-                         | operator_pfx LPAREN RPAREN LPAREN
-                         | operator_pfx ARROW LPAREN
-                         | operator_pfx NE LPAREN"""
-        n = len (p) - 1
-        self.functionObject ('operator ' + "".join (p [2:n]), p[1])
-        self.arguments = []
+        """operator_name : operator_pfx operator_type"""
+        if p[1] is not None:
+            self.functionObject ('operator ' + p[2], p[1])
+            self.arguments = []
+        
+    def p_operator_type (self, p):
+        """operator_type : PLUS LPAREN
+                         | MINUS LPAREN
+                         | ASTERISK LPAREN
+                         | SLASH LPAREN
+                         | PERCENT LPAREN
+                         | VBAR LPAREN
+                         | AMPERSAND LPAREN
+                         | LT LPAREN
+                         | LT LT LPAREN
+                         | GT LPAREN
+                         | GT GT LPAREN
+                         | LOR LPAREN
+                         | LAND LPAREN
+                         | BANG LPAREN
+                         | LE LPAREN
+                         | GE LPAREN
+                         | EQ LPAREN
+                         | EQUALS LPAREN
+                         | TIMESEQUAL LPAREN
+                         | DIVEQUAL LPAREN
+                         | MODEQUAL LPAREN
+                         | PLUSEQUAL LPAREN
+                         | MINUSEQUAL LPAREN
+                         | LSHIFTEQUAL LPAREN
+                         | GT GE LPAREN
+                         | ANDEQUAL LPAREN
+                         | OREQUAL LPAREN
+                         | XOREQUAL LPAREN
+                         | PLUSPLUS LPAREN
+                         | MINUSMINUS LPAREN
+                         | ARRAYOP LPAREN
+                         | LPAREN RPAREN LPAREN
+                         | ARROW LPAREN
+                         | NE LPAREN"""
+        p[0] = "".join (p [1:-1])
         
     def p_cast_operator_operator(self, p):
         """cast_operator_keyword : operator"""
@@ -961,7 +970,8 @@ class CppParser(object):
     def p_operator_primary0 (self, p):
         """operator_primary : operator_name argument_list RPAREN
                             | operator_name RPAREN"""
-        self.currentFunction.setArguments(self.argumentList())
+        if self.currentFunction is not None:
+            self.currentFunction.setArguments(self.argumentList())
 
     def p_operator_primary1 (self, p):
         """operator_primary : virtual operator_name argument_list RPAREN
@@ -977,7 +987,8 @@ class CppParser(object):
     def p_operator_stmt1 (self, p):
         """operator_stmt : operator_primary CVQUAL decl_end
                          | operator_primary CVQUAL pure_virtual_suffix"""
-        self.currentFunction.addQualifier(p[2])
+        if self.currentFunction is not None:
+            self.currentFunction.addQualifier(p[2])
 
     def p_ctor_name0 (self, p):
         'ctor_name : qualified_id LPAREN'

@@ -105,7 +105,7 @@ class TestSipParser(unittest.TestCase):
 class ServiceBase : KShared {
   ServiceBase (ServiceBasePrivate*const d);
 };
-""",3)
+""")
 
     def testOpaqueClass(self):
         self.mirrorTest(
@@ -729,8 +729,20 @@ public:
 class AddresseeList : QList<Addressee>
 {
 };
-""", 3)
-            
+""")
+
+    def testEnumAnnotation(self):
+        self.simpleParseTest("""enum Command
+{
+    None /PyName=None_/,
+    SetTransferMode,
+    SetProxy,
+    ConnectToHost
+};
+""")
+
+
+
     def xtestQtCoremod(self):
         with open("/usr/share/sip/PyQt4/QtCore/QtCoremod.sip") as fhandle:
             text = fhandle.read()

@@ -519,8 +519,13 @@ class SipParser(object):
         p[0] = [enumerator]
     
     def p_enumerator2 (self, p):
-        """enumerator : ID ENUMINIT"""
-        enumerator = self.symbolData.Enumerator(p[1], p[2])
+        """enumerator : ID EQUALS ID"""
+        enumerator = self.symbolData.Enumerator(p[1], "=" + p[3])
+        p[0] = [enumerator]
+        
+    def p_enumerator3 (self, p):
+        """enumerator : ID annotation"""
+        enumerator = self.symbolData.Enumerator(p[1], None)
         p[0] = [enumerator]
         
     def p_enumeratorcomment(self, p):

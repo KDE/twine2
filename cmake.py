@@ -64,6 +64,17 @@ def ExtractInstallFilesWithContext(variables,install_list,filename=None,input=No
                         if os.path.exists(include_filename):
                             ExtractInstallFilesWithContext(variables,install_list,include_filename)
 
+        elif command=="add_subdirectory":
+            if filename is not None:
+                command_args = ExpandArgs(variables, args)
+
+                this_dir = os.path.dirname(filename)
+                for arg in command_args:
+                    if len(arg.strip())!=0:
+                        include_filename = os.path.join(this_dir,arg,"CMakeLists.txt")
+                        if os.path.exists(include_filename):
+                            ExtractInstallFilesWithContext(variables,install_list,include_filename)
+
         elif command=="file":
             # This is just a basic cmake FILE() implementation. It just does GLOB.
             command_args = ExpandArgs(variables, args)

@@ -18,7 +18,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 from sealed import sealed
-from argvalidate import accepts,returns,one_of
+#from argvalidate import accepts,returns,one_of
 import types
 
 RETURN_INDENT = 24
@@ -42,7 +42,7 @@ class SymbolData(object):
     }
 
     ACCESS_TYPE_MAPPING_TO_NAME = {}
-    for (key,value) in ACCESS_TYPE_MAPPING_FROM_NAME.iteritems():
+    for (key,value) in ACCESS_TYPE_MAPPING_FROM_NAME.items():
         ACCESS_TYPE_MAPPING_TO_NAME[value] = key
 
     @sealed
@@ -107,6 +107,7 @@ class SymbolData(object):
 
         for scope in self._scopes:
             IndexScope(scope)
+        #print("index: " + repr(self._typeIndex.keys()))
 
     def lookupNamespace(self,nsName):
         if self._nsIndex is None:
@@ -195,17 +196,19 @@ class SymbolData(object):
             # A bit of an ugly hack to 
             for item in self:
                 if isinstance(item,SymbolData.Entity):
-                    #print("Fixing scope: " + str(id(item)))
                     if item._scope is not self:
                         print("Fixing scope found an error!")
+                        print("Fixing scope: " + repr(item._name))
+                        print("Old scope: " + repr(item._scope._name) + " " + repr(id(item._scope)) + " "+repr(type(item._scope)))
+                        print("Correct scope: " + repr(self._name) + " " + repr(id(self)) + " "+repr(type(item._scope)))
                     item._scope = self
                     item._fixScope()
         
-        @returns(one_of(str,types.NoneType))
+        #@returns(one_of(str,types.NoneType))
         def name(self):
             return self._name
             
-        @returns(str)
+        #@returns(str)
         def fqName(self):
             parentFqn = self.parentScope().fqName()
             
@@ -425,38 +428,38 @@ class SymbolData(object):
             self._opaque = False
             self._macros = []
 
-        @accepts(str)
+        #@accepts(str)
         def addBase(self, base):
             self._bases.append(base)
             
-        @accepts(list)
+        #@accepts(list)
         def setBases(self,baseList):
             self._bases = baseList
         
-        @returns(list)
+        #@returns(list)
         def bases(self):
             """List of base class names
             
             Returns a list of string base class names."""
             return self._bases
         
-        @accepts(bool)
+        #@accepts(bool)
         def setOpaque(self,opaque):
             self._opaque = opaque
             
-        @returns(bool)
+        #@returns(bool)
         def opaque(self):
             return self._opaque
             
         def addMacro(self,macro):
             self._macros.append(macro)
             
-        @returns(list)
+        #@returns(list)
         def macros(self):
             return self._macros
             
-        @accepts(indent=int)
-        @returns(str)
+        #@accepts(indent=int)
+        #@returns(str)
         def format(self,indent=0):
             pre = SymbolData._indentString(indent)
             accu = []
@@ -502,15 +505,15 @@ class SymbolData(object):
             #self._attributes = Attributes ()
             self._template = template           # the parsed info from any template-type argument
 
-        @returns(one_of(str,types.NoneType))
+        #@returns(one_of(str,types.NoneType))
         def argumentType(self):
             return self._argumentType
             
-        @returns(one_of(str,types.NoneType))
+        #@returns(one_of(str,types.NoneType))
         def name(self):
             return self._argumentName
             
-        @returns(one_of(str,types.NoneType))
+        #@returns(one_of(str,types.NoneType))
         def defaultValue(self):
             return self._defaultValue
             
@@ -552,12 +555,12 @@ class SymbolData(object):
         def argument(self):
             return self._argument
             
-        @accepts(one_of(str,types.NoneType))
+        #@accepts(one_of(str,types.NoneType))
         def setStorage(self,storage):
             self._storage = storage
             # "auto", "register", "static", "extern", "mutable"
             
-        @returns(one_of(str,types.NoneType))
+        #@returns(one_of(str,types.NoneType))
         def storage(self):
             return self._storage
             
@@ -567,8 +570,8 @@ class SymbolData(object):
         def bitfield(self):
             return self._bitfield
             
-        @accepts(indent=int)
-        @returns(str)
+        #@accepts(indent=int)
+        #@returns(str)
         def format(self,indent=0):
             pre = SymbolData._indentString(indent)
             storage = self._storage+" " if self._storage is not None else ""

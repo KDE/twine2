@@ -35,7 +35,7 @@ class TestCppParser(unittest.TestCase):
         scope = self.parser.parse(self.syms, code, debugLevel=debugLevel);
         new_code = scope.format()
         if CleanWhitespace(new_code)!=CleanWhitespace(code):
-            self.fail("Output code doesn't match input code.\n---- Original:\n" + code + "\n---- Result:" + new_code)
+            self.fail("Output code doesn't match input code.\n---- Original:\n" + code + "\n---- Result:\n" + new_code)
 
     def ioTest(self,incode,outcode,debugLevel=0):
         scope = self.parser.parse(self.syms, incode, debugLevel=debugLevel);
@@ -205,13 +205,13 @@ class TestCppParser(unittest.TestCase):
             void Foo (long x [5]);
             """)
 
-    def testFunctions6(self):
-        self.ioTest(
-            """
-            void* foo (int, double (*doublePtr)(float, QString*));
-            ""","""
-void* foo (int, $fpdouble (* doublePtr = float,QString*);
-            """)
+#     def testFunctions6(self):
+#         self.ioTest(
+#             """
+#             void* foo (int, double (*doublePtr)(float, QString*));
+#             ""","""
+# void* foo (int, $fpdouble (* doublePtr = float,QString*);
+#             """)
 
     def testFunctions7(self):
         self.mirrorTest(
@@ -244,7 +244,7 @@ const KConfigGroup      group (const QByteArray& group) const;
         self.mirrorTest(
             """
             class Foo {
-                bool operator == (int);
+                bool operator== (int);
             };
             """)
 
@@ -376,6 +376,19 @@ namespace Foo {
             ""","""
             bool operator bool () const;
             """)
+        
+    def testInline2(self):
+        self.ioTest(
+            """
+inline bool TileId::operator==( TileId const& rhs ) const
+{
+    return m_zoomLevel == rhs.m_zoomLevel
+        && m_tileX == rhs.m_tileX
+        && m_tileY == rhs.m_tileY
+        && m_mapThemeIdHash == rhs.m_mapThemeIdHash;
+}""", """
+bool TileId:: operator== (const TileId& rhs) const;
+""")
 
     def testMacro(self):
         self.parser.bareMacros = ["Q_OBJECT"]
@@ -444,12 +457,31 @@ public:
 class Foo {
     public:
         class Bar {
-            private:
                 void privateBar ();
         };
         void publicFoo ();
 };
 void PlainPostFunc ();
+""")
+
+    def testMacro4(self):
+        self.parser.bareMacros = ["Q_OBJECT"]
+        self.parser.macros = ["Q_PROPERTY"]
+        self.ioTest(
+            """
+class AbstractRunner : public QObject
+{
+    Q_OBJECT
+    Q_PROPERTY(bool matchingSuspended READ isMatchingSuspended WRITE suspendMatching NOTIFY matchingSuspend)
+    Q_PROPERTY(QString id READ id);
+};
+""","""
+class AbstractRunner : QObject
+{
+        Q_OBJECT
+        Q_PROPERTY(bool matchingSuspended READ isMatchingSuspended WRITE suspendMatching NOTIFY matchingSuspend)
+        Q_PROPERTY(QString id READ id)
+};
 """)
 
     def testFunnyNamespace(self):
@@ -481,7 +513,7 @@ bool operator==( const Entity& other ) const;
 class Foo {
         void                    reset (bool recursive = false);
         QUrl                    operator QUrl () const;
-        bool                    operator == (const Entity& other) const;
+        bool                    operator== (const Entity& other) const;
 };
 """)
 
@@ -509,14 +541,49 @@ public:
 
 """)
 
-    def xtestLiveAmmo(self):
-        with open("/home/sbe/devel/svn/kde/branches/KDE/4.3/kdeedu/marble/src/lib/MarbleMap.h") as fhandle:
-            text = fhandle.read()
-        self.parser.bareMacros = qtkdemacros.QtBareMacros(["MARBLE_EXPORT"])
+    def testPrivateSignalHack(self):
+        text = """
+class KJob : public QObject
+{
+    Q_OBJECT
+    Q_ENUMS( KillVerbosity Capability Unit )
+    Q_FLAGS( Capabilities )
+
+public:
+       
+public Q_SLOTS:
+    bool suspend();
+    
+protected:
+    virtual bool doKill();
+
+public:
+    bool exec();
+
+Q_SIGNALS:
+#ifndef Q_MOC_RUN
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+private: // don't tell moc or doxygen, but those signals are in fact private
+#endif 
+#endif
+    void result(KJob *job);
+};
+"""
+        self.parser.bareMacros = qtkdemacros.QtBareMacros()
         self.parser.macros = qtkdemacros.QtMacros()
         self.parser.preprocessorSubstitutionMacros = qtkdemacros.QtPreprocessSubstitutionMacros()
         scope = self.parser.parse(self.syms, text)
-        print(scope.format())
+        #print(scope.format())
+
+
+    #def testLiveAmmo(self):
+    #    with open("/home/sbe/devel/svn/kde/trunk/KDE/kdelibs/kdecore/jobs/kjob.h") as fhandle:
+    #        text = fhandle.read()
+    #    self.parser.bareMacros = qtkdemacros.QtBareMacros(["KDECORE_EXPORT","KDE_EXPORT","KIO_EXPORT","KDE_DEPRECATED", "KDECORE_EXPORT_DEPRECATED"])
+    #    self.parser.macros = qtkdemacros.QtMacros()
+    #    self.parser.preprocessorSubstitutionMacros = qtkdemacros.QtPreprocessSubstitutionMacros()
+    #    scope = self.parser.parse(self.syms, text)
+    #    print(scope.format())
 
     def testFriendOperator(self):
         self.ioTest(
@@ -528,21 +595,19 @@ friend bool operator == ( GeoDataLatLonAltBox const& lhs, GeoDataLatLonAltBox co
 ""","""
 class GeoDataLatLonAltBox : GeoDataLatLonBox
 {
-bool operator == (const GeoDataLatLonAltBox& lhs, const GeoDataLatLonAltBox& rhs);
+bool operator== (const GeoDataLatLonAltBox& lhs, const GeoDataLatLonAltBox& rhs);
 };
 """)
 
-    def testFriendOperator(self):
-        self.parser.bareMacros = qtkdemacros.QtBareMacros(["KDECORE_EXPORT"])
-        self.mirrorTest("""
-class Foo {
-    static KDateTime realCurrentLocalDateTime();
-    friend QDataStream KDECORE_EXPORT &operator<<(QDataStream &out, const KDateTime &dateTime);
-    friend QDataStream KDECORE_EXPORT &operator>>(QDataStream &in, KDateTime &dateTime);
-};
-""",2)
-
-
+#     def testFriendOperator2(self):
+#         self.parser.bareMacros = qtkdemacros.QtBareMacros(["KDECORE_EXPORT"])
+#         self.mirrorTest("""
+# class Foo {
+#     static KDateTime realCurrentLocalDateTime();
+#     friend QDataStream KDECORE_EXPORT &operator<<(QDataStream &out, const KDateTime &dateTime);
+#     friend QDataStream KDECORE_EXPORT &operator>>(QDataStream &in, KDateTime &dateTime);
+# };
+# """)
 
 if __name__ == '__main__':
     unittest.main()

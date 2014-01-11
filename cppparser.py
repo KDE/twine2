@@ -25,6 +25,14 @@ import cpplexer
 import pplexer
 import inspect
 
+def joinp(p, startindex, string=" "):
+    tmplist = []
+    i = startindex
+    while i < len(p):
+        tmplist.append(p[i])
+        i += 1
+    return string.join(tmplist)
+
 class CppParser(object):
     """Parser for C++ header files."""
 
@@ -202,12 +210,8 @@ class CppParser(object):
         class_ = self.symbolData.CppClass(self.scope, name, self.filename, self.lexer.lineno)
         self.currentClass = class_
         self._pushScope(class_)
+        class_.setAccess(self.access)
 
-        if type_ == 'class':
-            class_.setAccess('private')
-        else:
-            class_.setAccess('public')
-    
     def enumObject (self, name):
         enum = self.symbolData.Enum(None, name, self.filename, self.lexer.lineno)
         enum.setAccess(self.access)
@@ -550,7 +554,6 @@ class CppParser(object):
         
     def p_enumerator_list2 (self, p):
         """enumerator_list : enumerator_list enum_doc"""
-        #p[1][-1].doc = p[2]
         p[0] = p[1]
         
     def p_enum_delim0 (self, p):
@@ -570,18 +573,18 @@ class CppParser(object):
 
     def p_id_list_element0 (self, p):
         'id_list_element : ID'
-        p [0] = p [1]
+        p[0] = p[1]
         
     def p_id_list_element1 (self, p):
         """id_list_element : ASTERISK ID
                                     | AMPERSAND ID"""
-        p [0] = "".join (p [1:])
+        p[0] = p[1]
 
     def p_id_list (self, p):
         """id_list : id_list_element
                    | id_list COMMA id_list_element"""
-        p [0] = "".join (p [1:])
-                   
+        p[0] = joinp(p, 1, "")
+
     def p_qualified_id (self, p):
         """qualified_id : ID
                         | nested_name_specifier"""
@@ -591,7 +594,7 @@ class CppParser(object):
         """nested_name_specifier : ID COLON2 ID
                                  | nested_name_specifier COLON2 ID
                                  | template_type COLON2 ID"""
-        p [0] = "".join (p [1:])
+        p[0] = joinp(p, 1, "")
 
     def p_nested_name_specifier1 (self, p):
         'nested_name_specifier : COLON2 ID'
@@ -600,10 +603,8 @@ class CppParser(object):
     def p_template_type (self, p):
         """template_type : qualified_id LT type_specifier_list GT
                         | qualified_id LT static_cast_expression GT"""
-        
-        p[0] = "".join (p[1:])
-        #self.template = Template(p[1], p[3], self.template)
-        
+        p[0] = joinp(p, 1, "")
+
     def p_elaborated_type (self, p):
         """elaborated_type : enum qualified_id
                            | class qualified_id
@@ -646,7 +647,7 @@ class CppParser(object):
                                | bool
                                | void
                                | wchar_t"""
-        p [0] = " ".join (p [1:])
+        p [0] = joinp(p,1)
         
     def p_type_specifier0 (self, p):
         'type_specifier : type_specifier_base '
@@ -680,12 +681,13 @@ class CppParser(object):
                           | ASTERISK ASTERISK
                           | ASTERISK ASTERISK ASTERISK
                           | ARRAYOP"""
-        p [0] = "".join (p [1:])
+        p [0] = joinp(p, 1, "")
+
         
     def p_type_specifier_list (self, p):
         """type_specifier_list : type_specifier
                                | type_specifier_list COMMA type_specifier"""
-        p [0] = "".join (p [1:])
+        p [0] = joinp(p, 1, "")
                    
     def p_typedef_decl (self, p):
         """typedef_decl : typedef_simple SEMI
@@ -735,7 +737,7 @@ class CppParser(object):
         if p[1] == '*':
             p [0] = '*%s' % p[2]
         else:
-            p [0] = " ".join (p[1:])
+            p [0] = p[1]
         
     def p_pointer_to_function_name (self, p):
         'pointer_to_function_name : pointer_to_function_pfx ID'
@@ -757,7 +759,7 @@ class CppParser(object):
         'typedef_function_ptr : typedef pointer_to_function'
         
         ptrType, name, args = p [2].split ('|', 2)
-        
+
         fa = self.symbolData.FunctionArgument(name, ptrType, args)
         typedefObj = self.symbolData.FunctionPointerTypedef(self.scope, fa, self.filename, self.lexer.lineno)
         typedefObj.setAccess(self.access)
@@ -767,7 +769,7 @@ class CppParser(object):
         
     def p_array_variable (self, p):
         'array_variable : ID ARRAYOP'
-        p [0] = " ".join (p [1:])
+        p [0] = p[1] + " " + p[2]
                 
     def p_argument_specifier0 (self, p):
         """argument_specifier : type_specifier
@@ -808,7 +810,7 @@ class CppParser(object):
 
     def p_decl_starter0 (self, p):
         'decl_starter : type_specifier qualified_id'
-        p [0] = "|".join (p [1:])
+        p [0] = joinp(p, 1, "|")
         
     def p_decl_starter1 (self, p):
         'decl_starter : type_specifier bare_macro qualified_id'
@@ -816,12 +818,12 @@ class CppParser(object):
 
     def p_decl_starter2 (self, p):
         'decl_starter : STORAGE type_specifier qualified_id'
-        p [0] = "|".join (p [2:])
+        p [0] = joinp(p, 2, "|")
         self.storage = p [1]
         
     def p_decl_starter3 (self, p):
         'decl_starter : STORAGE bare_macro type_specifier qualified_id'
-        p [0] = "|".join (p [3:])
+        p [0] = joinp(3, "|")
         self.storage = p [1]
             
     def p_decl_starter4 (self, p):
@@ -900,12 +902,12 @@ class CppParser(object):
 
     def p_operator_pfx4 (self, p):
         'operator_pfx : type_specifier ID COLON2 operator'
-        p [0] = None
+        p [0] = p[1] + " " + p[2] + p[3]
     
     def p_operator_name (self, p):
         """operator_name : operator_pfx operator_type"""
         if p[1] is not None:
-            self.functionObject ('operator ' + p[2], p[1])
+            self.functionObject ('operator' + p[2], p[1])
             self.arguments = []
         
     def p_operator_type (self, p):
@@ -943,8 +945,11 @@ class CppParser(object):
                          | LPAREN RPAREN LPAREN
                          | ARROW LPAREN
                          | NE LPAREN"""
-        p[0] = "".join (p [1:-1])
-        
+        if len(p) == 3:
+            p[0] = p[1]
+        elif len(p) == 4:
+            p[0] = p[1] + p[2]
+
     def p_cast_operator_operator(self, p):
         """cast_operator_keyword : operator"""
         self.lexer.begin('function')
@@ -1108,7 +1113,7 @@ class CppParser(object):
     def p_template_param (self, p):
         """template_param : type_specifier
                          | type_specifier ID"""
-        p[0] = " ".join(p[1:])
+        p[0] = joinp(p, 1)
         
     def p_template_param_list (self, p):
         """template_param_list : template_param"""
@@ -1167,7 +1172,7 @@ class CppParser(object):
             
     def p_expression1 (self, p):
         'expression : LPAREN expression RPAREN'
-        p [0] = "".join (p [1:])
+        p [0] = joinp(p, 1, "")
 
     def p_expression2 (self, p):
         'expression : qualified_id'
@@ -1177,13 +1182,13 @@ class CppParser(object):
     def p_expression3 (self, p):
         """expression : type_specifier LPAREN expression_list RPAREN
                       | type_specifier LPAREN RPAREN"""
-        p [0] = "".join (p [1:])
+        p [0] = joinp(p, 1, "")
         self.exprElements.append ('%s()' % p [1])
         
     def p_expression4 (self, p):
         """expression : type_specifier PERIOD ID LPAREN expression_list RPAREN
                       | type_specifier PERIOD ID LPAREN RPAREN"""
-        p [0] = "".join (p [1:])
+        p [0] = joinp(p, 1, "")
         self.exprElements.append ('%s.%s()' % (p [1], p [3]))
 
     def p_expression5 (self, p):
@@ -1194,7 +1199,7 @@ class CppParser(object):
     def p_expression_list (self, p):
         """expression_list : expression
                            | expression_list COMMA expression"""
-        p [0] = "".join (p [1:])
+        p [0] = joinp(p, 1, "")
 
     def p_unary_expression (self, p):
         """unary_expression : sign_expression
@@ -1205,100 +1210,100 @@ class CppParser(object):
 
     def p_add_expression (self, p):
         'add_expression : expression PLUS expression'
-        p [0] = "".join (p [1:])
-        
+        p [0] = joinp(p, 1, "")
+
     def p_sub_expression (self, p):
         'sub_expression : expression MINUS expression'
-        p [0] = "".join (p [1:])
-    
+        p [0] = joinp(p, 1, "")
+
     def p_mult_expression (self, p):
         'mult_expression : expression ASTERISK expression'
-        p [0] = "".join (p [1:])
-    
+        p [0] = joinp(p, 1, "")
+
     def p_div_expression (self, p):
         'div_expression : expression SLASH expression'
-        p [0] = "".join (p [1:])
-    
+        p [0] = joinp(p, 1, "")
+
     def p_mod_expression (self, p):
         'mod_expression : expression PERCENT expression'
-        p [0] = "".join (p [1:])
-    
+        p [0] = joinp(p, 1, "")
+
     def p_sign_expression (self, p):
         'sign_expression : MINUS expression %prec UMINUS'
-        p [0] = "".join (p [1:])
-    
+        p [0] = joinp(p, 1, "")
+
     def p_or_expression (self, p):
         'or_expression : expression LOR expression'
-        p [0] = "".join (p [1:])
-    
+        p [0] = joinp(p, 1, "")
+
     def p_and_expression (self, p):
         'and_expression : expression LAND expression'
-        p [0] = "".join (p [1:])
-    
+        p [0] = joinp(p, 1, "")
+
     def p_xor_expression (self, p):
         'xor_expression : expression CARET expression'
-        p [0] = "".join (p [1:])
-    
+        p [0] = joinp(p, 1, "")
+
     def p_bitor_expression (self, p):
         'bitor_expression : expression VBAR expression'
-        p [0] = "".join (p [1:])
-    
+        p [0] = joinp(p, 1, "")
+
     def p_bitand_expression (self, p):
         'bitand_expression : expression AMPERSAND expression'
-        p [0] = "".join (p [1:])
-    
+        p [0] = joinp(p, 1, "")
+
     def p_lt_expression (self, p):
         'lt_expression : expression LT expression'
-        p [0] = "".join (p [1:])
-    
+        p [0] = joinp(p, 1, "")
+
     def p_le_expression (self, p):
         'le_expression : expression LE expression'
-        p [0] = "".join (p [1:])
-    
+        p [0] = joinp(p, 1, "")
+
     def p_eq_expression (self, p):
         'eq_expression : expression EQ expression'
-        p [0] = "".join (p [1:])
-    
+        p [0] = joinp(p, 1, "")
+
     def p_ge_expression (self, p):
         'ge_expression : expression GE expression'
-        p [0] = "".join (p [1:])
-    
+        p [0] = joinp(p, 1, "")
+
     def p_gt_expression (self, p):
         'gt_expression : expression GT expression'
-        p [0] = "".join (p [1:])
-    
+        p [0] = joinp(p, 1, "")
+
     def p_lshift_expression (self, p):
         'lshift_expression : expression GT GT expression'
-        p [0] = "".join (p [1:])
-    
+        p [0] = joinp(p, 1, "")
+
     def p_rshift_expression (self, p):
         'rshift_expression : expression LT LT expression'
-        p [0] = "".join (p [1:])
+        p [0] = joinp(p, 1, "")
 
     def p_not_expression (self, p):
         'not_expression : BANG expression'
-        p [0] = "".join (p [1:])
+        p [0] = joinp(p, 1, "")
 
     def p_bitnot_expression (self, p):
         'bitnot_expression : TILDE expression'
-        p [0] = "".join (p [1:])
-    
+        p [0] = joinp(p, 1, "")
+
     def p_new_expression (self, p):
         'new_expression : new expression'
-        p [0] = "".join (p [1:])
+        p [0] = joinp(p, 1, "")
 
     def p_static_cast_expression (self, p):
         'static_cast_expression : static_cast LT type_specifier GT LPAREN expression RPAREN'
-        p [0] = ''.join (p [1:])
+        p [0] = joinp(p, 1)
         self.exprElements.append (p [3])
     
     def p_ptr_expression (self, p):
         'ptr_expression : expression ARROW expression'
-        p [0] = "".join (p [1:])
+        p [0] = joinp(p, 1, "")
 
     def p_dot_expression (self, p):
         'dot_expression : expression PERIOD expression'
-        p [0] = "".join (p [1:])
+        p [0] = joinp(p, 1, "")
 
 # inline code/statements
 # the second and last cases are incorrect syntax, but show up in KDE
@@ -1349,7 +1354,7 @@ class CppParser(object):
 
     def p_macro_call_element_list1 (self, p):
         'macro_call_element_list : macro_call_element_list MACRO_ELEMENT'
-        p [0] = ' '.join (p [1:])
+        p [0] = joinp(p, 1)
 
     def p_macro_call_element_list2 (self, p):
         'macro_call_element_list : macro_call_element_list macro_call_parens'

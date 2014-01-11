@@ -158,7 +158,7 @@ t_ANY_ignore_cppcomment = '//[^/].*'
     
     
 def t_ANY_error(t):
-    print "Illegal character %s" % repr(t.value[0])
+    print("Illegal character %s" % repr(t.value[0]))
     t.lexer.skip(1)
 
     
@@ -320,7 +320,7 @@ class ExpressionParser(object):
         p [0] = p[3] in self.values
     
     def p_error(self, p):
-        print "Syntax error at '%s'" % p.value
+        print("Syntax error at '%s'" % p.value)
 
                   
 if __name__ == '__main__':                  
@@ -337,4 +337,4 @@ if __name__ == '__main__':
         except EOFError:
             break
         if not s: continue
-        print parser.parse(s, values)
+        print(parser.parse(s, values))

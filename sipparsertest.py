@@ -39,19 +39,19 @@ class TestSipParser(unittest.TestCase):
         scope = self.parser.parse(self.syms, code, debugLevel=debugLevel);
         new_code = scope.format()
         if CleanWhitespace(new_code)!=CleanWhitespace(code):
-            self.fail("Output code doesn't match input code.\n---- Original:\n" + code + "\n---- Result:" + new_code)
+            self.fail("Output code doesn't match input code.\n---- Original:\n" + code + "\n---- Result:\n" + new_code)
 
     def ioTest(self,incode,outcode,debugLevel=0):
         scope = self.parser.parse(self.syms, incode, debugLevel=debugLevel);
         new_code = scope.format()
         if CleanWhitespace(new_code)!=CleanWhitespace(outcode):
-            self.fail("Output code doesn't match expected output code.\n---- Expected:\n" + outcode + "\n---- Result:" + new_code)
+            self.fail("Output code doesn't match expected output code.\n---- Expected:\n" + outcode + "\n---- Result:\n" + new_code)
 
     def strictMirrorTest(self,code,debugLevel=0):
         scope = self.parser.parse(self.syms, code, debugLevel=debugLevel);
         new_code = scope.format()
         if new_code!=code:
-            self.fail("Output code doesn't match input code.\n---- Original:\n" + code + "\n---- Result:" + new_code)
+            self.fail("Output code doesn't match input code.\n---- Original:\n" + code + "\n---- Result:\n" + new_code)
 
     def simpleParseTest(self,code,debugLevel=0):
         self.parser.parse(self.syms, code, debugLevel=debugLevel);

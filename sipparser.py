@@ -22,6 +22,14 @@ from sealed import sealed
 import ply.yacc as yacc
 from siplexer import sipLexer, tokens
 
+def joinp(p, startindex, string=" "):
+    tmplist = []
+    i = startindex
+    while i < len(p):
+        tmplist.append(p[i])
+        i += 1
+    return string.join(tmplist)
+
 class SipParser(object):
     """Parser for SIP files
     
@@ -325,16 +333,16 @@ class SipParser(object):
                               | ID EQUALS ICONST
                               | ID EQUALS SCONST
                               | ID EQUALS HEXCONST"""
-        p[0] = ''.join(p[1:])
+        p[0] = joinp(p, 1, "")
         
     def p_annotation_element2 (self, p):
         """annotation_element : ID EQUALS ID COLON MINUS ICONST"""
-        p[0] = ''.join(p[1:5]) + ' ' + p[5] + ' ' + p[6]
+        p[0] = ''.join( [p[i] for i in range(1,5) ] ) + ' ' + p[5] + ' ' + p[6]
         
     def p_annotation_element3 (self, p):
         """annotation_element : ID EQUALS ID COLON ICONST MINUS"""
-        p[0] = ''.join(p[1:5]) + p[5] + ' ' + p[6] + ' '
-        
+        p[0] = ''.join( [p[i] for i in range(1,5) ] ) + p[5] + ' ' + p[6] + ' '
+
     def p_annotation_list0 (self, p):
         """annotation_list : annotation_element"""
         p[0] = [p[1]]
@@ -545,7 +553,7 @@ class SipParser(object):
     def p_id_list (self, p):
         """id_list : id_list_element
                    | id_list COMMA id_list_element"""
-        p [0] = "".join (p [1:])
+        p [0] = joinp(p, 1, "")
                    
     def p_qualified_id (self, p):
         """qualified_id : ID
@@ -556,11 +564,11 @@ class SipParser(object):
         """nested_name_specifier : ID COLON2 ID
                                  | nested_name_specifier COLON2 ID
                                  | template_type COLON2 ID"""
-        p [0] = "".join (p [1:])
-        
+        p [0] = joinp(p, 1, "")
+
     def p_template_type (self, p):
         'template_type : qualified_id LT type_specifier_list GT'
-        p[0] = "".join (p[1:])
+        p [0] = joinp(p, 1, "")
         #self.template = Template (p [1], p [3], self.template)
        
     def p_elaborated_type (self, p):
@@ -601,8 +609,8 @@ class SipParser(object):
                                | bool
                                | void
                                | wchar_t"""
-        p [0] = " ".join (p [1:])
-        
+        p[0] = joinp(p, 1)
+
     def p_type_specifier0 (self, p):
         'type_specifier : type_specifier_base '
         p [0] = p [1]
@@ -626,13 +634,13 @@ class SipParser(object):
                           | ASTERISK ASTERISK
                           | ASTERISK ASTERISK ASTERISK
                           | ASTERISK"""
-        p [0] = "".join (p [1:])
-        
+        p[0] = joinp(p, 1, "")
+
     def p_type_specifier_list (self, p):
         """type_specifier_list : type_specifier
                                | type_specifier_list COMMA type_specifier"""
-        p [0] = "".join (p [1:])
-                   
+        p[0] = joinp(p, 1, "")
+
     def p_typedef_decl (self, p):
         """typedef_decl : typedef_simple SEMI
                         | typedef_simple annotation SEMI
@@ -672,8 +680,8 @@ class SipParser(object):
         
     def p_array_variable (self, p):
         'array_variable : ID ARRAYOP'
-        p [0] = " ".join (p [1:])
-                        
+        p [0] = joinp(p, 1)
+
     def p_argument_specifier0 (self, p):
         """argument_specifier : type_specifier
                               | ELLIPSIS"""
@@ -738,8 +746,8 @@ class SipParser(object):
     def p_exception_list (self, p):
         """exception_list : exception_element
                           | exception_list COMMA exception_element"""
-        p [0] = "".join (p [1:])
-        
+        p [0] = joinp(p, 1, "")
+
     def p_exception (self, p):
         'exception : throw LPAREN exception_list RPAREN'
         self.stateInfo.currentObject ().exceptions = p [3]       
@@ -835,9 +843,11 @@ class SipParser(object):
                          | operator_pfx LPAREN RPAREN LPAREN
                          | operator_pfx ARROW LPAREN
                          | operator_pfx NE LPAREN"""
-        n = len (p) - 1
-        self.functionObject ('operator ' + "".join (p [2:n]), p[1])
-        
+        if len(p) == 4:
+            self.functionObject ('operator ' + p[2], p[1])
+        elif len(p) == 5:
+            self.functionObject ('operator ' + p[2] + p[3], p[1])
+
     def p_operator_primary0 (self, p):
         """operator_primary : operator_name argument_list RPAREN"""
         self.currentFunction.setArguments(p[2])
@@ -1111,8 +1121,8 @@ class SipParser(object):
     def p_template_param (self, p):
         """template_param : type_specifier
                          | type_specifier ID"""
-        self.templateParams.append (" ".join (p [1:]))
-        
+        self.templateParams.append (joinp(p, 1))
+
     def p_template_param_list (self, p):
         """template_param_list : template_param
                               | template_param_list COMMA template_param"""
@@ -1129,7 +1139,6 @@ class SipParser(object):
         
     def p_sip_block (self, p):
         'sip_block : sip_block_header BLOCK_BODY'
-        body = '\n'.join(p[1:])
         body = p[1] + p[2]
         if p[1]=='%MethodCode':
             blockObj = self.sipBlockObject(p[1])
@@ -1141,12 +1150,12 @@ class SipParser(object):
         
     def p_sip_block_header (self, p):
         'sip_block_header : PERCENT BLOCK'
-        p[0] = ''.join (p [1:])
+        p[0] = joinp(p, 1, "")
 
     def p_sip_stmt (self, p):
         'sip_stmt : sip_stmt_header SIPSTMT_BODY'
-        p[0] = '\n'.join(p[1:])
-        self._lastEntity().setBody('\n'.join(p[1:]))
+        p[0] = joinp(p, 1, "\n")
+        self._lastEntity().setBody(joinp(p, 1, "\n"))
         
     def p_sip_stmt_header (self, p):
         """sip_stmt_header : PERCENT SIPSTMT type_specifier
@@ -1155,7 +1164,7 @@ class SipParser(object):
         if len(p)==5:
             p[0] = '%%%s %s /%s/' % (p[2], p[3], ''.join(p[4]))
         else:
-            p[0] = '%%%s %s' % (p[2], ''.join(p[3:]))
+            p[0] = '%%%s %s' % (p[2], joinp(p, 3, ""))
         #if len(p) == 7:
         #    sipTypeObj.base = p [5]
         if not self.inTemplate:
@@ -1172,7 +1181,7 @@ class SipParser(object):
         """cmodule : PERCENT CModule ID
                    | PERCENT CModule ID ICONST"""
         directive = self.sipDirectiveObject ('CModule')
-        directive.setBody('%CModule' + ",".join (p [2:]))
+        directive.setBody('%CModule' + joinp(p, 2, ","))
 
     def p_comp_module (self, p):
         'comp_module : PERCENT CompositeModule ID'
@@ -1212,7 +1221,7 @@ class SipParser(object):
         """ored_qualifiers : if_qualifier
                            | ored_qualifiers VBAR VBAR if_qualifier
                            | ored_qualifiers LOR if_qualifier"""
-        p [0] = "".join (p [1:]) 
+        p [0] = joinp(p, 1, "")
         self.platform = p [0]
 
     def p_if_qualifier (self, p):
@@ -1271,8 +1280,8 @@ class SipParser(object):
     def p_license_annot_list (self, p):
         """license_annot_list : license_annot
                               | license_annot_list COMMA license_annot"""
-        p [0] = "".join (p [1:])
-        
+        p[0] = joinp(p, 1, "")
+
     def p_license (self, p):
         'license : PERCENT License SLASH license_annot_list SLASH'
         directive = self.sipDirectiveObject('License')
@@ -1282,7 +1291,7 @@ class SipParser(object):
         """module : PERCENT Module FILENAME
                   | PERCENT Module FILENAME ICONST"""
         directive = self.sipDirectiveObject('Module')
-        directive.setBody("%" + " ".join(p[2:]))
+        directive.setBody("%" + joinp(p, 2))
 
     def p_module2(self, p):
         """module : PERCENT Module keypairs
@@ -1318,8 +1327,8 @@ class SipParser(object):
     def p_undelimited_id_list (self, p):
         """undelimited_id_list : ID
                                | undelimited_id_list ID"""
-        p [0] = " ".join (p [1:])
-        
+        p[0] = joinp(p, 1)
+
     def p_platforms (self, p):
         'platforms : PERCENT Platforms LBRACE undelimited_id_list RBRACE'
         directive = self.sipDirectiveObject('Platforms')
@@ -1379,7 +1388,7 @@ class SipParser(object):
             
     def p_expression1 (self, p):
         'expression : LPAREN expression RPAREN'
-        p [0] = "".join (p [1:])
+        p[0] = joinp(p, 1, "")
 
     def p_expression2 (self, p):
         'expression : qualified_id'
@@ -1388,12 +1397,12 @@ class SipParser(object):
     def p_expression3 (self, p):
         """expression : type_specifier LPAREN expression_list RPAREN
                       | type_specifier LPAREN RPAREN"""
-        p [0] = "".join (p [1:])
-        
+        p[0] = joinp(p, 1, "")
+
     def p_expression_list (self, p):
         """expression_list : expression
                            | expression_list COMMA expression"""
-        p [0] = "".join (p [1:])
+        p[0] = joinp(p, 1, "")
 
     def p_unary_expression (self, p):
         """unary_expression : sign_expression
@@ -1403,88 +1412,88 @@ class SipParser(object):
 
     def p_add_expression (self, p):
         'add_expression : expression PLUS expression'
-        p [0] = "".join (p [1:])
-        
+        p[0] = joinp(p, 1, "")
+
     def p_sub_expression (self, p):
         'sub_expression : expression MINUS expression'
-        p [0] = "".join (p [1:])
-    
+        p[0] = joinp(p, 1, "")
+
     def p_mult_expression (self, p):
         'mult_expression : expression ASTERISK expression'
-        p [0] = "".join (p [1:])
-    
+        p[0] = joinp(p, 1, "")
+
     def p_div_expression (self, p):
         'div_expression : expression SLASH expression'
-        p [0] = "".join (p [1:])
-    
+        p[0] = joinp(p, 1, "")
+
     def p_mod_expression (self, p):
         'mod_expression : expression PERCENT expression'
-        p [0] = "".join (p [1:])
-    
+        p[0] = joinp(p, 1, "")
+
     def p_sign_expression (self, p):
         'sign_expression : MINUS expression %prec UMINUS'
-        p [0] = "".join (p [1:])
-    
+        p[0] = joinp(p, 1, "")
+
     def p_or_expression (self, p):
         'or_expression : expression LOR expression'
-        p [0] = "".join (p [1:])
-    
+        p[0] = joinp(p, 1, "")
+
     def p_and_expression (self, p):
         'and_expression : expression LAND expression'
-        p [0] = "".join (p [1:])
-    
+        p[0] = joinp(p, 1, "")
+
     def p_xor_expression (self, p):
         'xor_expression : expression CARET expression'
-        p [0] = "".join (p [1:])
-    
+        p[0] = joinp(p, 1, "")
+
     def p_bitor_expression (self, p):
         'bitor_expression : expression VBAR expression'
-        p [0] = "".join (p [1:])
-    
+        p[0] = joinp(p, 1, "")
+
     def p_bitand_expression (self, p):
         'bitand_expression : expression AMPERSAND expression'
-        p [0] = "".join (p [1:])
-    
+        p[0] = joinp(p, 1, "")
+
     def p_lt_expression (self, p):
         'lt_expression : expression LT expression'
-        p [0] = "".join (p [1:])
-    
+        p[0] = joinp(p, 1, "")
+
     def p_le_expression (self, p):
         'le_expression : expression LE expression'
-        p [0] = "".join (p [1:])
-    
+        p[0] = joinp(p, 1, "")
+
     def p_eq_expression (self, p):
         'eq_expression : expression EQ expression'
-        p [0] = "".join (p [1:])
-    
+        p[0] = joinp(p, 1, "")
+
     def p_ge_expression (self, p):
         'ge_expression : expression GE expression'
-        p [0] = "".join (p [1:])
-    
+        p[0] = joinp(p, 1, "")
+
     def p_gt_expression (self, p):
         'gt_expression : expression GT expression'
-        p [0] = "".join (p [1:])
-    
+        p[0] = joinp(p, 1, "")
+
     def p_lshift_expression (self, p):
         'lshift_expression : expression GT GT expression'
-        p [0] = "".join (p [1:])
-    
+        p[0] = joinp(p, 1, "")
+
     def p_rshift_expression (self, p):
         'rshift_expression : expression LT LT expression'
-        p [0] = "".join (p [1:])
+        p[0] = joinp(p, 1, "")
 
     def p_not_expression (self, p):
         'not_expression : BANG expression'
-        p [0] = "".join (p [1:])
+        p[0] = joinp(p, 1, "")
 
     def p_bitnot_expression (self, p):
         'bitnot_expression : TILDE expression'
-        p [0] = "".join (p [1:])
+        p[0] = joinp(p, 1, "")
 
     def p_arrow_expression (self, p):
         'arrow_expression : expression ARROW expression'
-        p [0] = "".join (p [1:])
-        
+        p[0] = joinp(p, 1, "")
+
     def p_error(self, p):
         if p is not None:
             print("File: " + repr(self.filename) + " Line: " + str(self.lexer.lineno) + " Syntax error in input. Token type: %s, token value: %s, lex state: %s" % (p.type, p.value, self.lexer.lexstate))

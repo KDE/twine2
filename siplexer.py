@@ -401,7 +401,7 @@ def t_preprocessor(t):
     t.lineno += 1
 
 def t_ANY_error(t):
-    print "Illegal character %s" % repr(t.value[0])
+    print("Illegal character %s" % repr(t.value[0]))
     t.lexer.skip(1)
 
 

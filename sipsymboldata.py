@@ -16,7 +16,7 @@
 # Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 from sealed import sealed
-from argvalidate import accepts,returns,one_of
+# from argvalidate import accepts,returns,one_of
 import types
 import cppsymboldata
 
@@ -35,7 +35,7 @@ class SymbolData(cppsymboldata.SymbolData):
             self._cppreturn = None
             self._force = False
             
-        @returns(str)
+        # @returns(str)
         def fqPythonName(self):
             parentFqn = self.parentScope().fqPythonName()
             
@@ -380,7 +380,7 @@ class SymbolData(cppsymboldata.SymbolData):
 
     class Enum(_SipEntityExtra, cppsymboldata.SymbolData.Enum):
         @sealed
-        @accepts(cppsymboldata.SymbolData.Entity,one_of(str,types.NoneType),filename=one_of(str,types.NoneType),lineno=int)
+        # @accepts(cppsymboldata.SymbolData.Entity,one_of(str,types.NoneType),filename=one_of(str,types.NoneType),lineno=int)
         def __init__(self, parentScope, name, filename=None, lineno=-1):
             cppsymboldata.SymbolData.Enum.__init__(self, parentScope, name, filename, lineno)
             SymbolData._SipEntityExtra.__init__(self)

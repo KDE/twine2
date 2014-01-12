@@ -28,12 +28,12 @@ def ExtractInstallFiles(filename=None,input=None):
     if filename is not None:
         variables['cmake_current_source_dir'] = [os.path.dirname(filename)]
 
-    ExtractInstallFilesWithContext(variables,install_list,filename,input)
+    ExtractInstallFilesWithContext(variables, install_list, filename,input)
 #    print(repr(variables))
 #    print(repr(install_list))
     return install_list
 
-def ExtractInstallFilesWithContext(variables,install_list,filename=None,input=None):
+def ExtractInstallFilesWithContext(variables, install_list, filename=None, input=None, fileprefix=""):
     lexer = cmakelexer.CMakeLexer()
     if input:
         lexer.input(input)
@@ -51,7 +51,7 @@ def ExtractInstallFilesWithContext(variables,install_list,filename=None,input=No
 
         elif command=="install":
             install_args = ExpandArgs(variables, args, filename)
-            install_list.extend( [x for x in install_args if x.endswith('.h')] )
+            install_list.extend( [os.path.join(fileprefix,x) for x in install_args if x.endswith('.h')] )
 
         elif command=="include":
             if filename is not None:
@@ -62,7 +62,7 @@ def ExtractInstallFilesWithContext(variables,install_list,filename=None,input=No
                     if len(arg.strip())!=0:
                         include_filename = os.path.join(this_dir,arg)
                         if os.path.exists(include_filename):
-                            ExtractInstallFilesWithContext(variables,install_list,include_filename)
+                            ExtractInstallFilesWithContext(variables, install_list, include_filename)
 
         elif command=="add_subdirectory":
             if filename is not None:
@@ -73,7 +73,7 @@ def ExtractInstallFilesWithContext(variables,install_list,filename=None,input=No
                     if len(arg.strip())!=0:
                         include_filename = os.path.join(this_dir,arg,"CMakeLists.txt")
                         if os.path.exists(include_filename):
-                            ExtractInstallFilesWithContext(variables,install_list,include_filename)
+                            ExtractInstallFilesWithContext(variables, install_list, include_filename, fileprefix=os.path.join(fileprefix,arg))
 
         elif command=="file":
             # This is just a basic cmake FILE() implementation. It just does GLOB.
@@ -99,7 +99,7 @@ def ExtractInstallFilesWithContext(variables,install_list,filename=None,input=No
                     result = []
                     current_dir = variables['cmake_current_source_dir'][0]
                     while True:
-                        for x in glob.iglob(os.path.join(current_dir,arg)):
+                        for x in glob.iglob(os.path.join(current_dir, arg)):
                             if x.startswith(relative_dir):
                                 x = x[len(relative_dir):]
                             result.append(x)

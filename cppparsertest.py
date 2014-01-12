@@ -1,3 +1,4 @@
+#!env python3
 # -*- coding: utf-8 -*-
 #     Copyright 2009 Simon Edwards <simon@simonzone.com>
 #

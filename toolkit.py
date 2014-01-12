@@ -16,7 +16,7 @@
 # Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-from argvalidate import accepts,returns,one_of
+#from argvalidate import accepts,returns,one_of
 import types
 from sealed import sealed
 import cmake
@@ -31,6 +31,10 @@ import os
 import os.path
 import glob
 from reducetxt import Reduce
+
+
+def cmp(a, b):
+    return (a > b) - (a < b)
 
 reducer = Reduce()
 
@@ -321,7 +325,7 @@ class ModuleGenerator(object):
             else:
                 print("    (Missing header file to match %s. Skipping merge.)" % (filename,) )
             
-        for key in updateSipMap.iterkeys():
+        for key in updateSipMap.keys():
             print("    Adding new header "+key)
             previousSipScopes.append(updateSipMap[key])
             
@@ -407,7 +411,7 @@ class ModuleGenerator(object):
         self.writeNamespaces(previousSipScopes,cppScopes)
         return previousSipScopes
 
-    @accepts(sipsymboldata.SymbolData.SipClass, dict)
+    # @accepts(sipsymboldata.SymbolData.SipClass, dict)
     def writeClassDoc(self, sipClass, subclassMapping):
         classComment = ""
         cppClass = None
@@ -430,8 +434,8 @@ class ModuleGenerator(object):
 
         self.writeClassPage(sipClass,subclassMapping,cppClass,classComment)
 
-    @accepts(sipsymboldata.SymbolData.Entity)
-    @returns(str)
+    # @accepts(sipsymboldata.SymbolData.Entity)
+    # @returns(str)
     def commentMapKey(self, item):
         if isinstance(item, (self._sipSymbolData.Constructor, self._symbolData.Constructor)):
             argNames = [(x.name() if x.name() is not None else "") for x in item.arguments()]
@@ -440,8 +444,8 @@ class ModuleGenerator(object):
             key = item.name()
         return key
 
-    @accepts(sipsymboldata.SymbolData.CppClass)
-    @returns(dict)
+    # @accepts(sipsymboldata.SymbolData.CppClass)
+    # @returns(dict)
     def buildCommentMap(self,cppClass):
         lastComment = None
         commentMap = {}
@@ -455,7 +459,7 @@ class ModuleGenerator(object):
                     lastComment = None
         return commentMap
             
-    @accepts(sipsymboldata.SymbolData.SipClass, dict, one_of(sipsymboldata.SymbolData.CppClass,types.NoneType), str)
+    # @accepts(sipsymboldata.SymbolData.SipClass, dict, one_of(sipsymboldata.SymbolData.CppClass,types.NoneType), str)
     def writeClassPage(self,sipClass,subclassMapping,cppClass,classComment):
         def nameKey(a): return a.name()
         enumList = [item for item in sipClass if isinstance(item,self._sipSymbolData.Enum) and not item.ignore()]
@@ -602,8 +606,8 @@ class ModuleGenerator(object):
         page.write(htmlFooter % {'path': '../'})
         page.close()
         
-    @accepts(list, types.FunctionType, str, useSelf=bool)
-    @returns(str)
+    # @accepts(list, types.FunctionType, str, useSelf=bool)
+    # @returns(str)
     def writeMethodIndex(self, methodList, methodFilter, title, useSelf=True):
         result = []
         result.append("""<tr><td colspan="2"><br><h2>""")
@@ -670,7 +674,7 @@ class ModuleGenerator(object):
             result.append(')</td></tr>\n')
         return "".join(result)
         
-    @accepts(file, list, dict, title=str, functions=bool)
+    # @accepts(file, list, dict, title=str, functions=bool)
     def writeMethodDetails(self, page, methodList, commentMap, title="Method Documentation", functions=False):
         if not methodList:
             return
@@ -680,7 +684,7 @@ class ModuleGenerator(object):
             comment = commentMap.setdefault(self.commentMapKey(obj),"")
             self.writeMethodDetail(page, obj, comment, function=functions)
         
-    @accepts(file, one_of(sipsymboldata.SymbolData.Function,sipsymboldata.SymbolData.Constructor), str, function=bool)
+    # @accepts(file, one_of(sipsymboldata.SymbolData.Function,sipsymboldata.SymbolData.Constructor), str, function=bool)
     def writeMethodDetail(self, page, obj, comment, function=False):
         retList = []
         if obj.return_():
@@ -790,8 +794,8 @@ class ModuleGenerator(object):
         
         page.write('</div></div>')
 
-    @accepts(list)
-    @returns(str)
+    # @accepts(list)
+    # @returns(str)
     def writeEnums(self, enumList): #:, flags = None):
         if len(enumList)==0:
             return ""
@@ -819,8 +823,8 @@ class ModuleGenerator(object):
 
         return "".join(result)
 
-    @accepts(list)
-    @returns(str)
+    # @accepts(list)
+    # @returns(str)
     def writeVariables(self, variableList):
         if not variableList:
             return ""
@@ -833,7 +837,7 @@ class ModuleGenerator(object):
             result.append('<tr><td class="memItemLeft" nowrap align="right" valign="top">' + self.formatArgument(obj.argument(),obj) + '&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="#var' + linkId(obj) + '">' + obj.name() +'</a></td></tr>')
         return "".join(result)
 
-    @accepts(file,list,dict)
+    # @accepts(file,list,dict)
     def writeVariableDetails(self, page, variableList, commentMap):
         if not variableList:
             return
@@ -857,7 +861,7 @@ class ModuleGenerator(object):
             page.write(self.formatDoxygen(commentMap.setdefault(self.commentMapKey(obj),"")))
             page.write("""</div></div><p>""")            
 
-    @accepts(file,list,dict)
+    # @accepts(file,list,dict)
     def writeEnumDetail(self, page, enumList, commentMap): #flags = None):
         if not enumList:
             return
@@ -922,7 +926,7 @@ class ModuleGenerator(object):
 </dl>
 </div></div><p>""")
 
-    @accepts(list)
+    # @accepts(list)
     def writeModuleIndexPage(self,sipScopes):
         #nsNames = self.namespaces.keys()
         #nsNames.sort()
@@ -956,7 +960,7 @@ class ModuleGenerator(object):
         page.write(htmlFooter % {'path': '../'})
         page.close()
 
-    @accepts(list,list)
+    # @accepts(list,list)
     def writeNamespaces(self,sipScopes,cppScopes):
         # Figure out what namespace we have.
         namespaceCollector = {} # namespace FQN -> list of namespace objects
@@ -973,7 +977,7 @@ class ModuleGenerator(object):
         for fqName,ns in namespaceCollector.items():
             self.writeNamespacePage(fqName,ns,cppScopes)
 
-    @accepts(str,list,list)
+    # @accepts(str,list,list)
     def writeNamespacePage(self,nsName,nsList,cppScopes):
 #        print(repr(cppScopes))
         # create namespace page and add header
@@ -1060,7 +1064,7 @@ class ModuleGenerator(object):
         nspage.write (htmlFooter % {'path': '../'})
         nspage.close ()
 
-    @accepts(file,list)
+    # @accepts(file,list)
     def writeNSNamespacesIndex(self, page, namespaces):
         if not namespaces:
             return
@@ -1079,7 +1083,7 @@ class ModuleGenerator(object):
             
         page.write(FormatTable(namespaces, format, kmp))
         
-    @accepts(file,list)
+    # @accepts(file,list)
     def writeNSClassIndex(self, page, rawClassList):
         if not rawClassList:
             return
@@ -1191,16 +1195,16 @@ code fragments in the documentation have not been translated from C++ to Python.
 
         page.close()
 
-    @accepts(sipsymboldata.SymbolData.Argument,sipsymboldata.SymbolData.Entity)
-    @returns(str)
+    # @accepts(sipsymboldata.SymbolData.Argument,sipsymboldata.SymbolData.Entity)
+    # @returns(str)
     def formatArgument(self, arg, context):
         #print("argument: " + arg.argumentType())
         return self.formatType(arg.argumentType(),context)
 
     # formatType()
     # rObj - string, type name, may contain C++ '&' and '*' characters.
-    @accepts(str,sipsymboldata.SymbolData.Entity)
-    @returns(str)
+    # @accepts(str,sipsymboldata.SymbolData.Entity)
+    # @returns(str)
     def formatType(self, ret, context):
         r = ''
         if not ret or ret == 'void':
@@ -1322,8 +1326,8 @@ code fragments in the documentation have not been translated from C++ to Python.
 
         return typeName
         
-    @accepts(str)
-    @returns(str)
+    # @accepts(str)
+    # @returns(str)
     def stripComment(self, text):
         parts = text.split('\n')
         parts[0] = parts[0].strip()
@@ -1342,8 +1346,8 @@ code fragments in the documentation have not been translated from C++ to Python.
                 return line
         return '\n'.join( (clean(line) for line in parts if line is not None) )
 
-    @accepts(str)
-    @returns(str)
+    # @accepts(str)
+    # @returns(str)
     def formatDoxygen(self, text):
         if text:
             return reducer.do_txt(self.stripComment(text))

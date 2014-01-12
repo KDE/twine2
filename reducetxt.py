@@ -17,7 +17,7 @@
 # Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-from string import lowercase
+from string import ascii_lowercase
 import re
 
 deleteWords = ["@attention", "@exception", "@name", "\\name", "@e", "@port4", "@private", "@reimp",\
@@ -314,7 +314,7 @@ class Reduce(object):
                             
                         elif word in ["@section", "\section"]:
                             line [j] = ""
-                            if nextWord [0] in lowercase and j < (len (line) - 2):
+                            if nextWord [0] in ascii_lowercase and j < (len (line) - 2):
                                 line [j + 1] = ""
                                 line [j + 2] = "<b>%s" % escapeHtml(line[j + 2])
                                 j += 2

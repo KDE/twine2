@@ -45,7 +45,6 @@ def ExtractInstallFilesWithContext(variables, install_list, filename=None, input
     command_list = FetchCommands(lexer)
     for command,args in command_list:
         command = command.lower()
-
         if command=="set":
             variables[args[0].lower()] = ExpandArgs(variables, args[1:], filename)
 
@@ -108,6 +107,13 @@ def ExtractInstallFilesWithContext(variables, install_list, filename=None, input
             except StopIteration:
                 if varname is not None and result is not None:
                     variables[varname.lower()] = result
+
+        elif command=="ecm_generate_headers":
+            header_args = ExpandArgs(variables, args, filename)
+            for item in header_args:
+                if item == "REQUIRED_HEADERS":
+                    break
+                install_list.append(os.path.join(fileprefix, item.lower() + ".h"))
 
 def ExpandArgs(variables, args, filename=None):
     rex  = re.compile(r'(\$\{[^\}]+\})')

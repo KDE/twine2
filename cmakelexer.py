@@ -1,43 +1,33 @@
 # -*- coding: utf-8 -*-
 import ply.lex as lex
 
-class CMakeLexerClass(object):
-    states = ( ('command', 'exclusive'), ('arguments', 'exclusive') )
+tokens = (
+   'SYMBOL',
+   'LPAREN',
+   'RPAREN',
+   'COMMENT',
+   'STRING'
+)
 
-    tokens = (
-       'COMMAND',
-       'ARGUMENT'
-    )
+class CMakeLexerClass(object):
+    def __init__(self, filename=None):
+        self._filename = filename
+
+    # states = ( ('command', 'exclusive'), ('arguments', 'exclusive') )
+
+    tokens = tokens
 
     t_ANY_ignore = " \t"
+    t_SYMBOL = r'[^()\s#"]+'
+    t_LPAREN = r'\('
+    t_RPAREN = r'\)'
+    t_ANY_COMMENT = r'\#.*'
 
-    def t_COMMAND(self,t):
-        r'[A-Za-z0-9_]+'
-        t.lexer.last_command = t.value
-        t.lexer.begin('command')
-
-    def t_command_LPAREN(self,t):
-        r'\('
-        t.type = 'COMMAND'
-        t.lexer.begin('arguments')
-        t.value = t.lexer.last_command
+    def t_STRING(self, t):
+        r'"[^"\\]*(\\"[^"\\]*)*"'
+        t.value  = t.value[1:-1]
+        t.lexer.lineno += t.value.count("\n")
         return t
-        
-    def t_ANY_comment(self,t):
-        r'\#.*'
-        pass
-    
-    def t_arguments_RPAREN(self,t):
-        r'\)'
-        #if parenStack.pop ():
-        #t.type = 'COMMAND_END'
-        t.lexer.begin('INITIAL')
-        #else:
-        #    t.type = 'RPAREN'
-        #return t
-        
-    t_arguments_ARGUMENT = '[^" \t\n)]+|("((\\\\")|(\\\\n)|[^\\\\"]|\\.)*?")'
-        #("([^\n]|(\.))*?")'
 
     # Define a rule so we can track line numbers
     def t_ANY_newline(self,t):
@@ -45,10 +35,11 @@ class CMakeLexerClass(object):
         t.lexer.lineno += len(t.value)
 
     def t_ANY_error(self,t):
-        print("Line %i: Illegal character %s" % (t.lexer.lineno,repr(t.value[0])))
+        if self._filename is not None:
+            print("Illegal character %s at line %i, %s" % (repr(t.value[0]), t.lexer.lineno, self._filename))
+        else:
+            print("Illegal character %s at line %i." % (repr(t.value[0]),t.lexer.lineno))
         t.lexer.skip(1)
 
-classinstance = CMakeLexerClass()
-
-def CMakeLexer():
-    return lex.lex(object=classinstance)
+def CMakeLexer(filename=None):
+    return lex.lex(object=CMakeLexerClass(filename))

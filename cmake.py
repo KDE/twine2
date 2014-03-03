@@ -16,10 +16,10 @@
 # Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import cmakelexer
 import re
 import os.path
 import glob
+import cmakeparser
 
 def ExtractInstallFiles(filename=None,input=None):
     variables = {}
@@ -34,17 +34,19 @@ def ExtractInstallFiles(filename=None,input=None):
     return install_list
 
 def ExtractInstallFilesWithContext(variables, install_list, filename=None, input=None, fileprefix=""):
-    lexer = cmakelexer.CMakeLexer()
+    inputstring = ""
     if input:
-        lexer.input(input)
+        inputstring = input
     elif filename:
         fhandle = open(filename)
-        lexer.input(fhandle.read())
+        inputstring=  fhandle.read()
         fhandle.close()
-        
-    command_list = FetchCommands(lexer)
-    for command,args in command_list:
-        command = command.lower()
+    parser = cmakeparser.CMakeParser()
+    command_list = parser.parse(inputstring, filename)
+
+    for commandobject in command_list:
+        command = commandobject.command().lower()
+        args = [arg.value() for arg in commandobject.arguments()]
         if command=="set":
             variables[args[0].lower()] = ExpandArgs(variables, args[1:], filename)
 
@@ -81,7 +83,7 @@ def ExtractInstallFilesWithContext(variables, install_list, filename=None, input
             result = None
             try:
                 it = iter(command_args)
-                arg = it.next()
+                arg = it.__next__()
                 if arg.lower()=='glob' and filename is not None:
                     arg = it.next()
                     varname = arg
@@ -138,7 +140,7 @@ def ExpandArgs(variables, args, filename=None):
         
     return fixed_args
     
-def FetchCommands(lexer):
+def __FetchCommands(lexer):
     topmode = True
     command_list = []
     command = None

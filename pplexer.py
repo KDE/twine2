@@ -195,10 +195,12 @@ def t_anyline (t):
         for m in macros:
             line = m[0].sub(m[1], line)
         newtext.append (line)
-        t.lexer.lineno += line.count('\'n')
+        t.lexer.lineno += line.count('\n')
     else:
-        newtext.append ('\n')
-        t.lexer.lineno += 1   
+        c = t.value.count('\n')
+        for x in range(c):
+            newtext.append('\n')
+        t.lexer.lineno += c
 
 # this needs to be HERE - not above token definitions
 ppLexer = lex.lex (debug=0)

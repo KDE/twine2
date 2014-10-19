@@ -159,6 +159,10 @@ def ExpandArgs(variables, args, filename=None):
     fixed_args = []
     for arg in args:
         fixed_parts = []
+
+        if arg.startswith("$<BUILD_INTERFACE:"):
+            arg = arg[len("$<BUILD_INTERFACE:"): -1]
+
         parts = rex.split(arg)
         for part in parts:
             if part.startswith("${"):

@@ -40,7 +40,7 @@ reducer = Reduce()
 
 class ModuleGenerator(object):
     @sealed
-    def __init__(self,module,cmakelists=[],headers=[],ignoreHeaders=[],noUpdateSip=[],outputDirectory=None,
+    def __init__(self,module,cmakelists=[], cmakeVariables=None, headers=[],ignoreHeaders=[],noUpdateSip=[],outputDirectory=None,
             preprocessorValues=[],preprocessSubstitutionMacros=[],macros=[],bareMacros=[],exportMacros=None,
             ignoreBases=None,noCTSCC=[],sipImportDirs=[],sipImports=[],copyrightNotice=None,
             annotationRules=[],docsOutputDirectory=None,mainDocs=None,filenameMappingFunction=None,
@@ -48,6 +48,7 @@ class ModuleGenerator(object):
             
         self._module = module
         self._cmakelists = [cmakelists] if isinstance(cmakelists,str) else cmakelists
+        self._cmakeVariables = cmakeVariables if cmakeVariables is not None else {}
         self._headers = headers
         self._ignoreHeaders = set([ignoreHeaders] if isinstance(ignoreHeaders,str) else ignoreHeaders)
         self._noUpdateSip = noUpdateSip
@@ -154,9 +155,10 @@ class ModuleGenerator(object):
         filenames = []
         for cmakeFilename in self._cmakelists:
             dirName = os.path.dirname(cmakeFilename)
-            for header in cmake.ExtractInstallFiles(cmakeFilename):
+            for header in cmake.ExtractInstallFiles(cmakeFilename, variables=self._cmakeVariables):
                 if os.path.basename(header) not in self._ignoreHeaders:
                     filenames.append(os.path.join(dirName,header))
+        print(repr(set(filenames)))
         return set(filenames)
         
     def expandHeaders(self):
@@ -232,7 +234,7 @@ class ModuleGenerator(object):
                     break
         scope.setModule(module)
         
-        print(sipFilename + " -> " + scope.headerFilename())
+        # print(sipFilename + " -> " + scope.headerFilename())
         
         scopeList = [scope]
         
@@ -461,7 +463,7 @@ class ModuleGenerator(object):
             
     # @accepts(sipsymboldata.SymbolData.SipClass, dict, one_of(sipsymboldata.SymbolData.CppClass,types.NoneType), str)
     def writeClassPage(self,sipClass,subclassMapping,cppClass,classComment):
-        def nameKey(a): return a.name()
+        def nameKey(a): return a.name() if a.name() is not None else ""
         enumList = [item for item in sipClass if isinstance(item,self._sipSymbolData.Enum) and not item.ignore()]
         enumList.sort(key=nameKey)
         
@@ -522,7 +524,7 @@ class ModuleGenerator(object):
         subClassSet = subclassMapping.get(sipClass,None)
         if subClassSet is not None:
             subClassList = list(subClassSet)
-            subClassList.sort()
+            subClassList.sort(key=nameKey)
             subClasses = 'Subclasses: ' + (', '.join ( [self.formatType(x.fqName(),sipClass) for x in subClassList] )) + '<br />'
         else:
             subClasses = ''
@@ -1081,7 +1083,7 @@ class ModuleGenerator(object):
             cellcontents = '<a class="el" href="%s.html">%s</a>&nbsp;&nbsp;&nbsp;' % (obj,name)
             return (indexstring,cellcontents)
             
-        page.write(FormatTable(namespaces, format, kmp))
+        page.write(FormatTable(namespaces, format, key))
         
     # @accepts(file,list)
     def writeNSClassIndex(self, page, rawClassList):
@@ -1108,9 +1110,9 @@ class ModuleGenerator(object):
             else:
                 return None
         
-        def kmp_obj(a,b):
-            return kmp(a.name(),b.name())
-        page.write(FormatTable(rawClassList, format, kmp_obj))
+        def key_obj(a):
+            return a.name()
+        page.write(FormatTable(rawClassList, format, key_obj))
 
     @staticmethod
     def WriteAllClasses(htmldst, nsNames, classNames):
@@ -1156,13 +1158,13 @@ class ModuleGenerator(object):
 
             cellcontents = '<a href="' + t[0] + '/' + t[1] + '.html">' + name + '</a>'
             return (indexstring,cellcontents)
-        def t_cmp(a,b):
-            return kmp(extract_name(a[1]), extract_name(b[1]))
-        page.write(FormatTable(nsNames, format, t_cmp, columns=2))
+        def t_key(a):
+            return key(extract_name(a[1]))
+        page.write(FormatTable(nsNames, format, t_key, columns=2))
 
         # Classes
         page.write("<p>\n<h2>All Classes</h2>\n")
-        page.write(FormatTable(classNames, format, t_cmp, columns=2))
+        page.write(FormatTable(classNames, format, t_key, columns=2))
 
         page.write(htmlFooter % {'path': ''})
         page.close()
@@ -1170,17 +1172,17 @@ class ModuleGenerator(object):
     @staticmethod
     def WriteMainPage(htmldst):
         page = open(os.path.join(htmldst, 'modules.html'), 'w')
-        page.write(htmlHeader % {'title': 'KDE 4.9 PyKDE API Reference', 'path': ''})
+        page.write(htmlHeader % {'title': 'KDE 5 PyKDE API Reference', 'path': ''})
 
         page.write("""<p>
-<h2>KDE 4.9 PyKDE API Reference</h2>
+<h2>KDE 5.0 PyKDE API Reference</h2>
 </p>
 <p>
 This is the reference to the KDE API as it appears to Python programs using PyKDE. This is just
 reference material, additional information about developing KDE applications using Python and the KDE API
 in general can be found on <a href="http://techbase.kde.org/">Techbase</a> and in the
 <a href="http://techbase.kde.org/Development/Languages/Python">Python section</a>. The reference for
-<a href="http://www.riverbankcomputing.co.uk/static/Docs/PyQt4/html/classes.html">PyQt 4 is here</a>.
+<a href="http://pyqt.sourceforge.net/Docs/PyQt5/class_reference.html">PyQt 5 is here</a>.
 </p>
 
 <p>
@@ -1395,7 +1397,7 @@ def BuildSubclassMap(scopeList,symbolData):
                         subClassList = mapping.setdefault(base,set())
                         subClassList.add(class_)
                     except KeyError:
-                        print("Warning: %s Unrecognized type '%s'." % (class_.sourceLocation(),baseName))
+                        print("Warning: %s Unrecognized type '%s' found when building subclass map." % (class_.sourceLocation(),baseName))
             elif isinstance(item,symbolData.Namespace):
                 processScope(item)
 
@@ -1419,21 +1421,22 @@ def FetchDocs(filename):
             return tok.value
     return ""
     
-def kmp(a,b):
+def key(a):
     if a.startswith('K'):
         a = a[1:]
-    if b.startswith('K'):
-        b = b[1:]
-    return cmp(a.lower(),b.lower())
+    return a.lower()
+
+def identity(x):
+    return x
 
 # (indexstring,cellcontents) = cellFunc(obj)
-def FormatTable(rawObjectList, cellFunc, cmpFunc=cmp, columns=3):
+def FormatTable(rawObjectList, cellFunc, keyFunc=identity, columns=3):
     if not rawObjectList:
         return
 
     # Sort the class list with special treatment for the letter K.
     objectList = rawObjectList[:]
-    objectList.sort(cmpFunc)
+    objectList.sort(key=keyFunc)
 
     result = []
 
@@ -1487,7 +1490,7 @@ htmlHeader = """<?xml version="1.0" encoding="UTF-8"?>
     <div>
       <div>
         <img alt ="" src="%(path)scommon/top-kde.jpg"/>
-        KDE 4.9 PyKDE API Reference
+        KDE 5.0 PyKDE API Reference
       </div>
     </div>
   </div>
@@ -1536,21 +1539,16 @@ htmlFooter = """
 </div></div>
 <div class="nav_list">
 <ul>""" + (
-"""<li><a href="%(path)sakonadi/index.html">akonadi</a></li>
-<li><a href="%(path)sdnssd/index.html">dnssd</a></li>
-<li><a href="%(path)skdecore/index.html">kdecore</a></li>
-<li><a href="%(path)skdeui/index.html">kdeui</a></li>
-<li><a href="%(path)skhtml/index.html">khtml</a></li>
-<li><a href="%(path)skio/index.html">kio</a></li>
-<li><a href="%(path)sknewstuff/index.html">knewstuff</a></li>
-<li><a href="%(path)skparts/index.html">kparts</a></li>
-<li><a href="%(path)skutils/index.html">kutils</a></li>
-<li><a href="%(path)snepomuk/index.html">nepomuk</a></li>
-<li><a href="%(path)sphonon/index.html">phonon</a></li>
-<li><a href="%(path)splasma/index.html">plasma</a></li>
-<li><a href="%(path)spolkitqt/index.html">polkitqt</a></li>
+"""<li><a href="%(path)skarchive/index.html">karchive</a></li>
+<li><a href="%(path)skcoreaddons/index.html">kcoreaddons</a></li>
+<li><a href="%(path)skguiaddons/index.html">kguiaddons</a></li>
+<li><a href="%(path)skitemmodels/index.html">kitemmodels</a></li>
+<li><a href="%(path)skitemviews/index.html">kitemviews</a></li>
+<li><a href="%(path)skplotting/index.html">kplotting</a></li>
+<li><a href="%(path)skwidgetsaddons/index.html">kwidgetsaddons</a></li>
 <li><a href="%(path)ssolid/index.html">solid</a></li>
-<li><a href="%(path)ssoprano/index.html">soprano</a></li>""" if True else
+<li><a href="%(path)ssonnet/index.html">sonnet</a></li>
+""" if True else
 """<li><a href="%(path)smarble/index.html">marble</a></li>""") + \
 """
 </ul></div></div>

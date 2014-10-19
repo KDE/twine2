@@ -70,12 +70,12 @@ class CMakeParser(object):
 
         self.values = {}
 
-    def parse(self, s, filename=None):
+    def parse(self, s, filename=None, debug=0):
         self.lexer = cmakelexer.CMakeLexer(filename)
         self.lexer.input(s)
         self.result = None
         self.filename = filename
-        self._parse(debug = 0, lexer = self.lexer)
+        self._parse(debug = debug, lexer = self.lexer)
         return self.result
 
     def p_cmake_file(self, p):

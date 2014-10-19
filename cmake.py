@@ -21,8 +21,12 @@ import os.path
 import glob
 import cmakeparser
 
-def ExtractInstallFiles(filename=None,input=None):
-    variables = {}
+def ExtractInstallFiles(filename=None,input=None,variables=None):
+    if variables is None:
+        variables = {}
+    else:
+        variables = variables.copy()
+
     install_list = []
 
     if filename is not None:
@@ -35,14 +39,17 @@ def ExtractInstallFiles(filename=None,input=None):
 
 def ExtractInstallFilesWithContext(variables, install_list, filename=None, input=None, fileprefix=""):
     inputstring = ""
+    currentdir = ""
     if input:
         inputstring = input
     elif filename:
+        currentdir = os.path.dirname(filename)
         fhandle = open(filename)
         inputstring=  fhandle.read()
         fhandle.close()
     parser = cmakeparser.CMakeParser()
     command_list = parser.parse(inputstring, filename)
+    include_dirs = []
 
     for commandobject in command_list:
         command = commandobject.command().lower()
@@ -52,7 +59,22 @@ def ExtractInstallFilesWithContext(variables, install_list, filename=None, input
 
         elif command=="install":
             install_args = ExpandArgs(variables, args, filename)
-            install_list.extend( [os.path.join(fileprefix,x) for x in install_args if x.endswith('.h')] )
+
+            for arg in install_args:
+                if arg.endswith('.h'):
+                    for basepath in [currentdir, fileprefix] + include_dirs:
+                        fullpath = os.path.join(basepath, arg)
+                        # print(fullpath)
+                        if os.path.exists(fullpath):
+                            install_list.append(fullpath)
+                            break
+                        else:
+                            fullpath = os.path.join(currentdir, basepath, arg)
+                            if os.path.exists(fullpath):
+                                install_list.append(fullpath)
+                                break
+                    else:
+                        print("Unable to find header file " + arg)
 
         elif command=="include":
             if filename is not None:
@@ -112,10 +134,25 @@ def ExtractInstallFilesWithContext(variables, install_list, filename=None, input
 
         elif command=="ecm_generate_headers":
             header_args = ExpandArgs(variables, args, filename)
+            # print("ecm_generate_headers:"+repr(header_args))
+
+            prefix=""
+            if "RELATIVE" in header_args:
+                prefix = header_args[header_args.index("RELATIVE")+1]
+
             for item in header_args:
-                if item == "REQUIRED_HEADERS":
+                if item == "REQUIRED_HEADERS" or item == "RELATIVE":
                     break
-                install_list.append(os.path.join(fileprefix, item.lower() + ".h"))
+                headername = os.path.join(currentdir, prefix, item.lower() + ".h")
+                if os.path.exists(headername):
+                    install_list.append(headername)
+
+        elif command == "target_include_directories":
+            include_args = ExpandArgs(variables, args, filename)
+            if "PUBLIC" in include_args:
+                for item in include_args[include_args.index("PUBLIC")+1:]:
+                    include_dirs.append(item)
+                #print("include dirs:",repr(include_dirs))
 
 def ExpandArgs(variables, args, filename=None):
     rex  = re.compile(r'(\$\{[^\}]+\})')

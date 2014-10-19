@@ -117,6 +117,14 @@ set_package_properties(PythonLibrary PROPERTIES DESCRIPTION
         # print(repr(result))
         self.assertEqual(len(result[0].arguments()), 2)
 
+    def testString4(self):
+        result = self.parser.parse(r"""
+target_compile_definitions(${BACKEND_TEST_TARGET} PUBLIC -DKDIRWATCH_TEST_METHOD=\"${_backendName}\")
+""", debug=0)
+        #print(repr(result))
+        #self.assertEqual(len(result[0].arguments()), 2)
+
+
     def testNesting(self):
         result = self.parser.parse("""
         if(MSVC OR (WIN32 AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel"))

@@ -597,9 +597,15 @@ class CppParser(object):
         p[0] = joinp(p, 1, "")
 
     def p_nested_name_specifier1 (self, p):
+        """nested_name_specifier : ID COLON2 TILDE ID
+                                 | nested_name_specifier COLON2 TILDE ID
+                                 | template_type COLON2 TILDE ID"""
+        p[0] = joinp(p, 1, "")
+
+    def p_nested_name_specifier2 (self, p):
         'nested_name_specifier : COLON2 ID'
         p [0] = p [2]
-        
+
     def p_template_type (self, p):
         """template_type : qualified_id LT type_specifier_list GT
                         | qualified_id LT static_cast_expression GT"""
@@ -903,7 +909,11 @@ class CppParser(object):
     def p_operator_pfx4 (self, p):
         'operator_pfx : type_specifier ID COLON2 operator'
         p [0] = p[1] + " " + p[2] + p[3]
-    
+
+    def p_operatorpfx5(self, p):
+        'operator_pfx : type_specifier template_type COLON2 operator'
+        p[0] = p[1] + " " + p[2] + p[3]
+
     def p_operator_name (self, p):
         """operator_name : operator_pfx operator_type"""
         if p[1] is not None:

@@ -1,0 +1,5 @@
+External requirements:
+
+PLY:
+http://www.dabeaz.com/ply/
+Available as python-ply in Debian and its derivatives such as Ubuntu.

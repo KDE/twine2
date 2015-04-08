@@ -22,13 +22,38 @@ import toolkit
 import qtkde5macros
 import os.path
 import sipsymboldata
+import configparser
+import os
 
-outputBaseDirectory = "/home/sbe/devel/git/kde/kdebindings/pykde5"
-cmakelistBaseDirectory = "/home/sbe/devel/git/kde/frameworks"
-kdelibsBuildDirectory = "/home/sbe/devel/git_build/kde/frameworks"
-cmakelistGitBaseDirectory = "/home/sbe/devel/git"
-sipImportDir = "/home/sbe/devel/kdesvninstall/share/sip/PyQt5"
-sipImportDirs = [sipImportDir, outputBaseDirectory+"/sip"]
+def _readConfiguration(configfile):
+
+    settings = configparser.ConfigParser()
+    settings._interpolation = configparser.ExtendedInterpolation()
+    settings.read(configfile)
+    
+    return(settings)
+
+configfile = 'config'
+settings = _readConfiguration(configfile)
+
+outputBaseDirectory = os.environ['HOME'] + \
+    settings.get('kf5.config', 'outputBaseDirectory')
+cmakelistBaseDirectory = os.environ['HOME'] + \
+    settings.get('kf5.config', 'cmakelistBaseDirectory')
+kdelibsBuildDirectory = os.environ['HOME'] + \
+    settings.get('kf5.config', 'kdelibsBuildDirectory')
+cmakelistGitBaseDirectory = os.environ['HOME'] + \
+    settings.get('kf5.config', 'cmakelistGitBaseDirectory')
+sipImportDir = os.environ['HOME'] + settings.get('kf5.config', 'sipImportDir')
+sipImportDirs = [ str(sipImportDir), str(outputBaseDirectory) + '/sip']
+
+# Leaving pre-refactor values for now, can delete later.
+#outputBaseDirectory = "/home/sbe/devel/git/kde/kdebindings/pykde5"
+#cmakelistBaseDirectory = "/home/sbe/devel/git/kde/frameworks"
+#kdelibsBuildDirectory = "/home/sbe/devel/git_build/kde/frameworks"
+#cmakelistGitBaseDirectory = "/home/sbe/devel/git"
+#sipImportDir = "/home/sbe/devel/kdesvninstall/share/sip/PyQt5"
+#sipImportDirs = [sipImportDir, outputBaseDirectory+"/sip"]
 
 ###########################################################################
 kauth = toolkit.ModuleGenerator(
@@ -344,18 +369,18 @@ kwidgetsaddons = toolkit.ModuleGenerator(
 def updateSIP():
     #kauth.run()
     kitemmodels.run()
-    kitemviews.run()
-    karchive.run()
-    kplotting.run()
-    solid.run()
-    kcoreaddons.run()
-    sonnet.run()
+    #kitemviews.run()
+    #karchive.run()
+    #kplotting.run()
+    #solid.run()
+    #kcoreaddons.run()
+    #sonnet.run()
 
     # kcodecs N/A - use Python's libraries for this functionality.
     # kwindowsystem N/A
 
-    kguiaddons.run()
-    kwidgetsaddons.run()
+    #kguiaddons.run()
+    #kwidgetsaddons.run()
 
     # TODO
     # kconfig
@@ -382,14 +407,14 @@ def updateDocs():
 
     # UpdateClassNamespaceList('kauth',kauth.docs())
     UpdateClassNamespaceList('kitemmodels',kitemmodels.docs())
-    UpdateClassNamespaceList('kitemviews',kitemviews.docs())
+    '''UpdateClassNamespaceList('kitemviews',kitemviews.docs())
     UpdateClassNamespaceList('karchive',karchive.docs())
     UpdateClassNamespaceList('kplotting',kplotting.docs())
     UpdateClassNamespaceList('solid',solid.docs())
     UpdateClassNamespaceList('kcoreaddons',kcoreaddons.docs())
     UpdateClassNamespaceList('sonnet',sonnet.docs())
     UpdateClassNamespaceList('kguiaddons',kguiaddons.docs())
-    UpdateClassNamespaceList('kwidgetsaddons',kwidgetsaddons.docs())
+    UpdateClassNamespaceList('kwidgetsaddons',kwidgetsaddons.docs())'''
 
     print("Writing all classes index:")
     toolkit.ModuleGenerator.WriteAllClasses(os.path.join(outputBaseDirectory,"docs/html"),nsNames,classNames)
@@ -397,7 +422,7 @@ def updateDocs():
     
 def main():
     #print(repr(kitemmodels.extractCmakeListsHeaders()))
-    #updateSIP()
+    updateSIP()
     updateDocs()
 
 if __name__=="__main__":

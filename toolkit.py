@@ -47,7 +47,7 @@ class ModuleGenerator(object):
             cppHeaderMappingFunction=None):
             
         self._module = module
-        self._cmakelists = [cmakelists] if isinstance(cmakelists,str) else cmakelists
+        self._cmakelists = [cmakelists] if (isinstance(cmakelists,str) or isinstance(cmakelists,unicode)) else cmakelists
         self._cmakeVariables = cmakeVariables if cmakeVariables is not None else {}
         self._headers = headers
         self._ignoreHeaders = set([ignoreHeaders] if isinstance(ignoreHeaders,str) else ignoreHeaders)

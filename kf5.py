@@ -367,20 +367,20 @@ kwidgetsaddons = toolkit.ModuleGenerator(
 ###########################################################################
 
 def updateSIP():
-    #kauth.run()
+    kauth.run()
     kitemmodels.run()
-    #kitemviews.run()
-    #karchive.run()
-    #kplotting.run()
-    #solid.run()
-    #kcoreaddons.run()
-    #sonnet.run()
+    kitemviews.run()
+    karchive.run()
+    kplotting.run()
+    solid.run()
+    kcoreaddons.run()
+    sonnet.run()
 
     # kcodecs N/A - use Python's libraries for this functionality.
     # kwindowsystem N/A
 
-    #kguiaddons.run()
-    #kwidgetsaddons.run()
+    kguiaddons.run()
+    kwidgetsaddons.run()
 
     # TODO
     # kconfig
@@ -407,14 +407,14 @@ def updateDocs():
 
     # UpdateClassNamespaceList('kauth',kauth.docs())
     UpdateClassNamespaceList('kitemmodels',kitemmodels.docs())
-    '''UpdateClassNamespaceList('kitemviews',kitemviews.docs())
+    UpdateClassNamespaceList('kitemviews',kitemviews.docs())
     UpdateClassNamespaceList('karchive',karchive.docs())
     UpdateClassNamespaceList('kplotting',kplotting.docs())
     UpdateClassNamespaceList('solid',solid.docs())
     UpdateClassNamespaceList('kcoreaddons',kcoreaddons.docs())
     UpdateClassNamespaceList('sonnet',sonnet.docs())
     UpdateClassNamespaceList('kguiaddons',kguiaddons.docs())
-    UpdateClassNamespaceList('kwidgetsaddons',kwidgetsaddons.docs())'''
+    UpdateClassNamespaceList('kwidgetsaddons',kwidgetsaddons.docs())
 
     print("Writing all classes index:")
     toolkit.ModuleGenerator.WriteAllClasses(os.path.join(outputBaseDirectory,"docs/html"),nsNames,classNames)

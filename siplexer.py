@@ -30,7 +30,7 @@ blockTokens = ('AccessCode', 'BIGetCharBufferCode', 'BIGetReadBufferCode', 'BIGe
                'FinalisationCode', 'GCClearCode', 'GCTraverseCode', 'GetCode', 'MethodCode', 'ModuleCode',\
                'ModuleHeaderCode', 'PickleCode', 'PostInitialisationCode', 'PreInitialisationCode',\
                'RaiseCode', 'SetCode', 'TypeCode', 'TypeHeaderCode', 'UnitCode', 'VirtualCatcherCode',\
-               'Makefile', 'PrePythonCode',\
+               'Makefile', 'PrePythonCode', 'VirtualErrorHandler', \
                'BIGetBufferCode','BIGetCharBufferCode','BIGetReadBufferCode','BIGetSegCountCode',\
                'BIGetWriteBufferCode','BIReleaseBufferCode', 'InitialisationCode','Docstring')
 

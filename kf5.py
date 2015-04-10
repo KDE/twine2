@@ -23,6 +23,7 @@ import qtkde5macros
 import os.path
 import sipsymboldata
 import configparser
+import argparse
 import os
 
 def _readConfiguration(configfile):
@@ -47,13 +48,16 @@ cmakelistGitBaseDirectory = os.environ['HOME'] + \
 sipImportDir = os.environ['HOME'] + settings.get('kf5.config', 'sipImportDir')
 sipImportDirs = [ str(sipImportDir), str(outputBaseDirectory) + '/sip']
 
-# Leaving pre-refactor values for now, can delete later.
-#outputBaseDirectory = "/home/sbe/devel/git/kde/kdebindings/pykde5"
-#cmakelistBaseDirectory = "/home/sbe/devel/git/kde/frameworks"
-#kdelibsBuildDirectory = "/home/sbe/devel/git_build/kde/frameworks"
-#cmakelistGitBaseDirectory = "/home/sbe/devel/git"
-#sipImportDir = "/home/sbe/devel/kdesvninstall/share/sip/PyQt5"
-#sipImportDirs = [sipImportDir, outputBaseDirectory+"/sip"]
+def _printConfiguration(outputBaseDirectory, cmakelistBaseDirectory,
+    kdelibsBuildDirectory, cmakelistGitBaseDirectory, sipImportDir,
+    sipImportDirs):
+    print('Current values for configuration options:')
+    print('outputBaseDirectory = {0}'.format(outputBaseDirectory))
+    print('cmakelistBaseDirectory = {0}'.format(cmakelistBaseDirectory))
+    print('kdelibsBuildDirectory = {0}'.format(kdelibsBuildDirectory))
+    print('cmakelistGitBaseDirectory = {0}'.format(cmakelistGitBaseDirectory))
+    print('sipImportDir = {0}'.format(sipImportDir))
+    print('sipImportDirs = {0}'.format(sipImportDirs))
 
 ###########################################################################
 kauth = toolkit.ModuleGenerator(
@@ -421,6 +425,13 @@ def updateDocs():
     print("Done")
     
 def main():
+    parser = argparse.ArgumentParser(description='Process kf5 source to generate Python bindings')
+    parser.add_argument('-l', '--listopts', default=False, action='store_true')
+    args = parser.parse_args()
+    if args.listopts:
+         _printConfiguration(outputBaseDirectory, cmakelistBaseDirectory,
+            kdelibsBuildDirectory, cmakelistGitBaseDirectory, sipImportDir,
+            sipImportDirs)
     #print(repr(kitemmodels.extractCmakeListsHeaders()))
     updateSIP()
     updateDocs()

@@ -426,12 +426,13 @@ def updateDocs():
     
 def main():
     parser = argparse.ArgumentParser(description='Process kf5 source to generate Python bindings')
-    parser.add_argument('-l', '--listopts', default=False, action='store_true')
+    parser.add_argument('-l', '--listopts', default=False, action='store_true', help='list stored configuration option values and exit')
     args = parser.parse_args()
     if args.listopts:
-         _printConfiguration(outputBaseDirectory, cmakelistBaseDirectory,
+        _printConfiguration(outputBaseDirectory, cmakelistBaseDirectory,
             kdelibsBuildDirectory, cmakelistGitBaseDirectory, sipImportDir,
             sipImportDirs)
+        exit(0)
     #print(repr(kitemmodels.extractCmakeListsHeaders()))
     updateSIP()
     updateDocs()

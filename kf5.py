@@ -1,4 +1,4 @@
-#!env python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #     Copyright 2009-2014 Simon Edwards <simon@simonzone.com>
 #

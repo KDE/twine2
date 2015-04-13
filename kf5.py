@@ -34,19 +34,29 @@ def _readConfiguration(configfile):
     
     return(settings)
 
+def _writeConfiguration(settings, configfile):
+    cfgfile = open(configfile,'w')
+    settings.write(cfgfile)
+    cfgfile.close()
+
+def _setSettings(settings):
+    outputBaseDirectory = os.environ['HOME'] + \
+        settings.get('kf5.config', 'outputBaseDirectory')
+    cmakelistBaseDirectory = os.environ['HOME'] + \
+        settings.get('kf5.config', 'cmakelistBaseDirectory')
+    kdelibsBuildDirectory = os.environ['HOME'] + \
+        settings.get('kf5.config', 'kdelibsBuildDirectory')
+    cmakelistGitBaseDirectory = os.environ['HOME'] + \
+        settings.get('kf5.config', 'cmakelistGitBaseDirectory')
+    sipImportDir = os.environ['HOME'] + settings.get('kf5.config', 'sipImportDir')
+    sipImportDirs = [ str(sipImportDir), str(outputBaseDirectory) + '/sip']
+    return(outputBaseDirectory, cmakelistBaseDirectory, kdelibsBuildDirectory,
+        cmakelistGitBaseDirectory, sipImportDir, sipImportDirs)
+
 configfile = 'config'
 settings = _readConfiguration(configfile)
-
-outputBaseDirectory = os.environ['HOME'] + \
-    settings.get('kf5.config', 'outputBaseDirectory')
-cmakelistBaseDirectory = os.environ['HOME'] + \
-    settings.get('kf5.config', 'cmakelistBaseDirectory')
-kdelibsBuildDirectory = os.environ['HOME'] + \
-    settings.get('kf5.config', 'kdelibsBuildDirectory')
-cmakelistGitBaseDirectory = os.environ['HOME'] + \
-    settings.get('kf5.config', 'cmakelistGitBaseDirectory')
-sipImportDir = os.environ['HOME'] + settings.get('kf5.config', 'sipImportDir')
-sipImportDirs = [ str(sipImportDir), str(outputBaseDirectory) + '/sip']
+outputBaseDirectory, cmakelistBaseDirectory, kdelibsBuildDirectory, \
+    cmakelistGitBaseDirectory, sipImportDir, sipImportDirs =_setSettings(settings)
 
 def _printConfiguration(outputBaseDirectory, cmakelistBaseDirectory,
     kdelibsBuildDirectory, cmakelistGitBaseDirectory, sipImportDir,
@@ -427,11 +437,27 @@ def updateDocs():
 def main():
     parser = argparse.ArgumentParser(description='Process kf5 source to generate Python bindings')
     parser.add_argument('-l', '--listopts', default=False, action='store_true', help='list stored configuration option values and exit')
+    parser.add_argument('-w', '--writeopt', default=[], action='append', help='change config file value using item=value syntax - add multiple times to change multiple values')
     args = parser.parse_args()
     if args.listopts:
         _printConfiguration(outputBaseDirectory, cmakelistBaseDirectory,
             kdelibsBuildDirectory, cmakelistGitBaseDirectory, sipImportDir,
             sipImportDirs)
+        exit(0)
+    if args.writeopt:
+        for arg in args.writeopt:
+            try:
+                item, value = arg.split('=')
+            except ValueError as e:
+                print("Error: item and value must be separated by '='. {0}".format(e))
+                exit(1)
+            item = item.strip()
+            value = value.strip()
+            oldvalue = settings.get('kf5.config', item)
+            print("Changing {0} from {1} to {2}".format(item, oldvalue, value))
+            settings.set('kf5.config', item, value)
+            _setSettings(settings)
+            _writeConfiguration(settings, configfile)
         exit(0)
     #print(repr(kitemmodels.extractCmakeListsHeaders()))
     updateSIP()

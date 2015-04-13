@@ -1,23 +1,24 @@
 [kdelibs.config]
-outputBaseDirectory: /devel/git/kde/kdebindings/pykde4
-cmakelistBaseDirectory: /devel/git/kde/kdelibs
-cmakelistPimlibsBaseDirectory: /devel/git/kde/kdepimlibs
-cmakelistPhononBaseDirectory: /devel/git/phonon
-kdelibsBuildDirectory: /devel/git_build/kde/kdelibs
-kdepimlibsBuildDirectory: /devel/git_build/kde/kdepimlibs
-cmakelistGitBaseDirectory: /devel/git
-polkitqtBaseDirectory: /devel/git/polkit-qt
-sipImportDir: /devel/kdesvninstall/share/sip/PyQt4
+outputbasedirectory = /devel/git/kde/kdebindings/pykde4
+cmakelistbasedirectory = /devel/git/kde/kdelibs
+cmakelistpimlibsbasedirectory = /devel/git/kde/kdepimlibs
+cmakelistphononbasedirectory = /devel/git/phonon
+kdelibsbuilddirectory = /devel/git_build/kde/kdelibs
+kdepimlibsbuilddirectory = /devel/git_build/kde/kdepimlibs
+cmakelistgitbasedirectory = /devel/git
+polkitqtbasedirectory = /devel/git/polkit-qt
+sipimportdir = /devel/kdesvninstall/share/sip/PyQt4
 
 [kdeedu.config]
-outputBaseDirectory: /devel/git/kde/marble
-cmakelistBaseDirectory: ${kdeedu.config:outputBaseDirectory}
-pyqt4SipDir: ${kdelibs.config:sipImportDir}
+outputbasedirectory = /devel/git/kde/marble
+cmakelistbasedirectory = ${kdeedu.config:outputBaseDirectory}
+pyqt4sipdir = ${kdelibs.config:sipImportDir}
 
 [kf5.config]
-outputBaseDirectory: /devel/git/kde/kdebindings/pykde5
-cmakelistBaseDirectory: /devel/git/kde/frameworks
-kdelibsBuildDirectory: /devel/git_build/kde/frameworks
-cmakelistGitBaseDirectory: /devel/git
-sipImportDir: /devel/kdesvninstall/share/sip/PyQt5
-sipImportDirs: [${kf5.config:sipImportDir}, ${kf5.config:outputBaseDirectory}/sip]
+outputbasedirectory = /devel/git/kde/kdebindings/pykde5
+cmakelistbasedirectory = /devel/git/kde/frameworks
+kdelibsbuilddirectory = /devel/git_build/kde/frameworks
+cmakelistgitbasedirectory = /devel/git
+sipimportdir = /devel/kdesvninstall/share/sip/PyQt5
+sipimportdirs = [${kf5.config:sipImportDir}, ${kf5.config:outputBaseDirectory}/sip]
+

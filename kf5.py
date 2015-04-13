@@ -26,6 +26,8 @@ import configparser
 import argparse
 import os
 
+configfile = 'config'
+
 def _readConfiguration(configfile):
 
     settings = configparser.ConfigParser()
@@ -53,10 +55,15 @@ def _setSettings(settings):
     return(outputBaseDirectory, cmakelistBaseDirectory, kdelibsBuildDirectory,
         cmakelistGitBaseDirectory, sipImportDir, sipImportDirs)
 
-configfile = 'config'
-settings = _readConfiguration(configfile)
+def _getConfiguration(configfile):
+    settings = _readConfiguration(configfile)
+    outputBaseDirectory, cmakelistBaseDirectory, kdelibsBuildDirectory, \
+        cmakelistGitBaseDirectory, sipImportDir, sipImportDirs =_setSettings(settings)
+    return(outputBaseDirectory, cmakelistBaseDirectory, kdelibsBuildDirectory,
+        cmakelistGitBaseDirectory, sipImportDir, sipImportDirs)
+
 outputBaseDirectory, cmakelistBaseDirectory, kdelibsBuildDirectory, \
-    cmakelistGitBaseDirectory, sipImportDir, sipImportDirs =_setSettings(settings)
+    cmakelistGitBaseDirectory, sipImportDir, sipImportDirs =_getConfiguration(configfile)
 
 def _printConfiguration(outputBaseDirectory, cmakelistBaseDirectory,
     kdelibsBuildDirectory, cmakelistGitBaseDirectory, sipImportDir,
@@ -437,6 +444,7 @@ def updateDocs():
 def main():
     parser = argparse.ArgumentParser(description='Process kf5 source to generate Python bindings')
     parser.add_argument('-l', '--listopts', default=False, action='store_true', help='list stored configuration option values and exit')
+    parser.add_argument('-f', '--configfile', default='', action='store', help='path to alternate configuration file to use')
     parser.add_argument('-w', '--writeopt', default=[], action='append', help='change config file value using item=value syntax - add multiple times to change multiple values')
     args = parser.parse_args()
     if args.listopts:
@@ -444,6 +452,13 @@ def main():
             kdelibsBuildDirectory, cmakelistGitBaseDirectory, sipImportDir,
             sipImportDirs)
         exit(0)
+    if args.configfile:
+        try:
+            configfile = args.configfile
+            _getConfiguration(configfile)
+        except configparser.NoSectionError as e:
+            print('Config file error: {0}'.format(e))
+            exit(1)
     if args.writeopt:
         for arg in args.writeopt:
             try:

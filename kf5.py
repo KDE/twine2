@@ -24,7 +24,7 @@ import os.path
 import sipsymboldata
 import configparser
 import argparse
-import os
+import os.environ
 
 configfile = 'config'
 

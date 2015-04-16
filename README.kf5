@@ -1,0 +1,71 @@
+Pre-requisites in addition to cmake, extra-cmake-modules, g++ and so on
+(Debian and its derivatives such as Ubuntu package names):
+    
+1. python3-ply
+   
+2. qt5-qmake
+   
+3. qtbase5-dev
+   
+4. sip-dev
+    
+5. Access to PyQt5 sip files
+
+6.  The kf5 source and an appropriate directory layout like this:
+   
+     $HOME/devel/git/kde
+         frameworks
+             kitemmodels
+             ...
+         pykde5
+             cmake
+             sip
+         pyqt5
+         twine2
+             kf5.py
+             ...
+     build
+         frameworks
+         pykde5
+         pyqt5
+         ...
+
+The current configuration defaults are:
+
+outputbasedirectory = /devel/git/kde/kdebindings/pykde5
+cmakelistbasedirectory = /devel/git/kde/frameworks
+kdelibsbuilddirectory = /devel/git_build/kde/frameworks
+cmakelistgitbasedirectory = /devel/git
+sipimportdir = /devel/kdesvninstall/share/sip/PyQt5
+sipimportdirs = [${kf5.config:sipImportDir}, ${kf5.config:outputBaseDirectory}/sip]
+    
+Note: the pyqt5 will typically be a link to somethng like PyQt-gpl-5.4.1
+which is the form currently used by Riverbank for PyQt.
+
+6. Configfure and build like this:
+  
+   cd .../build/frameworks/kitemmodels
+   cmake ../../../source/frameworks/kitemmodels/CMakeLists.txt
+   cd .../build/pyqt5
+   python ../../source/pyqt5/configure.py --qmake /usr/lib/x86_64-linux-gnu/qt5/bin/qmake
+   cd .../build/pykde5
+   python3 ../../source/twine2/kf5.py
+    
+The output is a set of files in the outputbasedirectory directory.
+
+These are the currently supported options (use the -h/--help option to check
+for updates):
+
+usage: kf5.py [-h] [-l] [-f CONFIGFILE] [-w WRITEOPT]
+
+Process kf5 source to generate Python bindings
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -l, --listopts        list stored configuration option values and exit
+  -f CONFIGFILE, --configfile CONFIGFILE
+                        path to alternate configuration file to use
+  -w WRITEOPT, --writeopt WRITEOPT
+                        change config file value using item=value syntax - add
+                        multiple times to change multiple values
+

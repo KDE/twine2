@@ -20,11 +20,10 @@
 import re
 import toolkit
 import qtkde5macros
-import os.path
+import os
 import sipsymboldata
 import configparser
 import argparse
-import os.environ
 
 configfile = 'config'
 

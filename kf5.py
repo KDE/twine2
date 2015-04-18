@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #     Copyright 2009-2014 Simon Edwards <simon@simonzone.com>
+#     Copyright 2015 Scott Kitterman <scott@kitterman.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

@@ -37,7 +37,7 @@ __QtMacros = [
         "KDEUI_DECLARE_PRIVATE", "KPARTS_DECLARE_PRIVATE", "Q_INTERFACES",\
         '__attribute__', 'Q_DISABLE_COPY', 'K_SYCOCATYPE', 'Q_DECLARE_TR_FUNCTIONS',\
         'Q_DECLARE_TYPEINFO' 'Q_REQUIRED_RESULT' 'KCONFIGCORE_DEPRECATED'
-        'KCONFIGGUI_EXPORT']
+        'KCONFIGGUI_EXPORT', 'KCOREADDONS_DEPRECATED']
 
 
 def QtMacros(extraMacros=[]):
@@ -60,7 +60,8 @@ __QtPreprocessSubstitutionMacros = [
         ("Q_DECL_IMPORT", ""),
         ("Q_REQUIRED_RESULT", ""),
         ("KCONFIGCORE_DEPRECATED", ""),
-        ("KCONFIGGUI_EXPORT", "")
+        ("KCONFIGGUI_EXPORT", ""),
+        ("KCOREADDONS_DEPRECATED", "")
         ]
 def QtPreprocessSubstitutionMacros(extraMacros=[]):
     macros = __QtPreprocessSubstitutionMacros[:]

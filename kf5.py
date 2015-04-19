@@ -19,10 +19,10 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 import re
-import toolkit
-import qtkde5macros
+import kbindinggenerator.toolkit as toolkit
+import kbindinggenerator.qtkde5macros as qtkde5macros
 import os
-import sipsymboldata
+import kbindinggenerator.sipsymboldata as sipsymboldata
 import configparser
 import argparse
 

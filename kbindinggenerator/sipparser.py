@@ -18,9 +18,9 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 import sys
-from sealed import sealed
+from .sealed import sealed
 import ply.yacc as yacc
-from siplexer import sipLexer, tokens
+from .siplexer import sipLexer, tokens
 
 def joinp(p, startindex, string=" "):
     tmplist = []

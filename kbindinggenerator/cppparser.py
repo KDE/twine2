@@ -19,10 +19,10 @@
 
 import sys
 import re
-from sealed import sealed
+from .sealed import sealed
 import ply.yacc as yacc
-import cpplexer
-import pplexer
+import kbindinggenerator.cpplexer as cpplexer
+import kbindinggenerator.pplexer as pplexer
 import inspect
 
 def joinp(p, startindex, string=" "):

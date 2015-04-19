@@ -16,7 +16,7 @@
 # Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import cmakelexer
+import kbindinggenerator.cmakelexer as cmakelexer
 import ply.yacc as yacc
 
 class CMakeThing(object):

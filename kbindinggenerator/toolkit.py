@@ -18,19 +18,19 @@
 
 #from argvalidate import accepts,returns,one_of
 import types
-from sealed import sealed
-import cmake
-import cpplexer
-import cppparser
-import cppsymboldata
-import sipparser
-import sipsymboldata
-import cpptosiptransformer
-import sipmerger
+from .sealed import sealed
+import kbindinggenerator.cmake as cmake
+import kbindinggenerator.cpplexer as cpplexer
+import kbindinggenerator.cppparser as cppparser
+import kbindinggenerator.cppsymboldata as cppsymboldata
+import kbindinggenerator.sipparser as sipparser
+import kbindinggenerator.sipsymboldata as sipsymboldata
+import kbindinggenerator.cpptosiptransformer as cpptosiptransformer
+import kbindinggenerator.sipmerger as sipmerger
 import os
 import os.path
 import glob
-from reducetxt import Reduce
+from .reducetxt import Reduce
 
 
 def cmp(a, b):

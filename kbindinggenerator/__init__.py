@@ -25,32 +25,4 @@
 
 __version__ = '0.1'
 
-from . import argvalidate.py
-from . import cmakeparsertest.py
-from . import cpplexer.py
-from . import cppsymboldata.py
-from . import exprparser.py
-from . import pplexer.py
-from . import qtkdemacros.py
-from . import siplexer.py
-from . import sipparser.py
-from . import toolkit.py
-from . import cmakelexer.py
-from . import cmake.py
-from . import cppparser.py
-from . import cpptosiptransformer.py
-from . import pplexertest.py
-from . import reducetxt.py
-from . import sipmerger.py
-from . import sipparsertest.py
-from . import cmakeparser.py
-from . import cpp_grammer.txt
-from . import cppparsertest.py
-from . import cpptosiptransformertest.py
-from . import kggzmod.py
-from . import qtkde5macros.py
-from . import sealed.py
-from . import sipmergertest.py
-from . import sipsymboldata.py
-
 

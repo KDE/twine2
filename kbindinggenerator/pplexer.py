@@ -19,7 +19,7 @@
 import re
 import ply.lex as lex
 # handles the evaluation of conditionals
-from exprparser import ExpressionParser
+from .exprparser import ExpressionParser
 
 newtext   = []
 macros    = []

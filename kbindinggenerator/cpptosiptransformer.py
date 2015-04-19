@@ -18,9 +18,9 @@
 
 import os.path
 import re
-from sealed import sealed
-import sipsymboldata
-import cppsymboldata
+from .sealed import sealed
+import kbindinggenerator.sipsymboldata as sipsymboldata
+import kbindinggenerator.cppsymboldata as cppsymboldata
 
 class CppToSipTransformer(object):
     @sealed

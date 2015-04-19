@@ -19,7 +19,7 @@
 import re
 import os.path
 import glob
-import cmakeparser
+import kbindinggenerator.cmakeparser as cmakeparser
 
 def ExtractInstallFiles(filename=None,input=None,variables=None):
     if variables is None:

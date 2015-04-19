@@ -15,10 +15,10 @@
 # along with this program; if not, write to the
 # Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-from sealed import sealed
+from .sealed import sealed
 # from argvalidate import accepts,returns,one_of
 import types
-import cppsymboldata
+import kbindinggenerator.cppsymboldata as cppsymboldata
 
 class SymbolData(cppsymboldata.SymbolData):
     @sealed

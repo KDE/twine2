@@ -18,9 +18,9 @@
 
 import re
 import toolkit
-import qtkdemacros
+import kbindinggenerator.qtkdemacros
 import os.path
-import sipsymboldata
+import kbindinggenerator.sipsymboldata
 
 outputBaseDirectory = "/home/sbe/devel/git/kde/kdebindings/pykde4"
 cmakelistBaseDirectory = "/home/sbe/devel/git/kde/kdelibs"

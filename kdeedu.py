@@ -16,10 +16,10 @@
 # Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import toolkit
-import qtkdemacros
+import kbindinggenerator.toolkit
+import kbindinggenerator.qtkdemacros
 import os.path
-import sipsymboldata
+import kbindinggenerator.sipsymboldata
 import re
 
 outputBaseDirectory = "/home/sbe/devel/git/kde/marble"

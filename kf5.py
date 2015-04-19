@@ -267,7 +267,7 @@ kcoreaddons = toolkit.ModuleGenerator(
 
     # .h file extraction
     cmakelists=os.path.join(cmakelistBaseDirectory,"kcoreaddons/CMakeLists.txt"),
-    cmakeVariables = {"cmake_current_binary_dir": ["/home/sbe/devel/git_build/kde/frameworks/kcoreaddons"]},
+    cmakeVariables = {"cmake_current_binary_dir": [kdelibsBuildDirectory + "/kcoreaddons"]},
 
     ignoreHeaders="""kcoreaddons_export.h kcoreaddons_version.h""".split(" "),
 
@@ -330,7 +330,7 @@ kguiaddons = toolkit.ModuleGenerator(
 
     # .h file extraction
     cmakelists=os.path.join(cmakelistBaseDirectory,"kguiaddons/CMakeLists.txt"),
-    cmakeVariables = {"cmake_current_binary_dir": ["/home/sbe/devel/git_build/kde/frameworks/kguiaddons"]},
+    cmakeVariables = {"cmake_current_binary_dir": [kdelibsBuildDirectory + "/kguiaddons"]},
 
     ignoreHeaders="""kguiaddons_export.h kguiaddons_version.h""".split(" "),
 
@@ -362,7 +362,7 @@ kwidgetsaddons = toolkit.ModuleGenerator(
 
     # .h file extraction
     cmakelists=os.path.join(cmakelistBaseDirectory,"kwidgetsaddons/CMakeLists.txt"),
-    cmakeVariables = {"cmake_current_binary_dir": ["/home/sbe/devel/git_build/kde/frameworks/kwidgetsaddons"]},
+    cmakeVariables = {"cmake_current_binary_dir": [kdelibsBuildDirectory + "/kwidgetsaddons"]},
 
     ignoreHeaders="""kwidgetsaddons_export.h kwidgetsaddons_version.h""".split(" "),
 

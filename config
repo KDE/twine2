@@ -15,11 +15,9 @@ cmakelistbasedirectory = ${kdeedu.config:outputBaseDirectory}
 pyqt4sipdir = ${kdelibs.config:sipImportDir}
 
 [kf5.config]
-source = /source
-build = /build
 outputbasedirectory = pykde5
 cmakelistbasedirectory = frameworks
-kdelibsbuilddirectory = ${kf5.config:build}/frameworks
+kdelibsbuilddirectory = frameworks
 cmakelistgitbasedirectory = /devel/git
 sipimportdir = pyqt5/sip
 

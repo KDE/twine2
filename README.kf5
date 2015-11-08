@@ -40,32 +40,4 @@ which is the form currently used by Riverbank for PyQt.
    cd $HOME/build/pyqt5
    python $HOME/source/pyqt5/configure.py --qmake /usr/lib/x86_64-linux-gnu/qt5/bin/qmake
    cd $HOME/build/pykde5
-   python3 $HOME/source/twine2/kf5.py
-    
-
-These are the currently supported options (use the -h/--help option to check
-for updates):
-
-usage: kf5.py [-h] [-l] [-f CONFIGFILE] [-w WRITEOPT]
-
-Process kf5 source to generate Python bindings
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -l, --listopts        list stored configuration option values and exit
-  -f CONFIGFILE, --configfile CONFIGFILE
-                        Path to alternate configuration file to use. The current
-                        configuration defaults are:
-
-                            source = /source
-                            build = /build
-                            ...
-                            outputbasedirectory = ${kf5.config:source}/pykde5
-                                
-                        The output is a set of files in the outputbasedirectory
-                        directory.
-
-  -w WRITEOPT, --writeopt WRITEOPT
-                        change config file value using item=value syntax - add
-                        multiple times to change multiple values
-
+   $HOME/source/twine2/kf5.py

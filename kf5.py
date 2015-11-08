@@ -18,13 +18,14 @@
 # Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import re
+import argparse
+import configparser
+import inspect
 import kbindinggenerator.toolkit as toolkit
 import kbindinggenerator.qtkde5macros as qtkde5macros
-import os
 import kbindinggenerator.sipsymboldata as sipsymboldata
-import configparser
-import argparse
+import os
+import re
 
 kauth = None
 kitemmodels = None
@@ -481,8 +482,22 @@ def updateDocs():
     
 ###########################################################################
 def main():
+    """
+    Process kf5 source to generate Python bindings.
+
+    The current CONFIGFILE defaults are:
+
+        [kf5.config]
+        source = /source
+        build = /build
+        ...
+        outputbasedirectory = ${kf5.config:source}/pykde5
+            
+    The output is a set of files in the outputbasedirectory directory.
+    """
     configfile = os.path.join(os.path.dirname(__file__), 'config')
-    parser = argparse.ArgumentParser(description='Process kf5 source to generate Python bindings')
+    parser = argparse.ArgumentParser(epilog = inspect.getdoc(main),
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('-l', '--listopts', default=False, action='store_true', help='list stored configuration option values and exit')
     parser.add_argument('-f', '--configfile', default=configfile, action='store', help='path to alternate configuration file to use')
     parser.add_argument('-w', '--writeopt', default=[], action='append', help='change config file value using item=value syntax - add multiple times to change multiple values')

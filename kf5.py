@@ -26,7 +26,16 @@ import kbindinggenerator.sipsymboldata as sipsymboldata
 import configparser
 import argparse
 
-configfile = 'config'
+kauth = None
+kitemmodels = None
+kitemviews = None
+karchive = None
+kplotting = None
+solid = None
+kcoreaddons = None
+sonnet = None
+kguiaddons = None
+kwidgetsaddons = None
 
 def _readConfiguration(configfile):
 
@@ -62,9 +71,6 @@ def _getConfiguration(configfile):
     return(outputBaseDirectory, cmakelistBaseDirectory, kdelibsBuildDirectory,
         cmakelistGitBaseDirectory, sipImportDir, sipImportDirs)
 
-outputBaseDirectory, cmakelistBaseDirectory, kdelibsBuildDirectory, \
-    cmakelistGitBaseDirectory, sipImportDir, sipImportDirs =_getConfiguration(configfile)
-
 def _printConfiguration(outputBaseDirectory, cmakelistBaseDirectory,
     kdelibsBuildDirectory, cmakelistGitBaseDirectory, sipImportDir,
     sipImportDirs):
@@ -76,318 +82,340 @@ def _printConfiguration(outputBaseDirectory, cmakelistBaseDirectory,
     print('sipImportDir = {0}'.format(sipImportDir))
     print('sipImportDirs = {0}'.format(sipImportDirs))
 
-###########################################################################
-kauth = toolkit.ModuleGenerator(
-    module="PyKDE5.kauth",
-    outputDirectory=os.path.join(outputBaseDirectory, "sip/kauth"),
-    docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/html/kauth"),
-    mainDocs=os.path.join(cmakelistBaseDirectory,"kauth/Mainpage.dox"),
-    
-    # .h file extraction
-    cmakelists=os.path.join(cmakelistBaseDirectory,"kauth/CMakeLists.txt"),
-    
-    ignoreHeaders="""kauth_export.h kauth_version.h kauth.h""".split(" "),
-    
-    #noUpdateSip=["typedefs.sip"],
-    
-    # Cpp parsing    
-    preprocessSubstitutionMacros=qtkde5macros.QtPreprocessSubstitutionMacros(),
-    macros=qtkde5macros.QtMacros(),
-    bareMacros=qtkde5macros.QtBareMacros(["KAUTH_EXPORT"]),
-    
-    # Sip generation
-    sipImportDirs=[sipImportDir],
-    sipImports=["QtCore/QtCoremod.sip","QtGui/QtGuimod.sip","QtNetwork/QtNetworkmod.sip"],
-    copyrightNotice=qtkde5macros.copyrightNotice(),
-    exportMacros=["KAUTH_EXPORT"],
-    ignoreBases=[],
-    
-    annotationRules=qtkde5macros.annotationRules()
-    )
-
-###########################################################################
-kitemmodels = toolkit.ModuleGenerator(
-    module="PyKDE5.kitemmodels",
-    outputDirectory=os.path.join(outputBaseDirectory, "sip/kitemmodels"),
-    docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/html/kitemmodels"),
-    # mainDocs=os.path.join(cmakelistBaseDirectory,"kitemmodels/Mainpage.dox"),
-
-    # .h file extraction
-    cmakelists=os.path.join(cmakelistBaseDirectory,"kitemmodels/CMakeLists.txt"),
-
-    ignoreHeaders="""kitemmodels_export.h kitemmodels_version.h kitemmodels.h""".split(" "),
-
-    #noUpdateSip=["typedefs.sip"],
-
-    # Cpp parsing
-    preprocessSubstitutionMacros=qtkde5macros.QtPreprocessSubstitutionMacros(),
-    macros=qtkde5macros.QtMacros(),
-    bareMacros=qtkde5macros.QtBareMacros(["KITEMMODELS_EXPORT"]),
-
-    # Sip generation
-    sipImportDirs=[sipImportDir],
-    sipImports=["QtCore/QtCoremod.sip"],
-    copyrightNotice=qtkde5macros.copyrightNotice(),
-    exportMacros=["KITEMMODELS_EXPORT"],
-    ignoreBases=[],
-
-    annotationRules=qtkde5macros.annotationRules()
-    )
-
-###########################################################################
-kitemviews = toolkit.ModuleGenerator(
-    module="PyKDE5.kitemviews",
-    outputDirectory=os.path.join(outputBaseDirectory, "sip/kitemviews"),
-    docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/html/kitemviews"),
-    # mainDocs=os.path.join(cmakelistBaseDirectory,"kitemviews/Mainpage.dox"),
-
-    # .h file extraction
-    cmakelists=os.path.join(cmakelistBaseDirectory,"kitemviews/CMakeLists.txt"),
-
-    ignoreHeaders="""kitemviews_export.h kitemviews_version.h kitemviews.h""".split(" "),
-
-    #noUpdateSip=["typedefs.sip"],
-
-    preprocessorValues={"KDE_NO_DEPRECATED": "1", "KITEMVIEWS_NO_DEPRECATED": "1"},
-
-    # Cpp parsing
-    preprocessSubstitutionMacros=qtkde5macros.QtPreprocessSubstitutionMacros(),
-    macros=qtkde5macros.QtMacros(),
-    bareMacros=qtkde5macros.QtBareMacros(["KITEMVIEWS_EXPORT"]),
-
-    # Sip generation
-    sipImportDirs=[sipImportDir],
-    sipImports=["QtCore/QtCoremod.sip","QtGui/QtGuimod.sip","QtWidgets/QtWidgetsmod.sip"],
-    copyrightNotice=qtkde5macros.copyrightNotice(),
-    exportMacros=["KITEMVIEWS_EXPORT"],
-    ignoreBases=[],
-
-    annotationRules=qtkde5macros.annotationRules()
-    )
-
-###########################################################################
-karchive = toolkit.ModuleGenerator(
-    module="PyKDE5.karchive",
-    outputDirectory=os.path.join(outputBaseDirectory, "sip/karchive"),
-    docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/html/karchive"),
-    # mainDocs=os.path.join(cmakelistBaseDirectory,"karchive/Mainpage.dox"),
-
-    # .h file extraction
-    cmakelists=os.path.join(cmakelistBaseDirectory,"karchive/CMakeLists.txt"),
-
-    ignoreHeaders="""karchive_export.h karchive_version.h""".split(" "),
-
-    #noUpdateSip=["typedefs.sip"],
+def _setupAll(outputBaseDirectory, cmakelistBaseDirectory,
+    kdelibsBuildDirectory, cmakelistGitBaseDirectory, sipImportDir,
+    sipImportDirs):
+
+    global kauth
+    global kitemmodels
+    global kitemviews
+    global karchive
+    global kplotting
+    global solid
+    global kcoreaddons
+    global sonnet
+    global kguiaddons
+    global kwidgetsaddons
+    ###########################################################################
+    kauth = toolkit.ModuleGenerator(
+        module="PyKDE5.kauth",
+        outputDirectory=os.path.join(outputBaseDirectory, "sip/kauth"),
+        docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/html/kauth"),
+        mainDocs=os.path.join(cmakelistBaseDirectory,"kauth/Mainpage.dox"),
+        
+        # .h file extraction
+        cmakelists=os.path.join(cmakelistBaseDirectory,"kauth/CMakeLists.txt"),
+        
+        ignoreHeaders="""kauth_export.h kauth_version.h kauth.h""".split(" "),
+        
+        #noUpdateSip=["typedefs.sip"],
+        
+        # Cpp parsing    
+        preprocessSubstitutionMacros=qtkde5macros.QtPreprocessSubstitutionMacros(),
+        macros=qtkde5macros.QtMacros(),
+        bareMacros=qtkde5macros.QtBareMacros(["KAUTH_EXPORT"]),
+        
+        # Sip generation
+        sipImportDirs=[sipImportDir],
+        sipImports=["QtCore/QtCoremod.sip","QtGui/QtGuimod.sip","QtNetwork/QtNetworkmod.sip"],
+        copyrightNotice=qtkde5macros.copyrightNotice(),
+        exportMacros=["KAUTH_EXPORT"],
+        ignoreBases=[],
+        
+        annotationRules=qtkde5macros.annotationRules()
+        )
+
+    ###########################################################################
+    kitemmodels = toolkit.ModuleGenerator(
+        module="PyKDE5.kitemmodels",
+        outputDirectory=os.path.join(outputBaseDirectory, "sip/kitemmodels"),
+        docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/html/kitemmodels"),
+        # mainDocs=os.path.join(cmakelistBaseDirectory,"kitemmodels/Mainpage.dox"),
+
+        # .h file extraction
+        cmakelists=os.path.join(cmakelistBaseDirectory,"kitemmodels/CMakeLists.txt"),
+
+        ignoreHeaders="""kitemmodels_export.h kitemmodels_version.h kitemmodels.h""".split(" "),
+
+        #noUpdateSip=["typedefs.sip"],
+
+        # Cpp parsing
+        preprocessSubstitutionMacros=qtkde5macros.QtPreprocessSubstitutionMacros(),
+        macros=qtkde5macros.QtMacros(),
+        bareMacros=qtkde5macros.QtBareMacros(["KITEMMODELS_EXPORT"]),
+
+        # Sip generation
+        sipImportDirs=[sipImportDir],
+        sipImports=["QtCore/QtCoremod.sip"],
+        copyrightNotice=qtkde5macros.copyrightNotice(),
+        exportMacros=["KITEMMODELS_EXPORT"],
+        ignoreBases=[],
+
+        annotationRules=qtkde5macros.annotationRules()
+        )
+
+    ###########################################################################
+    kitemviews = toolkit.ModuleGenerator(
+        module="PyKDE5.kitemviews",
+        outputDirectory=os.path.join(outputBaseDirectory, "sip/kitemviews"),
+        docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/html/kitemviews"),
+        # mainDocs=os.path.join(cmakelistBaseDirectory,"kitemviews/Mainpage.dox"),
+
+        # .h file extraction
+        cmakelists=os.path.join(cmakelistBaseDirectory,"kitemviews/CMakeLists.txt"),
+
+        ignoreHeaders="""kitemviews_export.h kitemviews_version.h kitemviews.h""".split(" "),
+
+        #noUpdateSip=["typedefs.sip"],
+
+        preprocessorValues={"KDE_NO_DEPRECATED": "1", "KITEMVIEWS_NO_DEPRECATED": "1"},
+
+        # Cpp parsing
+        preprocessSubstitutionMacros=qtkde5macros.QtPreprocessSubstitutionMacros(),
+        macros=qtkde5macros.QtMacros(),
+        bareMacros=qtkde5macros.QtBareMacros(["KITEMVIEWS_EXPORT"]),
+
+        # Sip generation
+        sipImportDirs=[sipImportDir],
+        sipImports=["QtCore/QtCoremod.sip","QtGui/QtGuimod.sip","QtWidgets/QtWidgetsmod.sip"],
+        copyrightNotice=qtkde5macros.copyrightNotice(),
+        exportMacros=["KITEMVIEWS_EXPORT"],
+        ignoreBases=[],
+
+        annotationRules=qtkde5macros.annotationRules()
+        )
+
+    ###########################################################################
+    karchive = toolkit.ModuleGenerator(
+        module="PyKDE5.karchive",
+        outputDirectory=os.path.join(outputBaseDirectory, "sip/karchive"),
+        docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/html/karchive"),
+        # mainDocs=os.path.join(cmakelistBaseDirectory,"karchive/Mainpage.dox"),
 
-    preprocessorValues={"KDE_NO_DEPRECATED": "1", "KARCHIVE_NO_DEPRECATED": "1"},
+        # .h file extraction
+        cmakelists=os.path.join(cmakelistBaseDirectory,"karchive/CMakeLists.txt"),
 
-    # Cpp parsing
-    preprocessSubstitutionMacros=qtkde5macros.QtPreprocessSubstitutionMacros(),
-    macros=qtkde5macros.QtMacros(),
-    bareMacros=qtkde5macros.QtBareMacros(["KARCHIVE_EXPORT"]),
+        ignoreHeaders="""karchive_export.h karchive_version.h""".split(" "),
 
-    # Sip generation
-    sipImportDirs=sipImportDirs,
-    sipImports=["typedefs.sip", "QtCore/QtCoremod.sip"],
-    copyrightNotice=qtkde5macros.copyrightNotice(),
-    exportMacros=["KARCHIVE_EXPORT"],
-    ignoreBases=[],
+        #noUpdateSip=["typedefs.sip"],
 
-    annotationRules=qtkde5macros.annotationRules()
-    )
+        preprocessorValues={"KDE_NO_DEPRECATED": "1", "KARCHIVE_NO_DEPRECATED": "1"},
 
-###########################################################################
-kplotting = toolkit.ModuleGenerator(
-    module="PyKDE5.kplotting",
-    outputDirectory=os.path.join(outputBaseDirectory, "sip/kplotting"),
-    docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/html/kplotting"),
-    # mainDocs=os.path.join(cmakelistBaseDirectory,"kplotting/Mainpage.dox"),
+        # Cpp parsing
+        preprocessSubstitutionMacros=qtkde5macros.QtPreprocessSubstitutionMacros(),
+        macros=qtkde5macros.QtMacros(),
+        bareMacros=qtkde5macros.QtBareMacros(["KARCHIVE_EXPORT"]),
 
-    # .h file extraction
-    cmakelists=os.path.join(cmakelistBaseDirectory,"kplotting/CMakeLists.txt"),
+        # Sip generation
+        sipImportDirs=sipImportDirs,
+        sipImports=["typedefs.sip", "QtCore/QtCoremod.sip"],
+        copyrightNotice=qtkde5macros.copyrightNotice(),
+        exportMacros=["KARCHIVE_EXPORT"],
+        ignoreBases=[],
 
-    ignoreHeaders="""kplotting_export.h kplotting_version.h""".split(" "),
+        annotationRules=qtkde5macros.annotationRules()
+        )
+
+    ###########################################################################
+    kplotting = toolkit.ModuleGenerator(
+        module="PyKDE5.kplotting",
+        outputDirectory=os.path.join(outputBaseDirectory, "sip/kplotting"),
+        docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/html/kplotting"),
+        # mainDocs=os.path.join(cmakelistBaseDirectory,"kplotting/Mainpage.dox"),
 
-    #noUpdateSip=["typedefs.sip"],
+        # .h file extraction
+        cmakelists=os.path.join(cmakelistBaseDirectory,"kplotting/CMakeLists.txt"),
 
-    preprocessorValues={"KDE_NO_DEPRECATED": "1"},
+        ignoreHeaders="""kplotting_export.h kplotting_version.h""".split(" "),
 
-    # Cpp parsing
-    preprocessSubstitutionMacros=qtkde5macros.QtPreprocessSubstitutionMacros(),
-    macros=qtkde5macros.QtMacros(),
-    bareMacros=qtkde5macros.QtBareMacros(["KPLOTTING_EXPORT"]),
+        #noUpdateSip=["typedefs.sip"],
 
-    # Sip generation
-    sipImportDirs=sipImportDirs,
-    sipImports=["typedefs.sip", "QtCore/QtCoremod.sip", "QtGui/QtGuimod.sip", "QtWidgets/QtWidgetsmod.sip"],
-    copyrightNotice=qtkde5macros.copyrightNotice(),
-    exportMacros=["KPLOTTING_EXPORT"],
-    ignoreBases=[],
+        preprocessorValues={"KDE_NO_DEPRECATED": "1"},
 
-    annotationRules=qtkde5macros.annotationRules()
-    )
+        # Cpp parsing
+        preprocessSubstitutionMacros=qtkde5macros.QtPreprocessSubstitutionMacros(),
+        macros=qtkde5macros.QtMacros(),
+        bareMacros=qtkde5macros.QtBareMacros(["KPLOTTING_EXPORT"]),
 
-###########################################################################
-solid = toolkit.ModuleGenerator(
-    module="PyKDE5.solid",
-    outputDirectory=os.path.join(outputBaseDirectory, "sip/solid"),
-    docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/html/solid"),
-    # mainDocs=os.path.join(cmakelistBaseDirectory,"solid/Mainpage.dox"),
+        # Sip generation
+        sipImportDirs=sipImportDirs,
+        sipImports=["typedefs.sip", "QtCore/QtCoremod.sip", "QtGui/QtGuimod.sip", "QtWidgets/QtWidgetsmod.sip"],
+        copyrightNotice=qtkde5macros.copyrightNotice(),
+        exportMacros=["KPLOTTING_EXPORT"],
+        ignoreBases=[],
 
-    # .h file extraction
-    cmakelists=os.path.join(cmakelistBaseDirectory,"solid/CMakeLists.txt"),
+        annotationRules=qtkde5macros.annotationRules()
+        )
 
-    ignoreHeaders="""solid_export.h solid_version.h kuser.h acpluggedjob.h inhibition.h inhibitionjob.h job.h power.h requeststatejob.h statesjob.h""".split(" "),
+    ###########################################################################
+    solid = toolkit.ModuleGenerator(
+        module="PyKDE5.solid",
+        outputDirectory=os.path.join(outputBaseDirectory, "sip/solid"),
+        docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/html/solid"),
+        # mainDocs=os.path.join(cmakelistBaseDirectory,"solid/Mainpage.dox"),
 
-    #noUpdateSip=["typedefs.sip"],
+        # .h file extraction
+        cmakelists=os.path.join(cmakelistBaseDirectory,"solid/CMakeLists.txt"),
 
-    preprocessorValues={"KDE_NO_DEPRECATED": "1"},
+        ignoreHeaders="""solid_export.h solid_version.h kuser.h acpluggedjob.h inhibition.h inhibitionjob.h job.h power.h requeststatejob.h statesjob.h""".split(" "),
 
-    # Cpp parsing
-    preprocessSubstitutionMacros=qtkde5macros.QtPreprocessSubstitutionMacros(),
-    macros=qtkde5macros.QtMacros(),
-    bareMacros=qtkde5macros.QtBareMacros(["SOLID_EXPORT", "SOLID_DEPRECATED"]),
+        #noUpdateSip=["typedefs.sip"],
 
-    # Sip generation
-    sipImportDirs=sipImportDirs,
-    sipImports=["typedefs.sip", "QtCore/QtCoremod.sip"],
-    copyrightNotice=qtkde5macros.copyrightNotice(),
-    exportMacros=["SOLID_EXPORT"],
-    ignoreBases=[],
+        preprocessorValues={"KDE_NO_DEPRECATED": "1"},
 
-    annotationRules=qtkde5macros.annotationRules()
-    )
+        # Cpp parsing
+        preprocessSubstitutionMacros=qtkde5macros.QtPreprocessSubstitutionMacros(),
+        macros=qtkde5macros.QtMacros(),
+        bareMacros=qtkde5macros.QtBareMacros(["SOLID_EXPORT", "SOLID_DEPRECATED"]),
 
-###########################################################################
-kcoreaddons = toolkit.ModuleGenerator(
-    module="PyKDE5.kcoreaddons",
-    outputDirectory=os.path.join(outputBaseDirectory, "sip/kcoreaddons"),
-    docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/html/kcoreaddons"),
-    # mainDocs=os.path.join(cmakelistBaseDirectory,"kcoreaddons/Mainpage.dox"),
+        # Sip generation
+        sipImportDirs=sipImportDirs,
+        sipImports=["typedefs.sip", "QtCore/QtCoremod.sip"],
+        copyrightNotice=qtkde5macros.copyrightNotice(),
+        exportMacros=["SOLID_EXPORT"],
+        ignoreBases=[],
 
-    # .h file extraction
-    cmakelists=os.path.join(cmakelistBaseDirectory,"kcoreaddons/CMakeLists.txt"),
-    cmakeVariables = {"cmake_current_binary_dir": [kdelibsBuildDirectory + "/kcoreaddons"]},
+        annotationRules=qtkde5macros.annotationRules()
+        )
 
-    ignoreHeaders="""kcoreaddons_export.h kcoreaddons_version.h""".split(" "),
+    ###########################################################################
+    kcoreaddons = toolkit.ModuleGenerator(
+        module="PyKDE5.kcoreaddons",
+        outputDirectory=os.path.join(outputBaseDirectory, "sip/kcoreaddons"),
+        docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/html/kcoreaddons"),
+        # mainDocs=os.path.join(cmakelistBaseDirectory,"kcoreaddons/Mainpage.dox"),
 
-    #noUpdateSip=["typedefs.sip"],
+        # .h file extraction
+        cmakelists=os.path.join(cmakelistBaseDirectory,"kcoreaddons/CMakeLists.txt"),
+        cmakeVariables = {"cmake_current_binary_dir": [kdelibsBuildDirectory + "/kcoreaddons"]},
 
-    preprocessorValues={"KDE_NO_DEPRECATED": "1", "KCOREADDONS_NO_DEPRECATED": "1"},
+        ignoreHeaders="""kcoreaddons_export.h kcoreaddons_version.h""".split(" "),
 
-    # Cpp parsing
-    preprocessSubstitutionMacros=qtkde5macros.QtPreprocessSubstitutionMacros(),
-    macros=qtkde5macros.QtMacros(),
-    bareMacros=qtkde5macros.QtBareMacros(["KCOREADDONS_EXPORT"]),
+        #noUpdateSip=["typedefs.sip"],
 
-    # Sip generation
-    sipImportDirs=sipImportDirs,
-    sipImports=["typedefs.sip", "QtCore/QtCoremod.sip"],
-    copyrightNotice=qtkde5macros.copyrightNotice(),
-    exportMacros=["KCOREADDONS_EXPORT"],
-    ignoreBases=[],
+        preprocessorValues={"KDE_NO_DEPRECATED": "1", "KCOREADDONS_NO_DEPRECATED": "1"},
 
-    annotationRules=qtkde5macros.annotationRules()
-    )
+        # Cpp parsing
+        preprocessSubstitutionMacros=qtkde5macros.QtPreprocessSubstitutionMacros(),
+        macros=qtkde5macros.QtMacros(),
+        bareMacros=qtkde5macros.QtBareMacros(["KCOREADDONS_EXPORT"]),
 
-###########################################################################
-sonnet = toolkit.ModuleGenerator(
-    module="PyKDE5.sonnet",
-    outputDirectory=os.path.join(outputBaseDirectory, "sip/sonnet"),
-    docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/html/sonnet"),
-    # mainDocs=os.path.join(cmakelistBaseDirectory,"sonnet/Mainpage.dox"),
+        # Sip generation
+        sipImportDirs=sipImportDirs,
+        sipImports=["typedefs.sip", "QtCore/QtCoremod.sip"],
+        copyrightNotice=qtkde5macros.copyrightNotice(),
+        exportMacros=["KCOREADDONS_EXPORT"],
+        ignoreBases=[],
 
-    # .h file extraction
-    cmakelists=os.path.join(cmakelistBaseDirectory,"sonnet/CMakeLists.txt"),
+        annotationRules=qtkde5macros.annotationRules()
+        )
 
-    ignoreHeaders="""sonnetui_export.h sonnet_export.h sonnet_version.h""".split(" "),
+    ###########################################################################
+    sonnet = toolkit.ModuleGenerator(
+        module="PyKDE5.sonnet",
+        outputDirectory=os.path.join(outputBaseDirectory, "sip/sonnet"),
+        docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/html/sonnet"),
+        # mainDocs=os.path.join(cmakelistBaseDirectory,"sonnet/Mainpage.dox"),
 
-    #noUpdateSip=["typedefs.sip"],
+        # .h file extraction
+        cmakelists=os.path.join(cmakelistBaseDirectory,"sonnet/CMakeLists.txt"),
 
-    preprocessorValues={"KDE_NO_DEPRECATED": "1"},
+        ignoreHeaders="""sonnetui_export.h sonnet_export.h sonnet_version.h""".split(" "),
 
-    # Cpp parsing
-    preprocessSubstitutionMacros=qtkde5macros.QtPreprocessSubstitutionMacros(),
-    macros=qtkde5macros.QtMacros(),
-    bareMacros=qtkde5macros.QtBareMacros(["SONNETCORE_EXPORT","SONNETUI_EXPORT"]),
+        #noUpdateSip=["typedefs.sip"],
 
-    # Sip generation
-    sipImportDirs=sipImportDirs,
-    sipImports=["typedefs.sip", "QtCore/QtCoremod.sip", "QtGui/QtGuimod.sip", "QtWidgets/QtWidgetsmod.sip"],
-    copyrightNotice=qtkde5macros.copyrightNotice(),
-    exportMacros=["SONNET_EXPORT","SONNETUI_EXPORT","SONNETCORE_EXPORT"],
-    ignoreBases=[],
+        preprocessorValues={"KDE_NO_DEPRECATED": "1"},
 
-    annotationRules=qtkde5macros.annotationRules()
-    )
+        # Cpp parsing
+        preprocessSubstitutionMacros=qtkde5macros.QtPreprocessSubstitutionMacros(),
+        macros=qtkde5macros.QtMacros(),
+        bareMacros=qtkde5macros.QtBareMacros(["SONNETCORE_EXPORT","SONNETUI_EXPORT"]),
 
-###########################################################################
-kguiaddons = toolkit.ModuleGenerator(
-    module="PyKDE5.kguiaddons",
-    outputDirectory=os.path.join(outputBaseDirectory, "sip/kguiaddons"),
-    docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/html/kguiaddons"),
-    # mainDocs=os.path.join(cmakelistBaseDirectory,"kguiaddons/Mainpage.dox"),
+        # Sip generation
+        sipImportDirs=sipImportDirs,
+        sipImports=["typedefs.sip", "QtCore/QtCoremod.sip", "QtGui/QtGuimod.sip", "QtWidgets/QtWidgetsmod.sip"],
+        copyrightNotice=qtkde5macros.copyrightNotice(),
+        exportMacros=["SONNET_EXPORT","SONNETUI_EXPORT","SONNETCORE_EXPORT"],
+        ignoreBases=[],
 
-    # .h file extraction
-    cmakelists=os.path.join(cmakelistBaseDirectory,"kguiaddons/CMakeLists.txt"),
-    cmakeVariables = {"cmake_current_binary_dir": [kdelibsBuildDirectory + "/kguiaddons"]},
+        annotationRules=qtkde5macros.annotationRules()
+        )
 
-    ignoreHeaders="""kguiaddons_export.h kguiaddons_version.h""".split(" "),
+    ###########################################################################
+    kguiaddons = toolkit.ModuleGenerator(
+        module="PyKDE5.kguiaddons",
+        outputDirectory=os.path.join(outputBaseDirectory, "sip/kguiaddons"),
+        docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/html/kguiaddons"),
+        # mainDocs=os.path.join(cmakelistBaseDirectory,"kguiaddons/Mainpage.dox"),
 
-    #noUpdateSip=["typedefs.sip"],
+        # .h file extraction
+        cmakelists=os.path.join(cmakelistBaseDirectory,"kguiaddons/CMakeLists.txt"),
+        cmakeVariables = {"cmake_current_binary_dir": [kdelibsBuildDirectory + "/kguiaddons"]},
 
-    preprocessorValues={"KDE_NO_DEPRECATED": "1"},
+        ignoreHeaders="""kguiaddons_export.h kguiaddons_version.h""".split(" "),
 
-    # Cpp parsing
-    preprocessSubstitutionMacros=qtkde5macros.QtPreprocessSubstitutionMacros(),
-    macros=qtkde5macros.QtMacros(),
-    bareMacros=qtkde5macros.QtBareMacros(["KGUIADDONS_EXPORT"]),
+        #noUpdateSip=["typedefs.sip"],
 
-    # Sip generation
-    sipImportDirs=sipImportDirs,
-    sipImports=["typedefs.sip", "QtCore/QtCoremod.sip", "QtGui/QtGuimod.sip"],
-    copyrightNotice=qtkde5macros.copyrightNotice(),
-    exportMacros=["KGUIADDONS_EXPORT"],
-    ignoreBases=[],
+        preprocessorValues={"KDE_NO_DEPRECATED": "1"},
 
-    annotationRules=qtkde5macros.annotationRules()
-    )
+        # Cpp parsing
+        preprocessSubstitutionMacros=qtkde5macros.QtPreprocessSubstitutionMacros(),
+        macros=qtkde5macros.QtMacros(),
+        bareMacros=qtkde5macros.QtBareMacros(["KGUIADDONS_EXPORT"]),
 
-###########################################################################
-kwidgetsaddons = toolkit.ModuleGenerator(
-    module="PyKDE5.kwidgetsaddons",
-    outputDirectory=os.path.join(outputBaseDirectory, "sip/kwidgetsaddons"),
-    docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/html/kwidgetsaddons"),
-    # mainDocs=os.path.join(cmakelistBaseDirectory,"kwidgetsaddons/Mainpage.dox"),
+        # Sip generation
+        sipImportDirs=sipImportDirs,
+        sipImports=["typedefs.sip", "QtCore/QtCoremod.sip", "QtGui/QtGuimod.sip"],
+        copyrightNotice=qtkde5macros.copyrightNotice(),
+        exportMacros=["KGUIADDONS_EXPORT"],
+        ignoreBases=[],
 
-    # .h file extraction
-    cmakelists=os.path.join(cmakelistBaseDirectory,"kwidgetsaddons/CMakeLists.txt"),
-    cmakeVariables = {"cmake_current_binary_dir": [kdelibsBuildDirectory + "/kwidgetsaddons"]},
+        annotationRules=qtkde5macros.annotationRules()
+        )
 
-    ignoreHeaders="""kwidgetsaddons_export.h kwidgetsaddons_version.h""".split(" "),
+    ###########################################################################
+    kwidgetsaddons = toolkit.ModuleGenerator(
+        module="PyKDE5.kwidgetsaddons",
+        outputDirectory=os.path.join(outputBaseDirectory, "sip/kwidgetsaddons"),
+        docsOutputDirectory=os.path.join(outputBaseDirectory, "docs/html/kwidgetsaddons"),
+        # mainDocs=os.path.join(cmakelistBaseDirectory,"kwidgetsaddons/Mainpage.dox"),
 
-    #noUpdateSip=["typedefs.sip"],
+        # .h file extraction
+        cmakelists=os.path.join(cmakelistBaseDirectory,"kwidgetsaddons/CMakeLists.txt"),
+        cmakeVariables = {"cmake_current_binary_dir": [kdelibsBuildDirectory + "/kwidgetsaddons"]},
 
-    preprocessorValues={"KDE_NO_DEPRECATED": "1", "KWIDGETSADDONS_NO_DEPRECATED": "1"},
+        ignoreHeaders="""kwidgetsaddons_export.h kwidgetsaddons_version.h""".split(" "),
 
-    # Cpp parsing
-    preprocessSubstitutionMacros=qtkde5macros.QtPreprocessSubstitutionMacros(),
-    macros=qtkde5macros.QtMacros(),
-    bareMacros=qtkde5macros.QtBareMacros(["KWIDGETSADDONS_EXPORT"]),
+        #noUpdateSip=["typedefs.sip"],
 
-    # Sip generation
-    sipImportDirs=sipImportDirs,
-    sipImports=["typedefs.sip", "QtCore/QtCoremod.sip", "QtWidgets/QtWidgetsmod.sip"],
-    copyrightNotice=qtkde5macros.copyrightNotice(),
-    exportMacros=["KWIDGETSADDONS_EXPORT"],
-    ignoreBases=[],
+        preprocessorValues={"KDE_NO_DEPRECATED": "1", "KWIDGETSADDONS_NO_DEPRECATED": "1"},
 
-    annotationRules=qtkde5macros.annotationRules()
-    )
+        # Cpp parsing
+        preprocessSubstitutionMacros=qtkde5macros.QtPreprocessSubstitutionMacros(),
+        macros=qtkde5macros.QtMacros(),
+        bareMacros=qtkde5macros.QtBareMacros(["KWIDGETSADDONS_EXPORT"]),
 
-###########################################################################
+        # Sip generation
+        sipImportDirs=sipImportDirs,
+        sipImports=["typedefs.sip", "QtCore/QtCoremod.sip", "QtWidgets/QtWidgetsmod.sip"],
+        copyrightNotice=qtkde5macros.copyrightNotice(),
+        exportMacros=["KWIDGETSADDONS_EXPORT"],
+        ignoreBases=[],
+
+        annotationRules=qtkde5macros.annotationRules()
+        )
 
 def updateSIP():
+    global kauth
+    global kitemmodels
+    global kitemviews
+    global karchive
+    global kplotting
+    global solid
+    global kcoreaddons
+    global sonnet
+    global kguiaddons
+    global kwidgetsaddons
     kauth.run()
     kitemmodels.run()
     kitemviews.run()
@@ -408,6 +436,16 @@ def updateSIP():
     # kjs
 
 def updateDocs():
+    global kauth
+    global kitemmodels
+    global kitemviews
+    global karchive
+    global kplotting
+    global solid
+    global kcoreaddons
+    global sonnet
+    global kguiaddons
+    global kwidgetsaddons
     classNames = []
     nsNames = []
 
@@ -441,24 +479,25 @@ def updateDocs():
     toolkit.ModuleGenerator.WriteAllClasses(os.path.join(outputBaseDirectory,"docs/html"),nsNames,classNames)
     print("Done")
     
+###########################################################################
 def main():
+    configfile = os.path.join(os.path.dirname(__file__), 'config')
     parser = argparse.ArgumentParser(description='Process kf5 source to generate Python bindings')
     parser.add_argument('-l', '--listopts', default=False, action='store_true', help='list stored configuration option values and exit')
-    parser.add_argument('-f', '--configfile', default='', action='store', help='path to alternate configuration file to use')
+    parser.add_argument('-f', '--configfile', default=configfile, action='store', help='path to alternate configuration file to use')
     parser.add_argument('-w', '--writeopt', default=[], action='append', help='change config file value using item=value syntax - add multiple times to change multiple values')
     args = parser.parse_args()
+    try:
+        outputBaseDirectory, cmakelistBaseDirectory, kdelibsBuildDirectory, \
+            cmakelistGitBaseDirectory, sipImportDir, sipImportDirs =_getConfiguration(args.configfile)
+    except configparser.NoSectionError as e:
+        print('Config file error: {0}'.format(e))
+        exit(1)
     if args.listopts:
         _printConfiguration(outputBaseDirectory, cmakelistBaseDirectory,
             kdelibsBuildDirectory, cmakelistGitBaseDirectory, sipImportDir,
             sipImportDirs)
         exit(0)
-    if args.configfile:
-        try:
-            configfile = args.configfile
-            _getConfiguration(configfile)
-        except configparser.NoSectionError as e:
-            print('Config file error: {0}'.format(e))
-            exit(1)
     if args.writeopt:
         for arg in args.writeopt:
             try:
@@ -474,6 +513,9 @@ def main():
             _setSettings(settings)
             _writeConfiguration(settings, configfile)
         exit(0)
+    _setupAll(outputBaseDirectory, cmakelistBaseDirectory,
+        kdelibsBuildDirectory, cmakelistGitBaseDirectory, sipImportDir,
+        sipImportDirs)
     #print(repr(kitemmodels.extractCmakeListsHeaders()))
     updateSIP()
     updateDocs()

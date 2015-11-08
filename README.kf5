@@ -11,9 +11,9 @@ Pre-requisites in addition to cmake, extra-cmake-modules, g++ and so on
     
 5. Access to PyQt5 sip files
 
-6.  The kf5 source and an appropriate directory layout like this:
+6. The kf5 source and an appropriate directory layout like this:
    
-     $HOME/devel/git/kde
+     $HOME/source
          frameworks
              kitemmodels
              ...
@@ -24,34 +24,24 @@ Pre-requisites in addition to cmake, extra-cmake-modules, g++ and so on
          twine2
              kf5.py
              ...
-     build
+     $HOME/build
          frameworks
          pykde5
          pyqt5
          ...
 
-The current configuration defaults are:
-
-outputbasedirectory = /devel/git/kde/kdebindings/pykde5
-cmakelistbasedirectory = /devel/git/kde/frameworks
-kdelibsbuilddirectory = /devel/git_build/kde/frameworks
-cmakelistgitbasedirectory = /devel/git
-sipimportdir = /devel/kdesvninstall/share/sip/PyQt5
-sipimportdirs = [${kf5.config:sipImportDir}, ${kf5.config:outputBaseDirectory}/sip]
-    
 Note: the pyqt5 will typically be a link to somethng like PyQt-gpl-5.4.1
 which is the form currently used by Riverbank for PyQt.
 
-6. Configfure and build like this:
+6. Configure and build like this:
   
-   cd .../build/frameworks/kitemmodels
-   cmake ../../../source/frameworks/kitemmodels/CMakeLists.txt
-   cd .../build/pyqt5
-   python ../../source/pyqt5/configure.py --qmake /usr/lib/x86_64-linux-gnu/qt5/bin/qmake
-   cd .../build/pykde5
-   python3 ../../source/twine2/kf5.py
+   cd $HOME/build/frameworks/kitemmodels
+   cmake $HOME/source/frameworks/kitemmodels
+   cd $HOME/build/pyqt5
+   python $HOME/source/pyqt5/configure.py --qmake /usr/lib/x86_64-linux-gnu/qt5/bin/qmake
+   cd $HOME/build/pykde5
+   python3 $HOME/source/twine2/kf5.py
     
-The output is a set of files in the outputbasedirectory directory.
 
 These are the currently supported options (use the -h/--help option to check
 for updates):
@@ -64,7 +54,17 @@ optional arguments:
   -h, --help            show this help message and exit
   -l, --listopts        list stored configuration option values and exit
   -f CONFIGFILE, --configfile CONFIGFILE
-                        path to alternate configuration file to use
+                        Path to alternate configuration file to use. The current
+                        configuration defaults are:
+
+                            source = /source
+                            build = /build
+                            ...
+                            outputbasedirectory = ${kf5.config:source}/pykde5
+                                
+                        The output is a set of files in the outputbasedirectory
+                        directory.
+
   -w WRITEOPT, --writeopt WRITEOPT
                         change config file value using item=value syntax - add
                         multiple times to change multiple values

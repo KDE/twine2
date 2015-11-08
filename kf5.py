@@ -58,35 +58,30 @@ def _setSettings(source_dir, build_dir, settings):
                                           settings.get('kf5.config', 'cmakelistBaseDirectory'))
     kdelibsBuildDirectory = os.path.join(build_dir,
                                          settings.get('kf5.config', 'kdelibsBuildDirectory'))
-    cmakelistGitBaseDirectory = os.environ['HOME'] + \
-        settings.get('kf5.config', 'cmakelistGitBaseDirectory')
     sipImportDir = os.path.join(source_dir,
                                 settings.get('kf5.config', 'sipImportDir'))
     sipImportDirs = [ str(sipImportDir), str(outputBaseDirectory) + '/sip']
     return(outputBaseDirectory, cmakelistBaseDirectory, kdelibsBuildDirectory,
-        cmakelistGitBaseDirectory, sipImportDir, sipImportDirs)
+           sipImportDir, sipImportDirs)
 
 def _getConfiguration(configfile):
     settings = _readConfiguration(configfile)
     outputBaseDirectory, cmakelistBaseDirectory, kdelibsBuildDirectory, \
-        cmakelistGitBaseDirectory, sipImportDir, sipImportDirs =_setSettings(settings)
+        sipImportDir, sipImportDirs =_setSettings(settings)
     return(outputBaseDirectory, cmakelistBaseDirectory, kdelibsBuildDirectory,
-        cmakelistGitBaseDirectory, sipImportDir, sipImportDirs)
+        sipImportDir, sipImportDirs)
 
 def _printConfiguration(outputBaseDirectory, cmakelistBaseDirectory,
-    kdelibsBuildDirectory, cmakelistGitBaseDirectory, sipImportDir,
-    sipImportDirs):
+                        kdelibsBuildDirectory, sipImportDir, sipImportDirs):
     print('Current values for configuration options:')
     print('outputBaseDirectory = {0}'.format(outputBaseDirectory))
     print('cmakelistBaseDirectory = {0}'.format(cmakelistBaseDirectory))
     print('kdelibsBuildDirectory = {0}'.format(kdelibsBuildDirectory))
-    print('cmakelistGitBaseDirectory = {0}'.format(cmakelistGitBaseDirectory))
     print('sipImportDir = {0}'.format(sipImportDir))
     print('sipImportDirs = {0}'.format(sipImportDirs))
 
-def _setupAll(outputBaseDirectory, cmakelistBaseDirectory,
-    kdelibsBuildDirectory, cmakelistGitBaseDirectory, sipImportDir,
-    sipImportDirs):
+def _setupAll(outputBaseDirectory, cmakelistBaseDirectory, kdelibsBuildDirectory,
+              sipImportDir, sipImportDirs):
 
     global kauth
     global kitemmodels
@@ -503,19 +498,21 @@ def main():
     parser.add_argument('-f', '--configfile', default=configfile, action='store', help='path to alternate configuration file to use')
     parser.add_argument('-w', '--writeopt', default=[], action='append', help='change config file value using item=value syntax - add multiple times to change multiple values')
     args = parser.parse_args()
+    #
+    # The source directory is located relative to the specified configfile,
+    # and the build directory is "here".
+    #
     source_dir = os.path.dirname(os.path.dirname(os.path.realpath(args.configfile)))
     build_dir = os.getcwd()
-    try:
-        settings = _readConfiguration(args.configfile)
-        outputBaseDirectory, cmakelistBaseDirectory, kdelibsBuildDirectory, \
-            cmakelistGitBaseDirectory, sipImportDir, sipImportDirs =_setSettings(source_dir, build_dir, settings)
-    except configparser.NoSectionError as e:
-        print('Config file error: {0}'.format(e))
-        exit(1)
+    #
+    # Read the default settings.
+    #
+    settings = _readConfiguration(args.configfile)
+    outputBaseDirectory, cmakelistBaseDirectory, kdelibsBuildDirectory, sipImportDir, \
+        sipImportDirs =_setSettings(source_dir, build_dir, settings)
     if args.listopts:
         _printConfiguration(outputBaseDirectory, cmakelistBaseDirectory,
-            kdelibsBuildDirectory, cmakelistGitBaseDirectory, sipImportDir,
-            sipImportDirs)
+                            kdelibsBuildDirectory, sipImportDir, sipImportDirs)
         exit(0)
     if args.writeopt:
         for arg in args.writeopt:
@@ -532,9 +529,9 @@ def main():
             _setSettings(source_dir, build_dir, settings)
             _writeConfiguration(settings, configfile)
         exit(0)
-    _setupAll(outputBaseDirectory, cmakelistBaseDirectory,
-        kdelibsBuildDirectory, cmakelistGitBaseDirectory, sipImportDir,
-        sipImportDirs)
+        
+    _setupAll(outputBaseDirectory, cmakelistBaseDirectory, kdelibsBuildDirectory,
+              sipImportDir, sipImportDirs)
     #print(repr(kitemmodels.extractCmakeListsHeaders()))
     updateSIP()
     updateDocs()

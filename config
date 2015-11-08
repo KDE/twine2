@@ -18,6 +18,5 @@ pyqt4sipdir = ${kdelibs.config:sipImportDir}
 outputbasedirectory = pykde5
 cmakelistbasedirectory = frameworks
 kdelibsbuilddirectory = frameworks
-cmakelistgitbasedirectory = /devel/git
 sipimportdir = pyqt5/sip
 

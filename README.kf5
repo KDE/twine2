@@ -13,7 +13,7 @@ Pre-requisites in addition to cmake, extra-cmake-modules, g++ and so on
 
 6. The kf5 source and an appropriate directory layout like this:
    
-     $HOME/source
+     .../source
          frameworks
              kitemmodels
              ...
@@ -24,7 +24,7 @@ Pre-requisites in addition to cmake, extra-cmake-modules, g++ and so on
          twine2
              kf5.py
              ...
-     $HOME/build
+     .../build
          frameworks
          pykde5
          pyqt5
@@ -35,9 +35,9 @@ which is the form currently used by Riverbank for PyQt.
 
 6. Configure and build like this:
   
-   cd $HOME/build/frameworks/kitemmodels
-   cmake $HOME/source/frameworks/kitemmodels
-   cd $HOME/build/pyqt5
-   python $HOME/source/pyqt5/configure.py --qmake /usr/lib/x86_64-linux-gnu/qt5/bin/qmake
-   cd $HOME/build/pykde5
-   $HOME/source/twine2/kf5.py
+   cd .../build/frameworks/kitemmodels
+   cmake ../../../source/frameworks/kitemmodels
+   cd ../../build/pyqt5
+   python ../../source/pyqt5/configure.py --qmake /usr/lib/x86_64-linux-gnu/qt5/bin/qmake
+   cd ../../build/pykde5
+   ../../source/twine2/kf5.py

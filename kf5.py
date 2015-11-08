@@ -51,16 +51,17 @@ def _writeConfiguration(settings, configfile):
     settings.write(cfgfile)
     cfgfile.close()
 
-def _setSettings(settings):
-    outputBaseDirectory = os.environ['HOME'] + \
-        settings.get('kf5.config', 'outputBaseDirectory')
-    cmakelistBaseDirectory = os.environ['HOME'] + \
-        settings.get('kf5.config', 'cmakelistBaseDirectory')
-    kdelibsBuildDirectory = os.environ['HOME'] + \
-        settings.get('kf5.config', 'kdelibsBuildDirectory')
+def _setSettings(source_dir, build_dir, settings):
+    outputBaseDirectory = os.path.join(source_dir,
+                                       settings.get('kf5.config', 'outputBaseDirectory'))
+    cmakelistBaseDirectory = os.path.join(source_dir,
+                                          settings.get('kf5.config', 'cmakelistBaseDirectory'))
+    kdelibsBuildDirectory = os.path.join(build_dir,
+                                         settings.get('kf5.config', 'kdelibsBuildDirectory'))
     cmakelistGitBaseDirectory = os.environ['HOME'] + \
         settings.get('kf5.config', 'cmakelistGitBaseDirectory')
-    sipImportDir = os.environ['HOME'] + settings.get('kf5.config', 'sipImportDir')
+    sipImportDir = os.path.join(source_dir,
+                                settings.get('kf5.config', 'sipImportDir'))
     sipImportDirs = [ str(sipImportDir), str(outputBaseDirectory) + '/sip']
     return(outputBaseDirectory, cmakelistBaseDirectory, kdelibsBuildDirectory,
         cmakelistGitBaseDirectory, sipImportDir, sipImportDirs)
@@ -502,9 +503,12 @@ def main():
     parser.add_argument('-f', '--configfile', default=configfile, action='store', help='path to alternate configuration file to use')
     parser.add_argument('-w', '--writeopt', default=[], action='append', help='change config file value using item=value syntax - add multiple times to change multiple values')
     args = parser.parse_args()
+    source_dir = os.path.dirname(os.path.dirname(os.path.realpath(args.configfile)))
+    build_dir = os.getcwd()
     try:
+        settings = _readConfiguration(args.configfile)
         outputBaseDirectory, cmakelistBaseDirectory, kdelibsBuildDirectory, \
-            cmakelistGitBaseDirectory, sipImportDir, sipImportDirs =_getConfiguration(args.configfile)
+            cmakelistGitBaseDirectory, sipImportDir, sipImportDirs =_setSettings(source_dir, build_dir, settings)
     except configparser.NoSectionError as e:
         print('Config file error: {0}'.format(e))
         exit(1)
@@ -525,7 +529,7 @@ def main():
             oldvalue = settings.get('kf5.config', item)
             print("Changing {0} from {1} to {2}".format(item, oldvalue, value))
             settings.set('kf5.config', item, value)
-            _setSettings(settings)
+            _setSettings(source_dir, build_dir, settings)
             _writeConfiguration(settings, configfile)
         exit(0)
     _setupAll(outputBaseDirectory, cmakelistBaseDirectory,

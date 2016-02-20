@@ -1,3 +1,4 @@
+# vim: set fileencoding=utf-8
 # kbinding generator: Generate sip based Python bindings for C++
 
 # This file is part of the kbindinggenerator project for generating Python
